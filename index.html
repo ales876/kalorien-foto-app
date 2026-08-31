@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#FFD400">
+<title>Kcal-Scanner</title>
+<style>
+  :root{
+    --yellow:#FFD400;
+    --pink:#FF5CA8;
+    --blue:#3DB4FF;
+    --green:#33D17A;
+    --red:#FF4757;
+    --ink:#111111;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--yellow);
+    font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+    color:var(--ink);
+    min-height:100vh;
+    padding:16px;
+    padding-bottom:48px;
+  }
+  .wrap{max-width:480px;margin:0 auto;}
+
+  header{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:20px;
+  }
+  h1{
+    font-size:28px;
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:-0.5px;
+    margin:0;
+    text-align:center;
+    -webkit-text-stroke:1px var(--ink);
+  }
+  .gear{
+    position:absolute;
+    right:0;
+    top:50%;
+    transform:translateY(-50%);
+    width:44px;height:44px;
+    background:#fff;
+    border:3px solid var(--ink);
+    border-radius:12px;
+    box-shadow:4px 4px 0 var(--ink);
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;
+    cursor:pointer;
+  }
+  .gear:active{box-shadow:1px 1px 0 var(--ink);transform:translateY(-50%) translate(3px,3px);}
+
+  .card{
+    background:#fff;
+    border:4px solid var(--ink);
+    border-radius:20px;
+    box-shadow:8px 8px 0 var(--ink);
+    padding:20px;
+    margin-bottom:20px;
+  }
+
+  .btn{
+    display:block;
+    width:100%;
+    font-size:18px;
+    font-weight:900;
+    text-transform:uppercase;
+    text-align:center;
+    padding:18px;
+    border:4px solid var(--ink);
+    border-radius:16px;
+    box-shadow:6px 6px 0 var(--ink);
+    cursor:pointer;
+    background:var(--pink);
+    color:var(--ink);
+    margin-bottom:14px;
+    transition:transform .05s;
+  }
+  .btn:active{box-shadow:2px 2px 0 var(--ink);transform:translate(4px,4px);}
+  .btn.blue{background:var(--blue);}
+  .btn.green{background:var(--green);}
+  .btn.ghost{background:#fff;}
+  .btn:disabled{opacity:.5;cursor:default;}
+
+  input[type=file]{display:none;}
+
+  .preview{
+    width:100%;
+    border-radius:14px;
+    border:3px solid var(--ink);
+    margin-bottom:14px;
+    display:block;
+    max-height:280px;
+    object-fit:cover;
+  }
+
+  .loading{
+    text-align:center;
+    font-weight:800;
+    font-size:16px;
+    padding:20px 0;
+  }
+  .spin{
+    display:inline-block;
+    animation:spin 1s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .item{
+    border:3px solid var(--ink);
+    border-radius:14px;
+    padding:12px 14px;
+    margin-bottom:10px;
+    background:#FFF7DE;
+  }
+  .item-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-weight:800;
+    margin-bottom:8px;
+    text-transform:uppercase;
+    font-size:15px;
+  }
+  .conf{
+    font-size:11px;
+    padding:2px 8px;
+    border-radius:8px;
+    border:2px solid var(--ink);
+    text-transform:none;
+    font-weight:700;
+  }
+  .conf.hoch{background:var(--green);}
+  .conf.mittel{background:var(--yellow);}
+  .conf.niedrig{background:#fff;}
+
+  .item-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:14px;
+  }
+  .item-row input{
+    width:64px;
+    font-size:15px;
+    font-weight:700;
+    padding:6px 8px;
+    border:2px solid var(--ink);
+    border-radius:8px;
+    text-align:center;
+  }
+  .kcal-val{
+    font-weight:900;
+    margin-left:auto;
+  }
+
+  .total{
+    background:var(--ink);
+    color:#fff;
+    border-radius:16px;
+    padding:18px;
+    text-align:center;
+    margin-top:6px;
+  }
+  .total .num{
+    font-size:36px;
+    font-weight:900;
+    display:block;
+  }
+  .total .label{
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    opacity:.8;
+  }
+
+  .notes{
+    font-size:13px;
+    font-style:italic;
+    margin-top:10px;
+    opacity:.75;
+  }
+
+  .error{
+    background:var(--red);
+    border:3px solid var(--ink);
+    border-radius:14px;
+    padding:14px;
+    font-weight:700;
+    margin-bottom:14px;
+  }
+
+  label.small{
+    display:block;
+    font-size:13px;
+    font-weight:800;
+    text-transform:uppercase;
+    margin-bottom:6px;
+  }
+  input[type=password], input[type=text]{
+    width:100%;
+    font-size:15px;
+    padding:12px;
+    border:3px solid var(--ink);
+    border-radius:12px;
+    margin-bottom:14px;
+  }
+
+  .hidden{display:none !important;}
+  .copied-toast{
+    position:fixed;
+    bottom:24px;
+    left:50%;
+    transform:translateX(-50%);
+    background:var(--ink);
+    color:#fff;
+    padding:10px 18px;
+    border-radius:12px;
+    font-weight:800;
+    font-size:14px;
+    opacity:0;
+    transition:opacity .2s;
+    pointer-events:none;
+  }
+  .copied-toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>🍽️ Kcal-Scanner</h1>
+    <div class="gear" id="gearBtn">⚙️</div>
+  </header>
+
+  <!-- Settings -->
+  <div class="card hidden" id="settingsCard">
+    <label class="small">Anthropic API-Key</label>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-...">
+    <div class="btn green" id="saveKeyBtn">Speichern</div>
+    <div style="font-size:12px;opacity:.65;">Wird nur lokal in diesem Browser gespeichert.</div>
+  </div>
+
+  <!-- Main capture card -->
+  <div class="card" id="captureCard">
+    <input type="file" id="fileInput" accept="image/*" capture="environment">
+    <input type="file" id="fileInputLibrary" accept="image/*">
+    <div class="btn" id="shootBtn">📸 Foto aufnehmen</div>
+    <div class="btn ghost" id="libraryBtn">🖼️ Aus Fotos / Dateien wählen</div>
+    <img id="previewImg" class="preview hidden">
+    <div class="loading hidden" id="loadingEl"><span class="spin">🍝</span> Analysiere Essen …</div>
+    <div class="error hidden" id="errorEl"></div>
+  </div>
+
+  <!-- Result card -->
+  <div class="card hidden" id="resultCard">
+    <div id="itemsWrap"></div>
+    <div class="total">
+      <span class="num" id="totalKcal">0</span>
+      <span class="label">kcal gesamt · <span id="totalGrams">0</span> g</span>
+    </div>
+    <div class="notes hidden" id="notesEl"></div>
+    <div style="height:16px;"></div>
+    <div class="btn blue" id="copyBtn">📋 Für FDDB kopieren</div>
+    <div class="btn ghost" id="resetBtn">🔄 Neues Foto</div>
+  </div>
+
+  <!-- History -->
+  <div class="card" id="historyCard">
+    <div style="font-weight:900;text-transform:uppercase;font-size:15px;margin-bottom:12px;">🕓 Verlauf</div>
+    <div style="overflow-x:auto;">
+      <table id="historyTable" style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead>
+          <tr style="text-align:left;">
+            <th style="padding:6px 4px;">Foto</th>
+            <th style="padding:6px 4px;">Essen</th>
+            <th style="padding:6px 4px;">Kcal</th>
+            <th style="padding:6px 4px;">Zeitpunkt</th>
+          </tr>
+        </thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+    </div>
+    <div id="historyEmpty" style="font-size:13px;opacity:.6;padding:8px 0;">Noch keine Einträge.</div>
+  </div>
+
+</div>
+
+<div class="copied-toast" id="toast">In Zwischenablage kopiert ✅</div>
+
+<script>
+const KEY_STORAGE = "kcalscanner_api_key";
+const HISTORY_STORAGE = "kcalscanner_history";
+const HISTORY_MAX = 25;
+const MODEL = "claude-sonnet-5";
+
+const $ = id => document.getElementById(id);
+const gearBtn = $("gearBtn"), settingsCard = $("settingsCard");
+const apiKeyInput = $("apiKeyInput"), saveKeyBtn = $("saveKeyBtn");
+const shootBtn = $("shootBtn"), fileInput = $("fileInput");
+const libraryBtn = $("libraryBtn"), fileInputLibrary = $("fileInputLibrary");
+const previewImg = $("previewImg"), loadingEl = $("loadingEl"), errorEl = $("errorEl");
+const resultCard = $("resultCard"), itemsWrap = $("itemsWrap");
+const totalKcalEl = $("totalKcal"), totalGramsEl = $("totalGrams"), notesEl = $("notesEl");
+const copyBtn = $("copyBtn"), resetBtn = $("resetBtn"), toast = $("toast");
+const historyBody = $("historyBody"), historyEmpty = $("historyEmpty");
+
+let currentItems = []; // {name, grams, kcal_per_100g, confidence}
+
+function getKey(){ return localStorage.getItem(KEY_STORAGE) || ""; }
+function setKey(k){ localStorage.setItem(KEY_STORAGE, k); }
+
+function openSettings(){
+  apiKeyInput.value = getKey();
+  settingsCard.classList.remove("hidden");
+}
+
+gearBtn.onclick = () => settingsCard.classList.toggle("hidden");
+saveKeyBtn.onclick = () => {
+  setKey(apiKeyInput.value.trim());
+  settingsCard.classList.add("hidden");
+};
+
+if(!getKey()){ openSettings(); }
+renderHistory();
+
+shootBtn.onclick = () => fileInput.click();
+libraryBtn.onclick = () => fileInputLibrary.click();
+
+fileInput.onchange = (e) => handleFile(e.target.files[0], fileInput);
+fileInputLibrary.onchange = (e) => handleFile(e.target.files[0], fileInputLibrary);
+
+async function handleFile(file, sourceInput){
+  if(!file) return;
+  if(!getKey()){
+    openSettings();
+    return;
+  }
+  errorEl.classList.add("hidden");
+  resultCard.classList.add("hidden");
+
+  try{
+    const base64 = await downscaleToBase64(file, 1024, 0.82);
+    previewImg.src = "data:image/jpeg;base64," + base64;
+    previewImg.classList.remove("hidden");
+    loadingEl.classList.remove("hidden");
+    shootBtn.setAttribute("disabled","disabled");
+    libraryBtn.setAttribute("disabled","disabled");
+
+    const result = await analyzeImage(base64);
+    currentItems = result.items || [];
+    renderResult(result);
+
+    // kleines Thumbnail fürs Verlauf, Original-Foto wird nicht behalten
+    const thumb = await downscaleToBase64(file, 100, 0.6);
+    addHistoryEntry(thumb, currentItems, Math.round(totalKcalFromItems(currentItems)));
+
+    // Foto ist ausgewertet -> aus dem Speicher/Preview entfernen
+    previewImg.src = "";
+    previewImg.classList.add("hidden");
+  }catch(err){
+    console.error(err);
+    errorEl.textContent = "❌ " + (err.message || "Etwas ist schiefgelaufen.");
+    errorEl.classList.remove("hidden");
+    previewImg.classList.add("hidden");
+    previewImg.src = "";
+  }finally{
+    loadingEl.classList.add("hidden");
+    shootBtn.removeAttribute("disabled");
+    libraryBtn.removeAttribute("disabled");
+    fileInput.value = "";
+    fileInputLibrary.value = "";
+  }
+}
+
+function downscaleToBase64(file, maxDim, quality){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = () => { img.src = reader.result; };
+    reader.onerror = reject;
+    img.onload = () => {
+      let { width, height } = img;
+      if(width > height && width > maxDim){
+        height = Math.round(height * maxDim / width); width = maxDim;
+      }else if(height > maxDim){
+        width = Math.round(width * maxDim / height); height = maxDim;
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width; canvas.height = height;
+      canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+      const dataUrl = canvas.toDataURL("image/jpeg", quality);
+      resolve(dataUrl.split(",")[1]);
+    };
+    img.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+const PROMPT = `Du bist eine Ernährungs-Expertin. Analysiere das Foto einer Mahlzeit.
+Schätze für jede erkennbare Komponente (z.B. Nudeln, Soße, Fleisch, Gemüse, Beilage, Öl beim Anbraten falls plausibel) das Gewicht in Gramm und die Kalorien pro 100g.
+
+Antworte AUSSCHLIESSLICH mit validem JSON, keine Erklärung, kein Markdown, kein Codeblock. Exaktes Format:
+{"items":[{"name":"string","grams":number,"kcal_per_100g":number,"confidence":"hoch"|"mittel"|"niedrig"}],"notes":"string"}
+
+Gramm sind ganze Zahlen, kcal_per_100g sind realistische Nährwerte (z.B. gekochte Nudeln ~158, Tomatensauce ~55). "notes" ist ein kurzer Satz zu Annahmen, oder ein leerer String. Wenn kein Essen erkennbar ist, gib ein leeres items-Array zurück und erkläre das kurz in notes.`;
+
+async function analyzeImage(base64){
+  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-api-key": getKey(),
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: 1024,
+      messages: [{
+        role: "user",
+        content: [
+          { type: "image", source: { type: "base64", media_type: "image/jpeg", data: base64 } },
+          { type: "text", text: PROMPT }
+        ]
+      }]
+    })
+  });
+
+  if(!resp.ok){
+    const t = await resp.text();
+    throw new Error("API-Fehler (" + resp.status + "): " + t.slice(0,200));
+  }
+  const data = await resp.json();
+  const text = data.content && data.content[0] && data.content[0].text;
+  if(!text) throw new Error("Keine Antwort erhalten.");
+
+  const cleaned = text.trim().replace(/^```json/i,"").replace(/^```/,"").replace(/```$/,"").trim();
+  let parsed;
+  try{ parsed = JSON.parse(cleaned); }
+  catch(e){ throw new Error("Antwort konnte nicht gelesen werden."); }
+  return parsed;
+}
+
+function renderResult(result){
+  itemsWrap.innerHTML = "";
+  if(!currentItems.length){
+    itemsWrap.innerHTML = "<div style='font-weight:700;'>Kein Essen erkannt.</div>";
+  }
+  currentItems.forEach((item, idx) => {
+    const div = document.createElement("div");
+    div.className = "item";
+    div.innerHTML = `
+      <div class="item-top">
+        <span>${escapeHtml(item.name)}</span>
+        <span class="conf ${item.confidence}">${item.confidence}</span>
+      </div>
+      <div class="item-row">
+        <input type="number" min="0" step="1" value="${item.grams}" data-idx="${idx}" class="gramsInput">
+        <span>g</span>
+        <span class="kcal-val" id="kcalItem${idx}">${Math.round(item.grams * item.kcal_per_100g / 100)} kcal</span>
+      </div>
+    `;
+    itemsWrap.appendChild(div);
+  });
+
+  itemsWrap.querySelectorAll(".gramsInput").forEach(inp => {
+    inp.addEventListener("input", () => {
+      const idx = +inp.dataset.idx;
+      const g = Math.max(0, parseFloat(inp.value) || 0);
+      currentItems[idx].grams = g;
+      $("kcalItem" + idx).textContent = Math.round(g * currentItems[idx].kcal_per_100g / 100) + " kcal";
+      updateTotals();
+    });
+  });
+
+  if(result.notes){
+    notesEl.textContent = "💬 " + result.notes;
+    notesEl.classList.remove("hidden");
+  }else{
+    notesEl.classList.add("hidden");
+  }
+
+  updateTotals();
+  resultCard.classList.remove("hidden");
+}
+
+function updateTotals(){
+  const totalKcal = currentItems.reduce((s,i) => s + i.grams * i.kcal_per_100g / 100, 0);
+  const totalGrams = currentItems.reduce((s,i) => s + i.grams, 0);
+  totalKcalEl.textContent = Math.round(totalKcal);
+  totalGramsEl.textContent = Math.round(totalGrams);
+}
+
+function totalKcalFromItems(items){
+  return items.reduce((s,i) => s + i.grams * i.kcal_per_100g / 100, 0);
+}
+
+function loadHistory(){
+  try{ return JSON.parse(localStorage.getItem(HISTORY_STORAGE) || "[]"); }
+  catch(e){ return []; }
+}
+
+function addHistoryEntry(thumbBase64, items, kcal){
+  const history = loadHistory();
+  history.unshift({
+    thumb: thumbBase64,
+    names: items.map(i => i.name).join(", ") || "Unbekannt",
+    kcal: kcal,
+    ts: Date.now()
+  });
+  localStorage.setItem(HISTORY_STORAGE, JSON.stringify(history.slice(0, HISTORY_MAX)));
+  renderHistory();
+}
+
+function formatTs(ts){
+  const d = new Date(ts);
+  const date = d.toLocaleDateString("de-DE", { day:"2-digit", month:"2-digit", year:"2-digit" });
+  const time = d.toLocaleTimeString("de-DE", { hour:"2-digit", minute:"2-digit" });
+  return date + " · " + time;
+}
+
+function renderHistory(){
+  const history = loadHistory();
+  if(!history.length){
+    historyBody.innerHTML = "";
+    historyEmpty.classList.remove("hidden");
+    return;
+  }
+  historyEmpty.classList.add("hidden");
+  historyBody.innerHTML = history.map(entry => `
+    <tr style="border-top:2px solid var(--ink);">
+      <td style="padding:6px 4px;"><img src="data:image/jpeg;base64,${entry.thumb}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;border:2px solid var(--ink);"></td>
+      <td style="padding:6px 4px;">${escapeHtml(entry.names)}</td>
+      <td style="padding:6px 4px;font-weight:800;">${entry.kcal}</td>
+      <td style="padding:6px 4px;white-space:nowrap;">${formatTs(entry.ts)}</td>
+    </tr>
+  `).join("");
+}
+
+copyBtn.onclick = () => {
+  const lines = currentItems.map(i =>
+    `${i.name}: ca. ${Math.round(i.grams)}g, ${Math.round(i.grams * i.kcal_per_100g / 100)} kcal`
+  );
+  lines.push(`Gesamt: ca. ${totalKcalEl.textContent} kcal`);
+  const text = lines.join("\n");
+  navigator.clipboard.writeText(text).then(() => {
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 1500);
+  });
+};
+
+resetBtn.onclick = () => {
+  currentItems = [];
+  resultCard.classList.add("hidden");
+  previewImg.src = "";
+  previewImg.classList.add("hidden");
+};
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+</script>
+</body>
+</html>
