@@ -7,7 +7,7 @@ const { version } = JSON.parse(readFileSync("./package.json", "utf-8")) as {
   version: string;
 };
 
-// Der Repo-Name bleibt "kalorien-foto-app", auch wenn die App "Plate" heißt:
+// Der Repo-Name bleibt "kalorien-foto-app", auch wenn die App "Sunny Orbit" heißt:
 // die veröffentlichte URL https://ales876.github.io/kalorien-foto-app/ hängt daran.
 const BASE = "/kalorien-foto-app/";
 
@@ -22,8 +22,8 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.svg", "apple-touch-icon.png"],
       manifest: {
-        name: "Plate",
-        short_name: "Plate",
+        name: "Sunny Orbit",
+        short_name: "Sunny Orbit",
         description:
           "Kalorien und Makros per Foto, Barcode oder Suche erfassen",
         lang: "de",

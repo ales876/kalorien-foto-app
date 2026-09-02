@@ -1,4 +1,4 @@
-# Plate — Hinweise für die Arbeit am Code
+# Sunny Orbit — Hinweise für die Arbeit am Code
 
 - Sprache in Code-Kommentaren, UI und Commits: Deutsch. Zahlen deutsch
   formatiert (`formatNumber`, `formatDecimal` aus `lib/format.ts`).

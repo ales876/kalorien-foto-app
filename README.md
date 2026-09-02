@@ -1,4 +1,4 @@
-# Plate
+# Sunny Orbit
 
 Persönliche Ernährungs-App für **einen** Nutzer: Kalorien und Makros per Foto,
 Barcode, Produktsuche oder Schnellzugriff erfassen, dazu Gewicht, Bauchumfang
@@ -10,7 +10,7 @@ und Aktivität. Die Berichte leiten den Erhaltungsbedarf aus echten Daten ab.
 | **Daten**   | rein lokal in IndexedDB, kein Backend, kein Konto |
 | **Nutzung** | PWA auf dem iPhone-Home-Bildschirm                |
 
-Der Repo-Name bleibt `kalorien-foto-app`, obwohl die App „Plate" heißt — die
+Der Repo-Name bleibt `kalorien-foto-app`, obwohl die App „Sunny Orbit" heißt — die
 veröffentlichte URL und der Basispfad in `vite.config.ts` hängen daran.
 
 ## Stack

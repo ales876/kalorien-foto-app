@@ -74,7 +74,7 @@ describe("lookupBarcode", () => {
       barcode: "4000",
       source: "barcode",
     });
-    expect(String(fetchFn.mock.calls[0]?.[0])).toContain("app_name=Plate");
+    expect(String(fetchFn.mock.calls[0]?.[0])).toContain("app_name=SunnyOrbit");
   });
 
   it("meldet fehlende Produkte und fehlende Nährwerte", async () => {

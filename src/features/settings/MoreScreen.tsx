@@ -47,7 +47,7 @@ export function MoreScreen() {
         </div>
       )}
 
-      <div className="row-sub version-line">Plate {APP_VERSION}</div>
+      <div className="row-sub version-line">Sunny Orbit {APP_VERSION}</div>
     </div>
   );
 }

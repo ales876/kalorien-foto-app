@@ -11,15 +11,15 @@ import {
  *  liegen die bestehenden Einträge auf dem Gerät. */
 export const DB_NAME = "KcalScanner";
 
-export type PlateDatabase = Dexie & {
+export type AppDatabase = Dexie & {
   entries: EntityTable<FoodEntry, "id">;
   measurements: EntityTable<BodyMeasurement, "id">;
   settings: EntityTable<Settings, "id">;
   activities: EntityTable<Activity, "id">;
 };
 
-export function createDatabase(name: string = DB_NAME): PlateDatabase {
-  const db = new Dexie(name) as PlateDatabase;
+export function createDatabase(name: string = DB_NAME): AppDatabase {
+  const db = new Dexie(name) as AppDatabase;
 
   // Alte Schema-Versionen bleiben stehen — Dexie migriert vorhandene
   // Datenbanken damit automatisch hoch.
@@ -38,7 +38,7 @@ export function createDatabase(name: string = DB_NAME): PlateDatabase {
 export const db = createDatabase();
 
 export async function getSettings(
-  database: PlateDatabase = db,
+  database: AppDatabase = db,
 ): Promise<Settings> {
   const stored = await database.settings.get("settings");
   return stored ? { ...DEFAULT_SETTINGS, ...stored } : DEFAULT_SETTINGS;
@@ -46,7 +46,7 @@ export async function getSettings(
 
 export async function saveSettings(
   patch: Partial<Settings>,
-  database: PlateDatabase = db,
+  database: AppDatabase = db,
 ): Promise<void> {
   const current = await getSettings(database);
   await database.settings.put({ ...current, ...patch, id: "settings" });
@@ -54,7 +54,7 @@ export async function saveSettings(
 
 export async function addEntries(
   entries: readonly FoodEntry[],
-  database: PlateDatabase = db,
+  database: AppDatabase = db,
 ): Promise<void> {
   await database.entries.bulkAdd(entries as FoodEntry[]);
 }
@@ -62,14 +62,14 @@ export async function addEntries(
 export async function updateEntry(
   id: number,
   patch: Partial<Omit<FoodEntry, "id">>,
-  database: PlateDatabase = db,
+  database: AppDatabase = db,
 ): Promise<void> {
   await database.entries.update(id, patch);
 }
 
 export async function deleteEntry(
   id: number,
-  database: PlateDatabase = db,
+  database: AppDatabase = db,
 ): Promise<void> {
   await database.entries.delete(id);
 }
@@ -79,7 +79,7 @@ export async function deleteEntry(
 export async function upsertMeasurement(
   date: string,
   values: { weightKg?: number; waistCm?: number },
-  database: PlateDatabase = db,
+  database: AppDatabase = db,
 ): Promise<void> {
   const patch: Partial<BodyMeasurement> = { timestamp: Date.now() };
   if (values.weightKg !== undefined) patch.weightKg = values.weightKg;
@@ -106,7 +106,7 @@ export async function upsertMeasurement(
 export async function upsertActivity(
   date: string,
   kcal: number,
-  database: PlateDatabase = db,
+  database: AppDatabase = db,
 ): Promise<void> {
   await database.transaction("rw", database.activities, async () => {
     const existing = await database.activities

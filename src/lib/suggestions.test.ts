@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { createDatabase, type PlateDatabase } from "./db";
+import { createDatabase, type AppDatabase } from "./db";
 import {
   copyDay,
   copyMeal,
@@ -53,7 +53,7 @@ describe("rankSuggestions", () => {
 });
 
 describe("Übernehmen", () => {
-  let db: PlateDatabase;
+  let db: AppDatabase;
 
   beforeEach(async () => {
     db = createDatabase(`test-${Math.random()}`);
