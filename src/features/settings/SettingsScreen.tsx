@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, getSettings, saveSettings } from "../../lib/db";
 import { Card, Loading, ScreenHeader } from "../../ui/components";
+import { IconDownload } from "../../ui/icons";
 import type { Settings } from "../../lib/types";
 import { APP_VERSION } from "../../version";
 
@@ -99,7 +100,8 @@ function SettingsForm({ settings }: { settings: Settings }) {
 
       <Card title="Daten">
         <button className="btn btn-secondary" onClick={exportData}>
-          ⬇︎ Backup exportieren (JSON)
+          <IconDownload size={19} />
+          Backup exportieren (JSON)
         </button>
       </Card>
 

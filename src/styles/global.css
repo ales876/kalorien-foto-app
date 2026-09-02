@@ -15,6 +15,16 @@
 
   --hairline: #e8e8e4;
 
+  --tab-today: #f0b429;
+  --tab-body: #4a90d9;
+  --tab-reports: #35b37e;
+  --tab-more: #9aa0a6;
+
+  --meal-morning: #f2994a;
+  --meal-noon: #f0b429;
+  --meal-evening: #6c7ae0;
+  --meal-snack: #35b37e;
+
   --protein: #4a90d9;
   --carbs: #f2994a;
   --fat: #9b7ede;
@@ -149,6 +159,9 @@ select {
 .row-sub {
   font-size: 13px;
   color: var(--ink-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .row-value {
@@ -328,27 +341,40 @@ select {
   z-index: 20;
 }
 
-.tab {
+.tab-link {
   flex: 1;
+  text-decoration: none;
+  display: flex;
+  justify-content: center;
+}
+
+.tab {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  border: none;
-  background: transparent;
+  gap: 3px;
   padding: 6px 0;
   font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
   color: var(--ink-tertiary);
-  text-decoration: none;
+  transition: color 0.15s ease;
 }
 
 .tab[data-active="true"] {
   color: var(--ink);
+  font-weight: 600;
 }
 
+/* Das Icon behält seine Farbe; inaktiv nur zurückgenommen. */
 .tab-icon {
-  font-size: 20px;
-  line-height: 1;
+  display: flex;
+  opacity: 0.4;
+  transition: opacity 0.15s ease;
+}
+
+.tab[data-active="true"] .tab-icon {
+  opacity: 1;
 }
 
 .tab-add {
@@ -487,4 +513,202 @@ select {
 #reader video {
   width: 100% !important;
   border-radius: var(--radius);
+}
+
+
+/* ---------- Mahlzeiten-Abschnitte ---------- */
+
+.meal-header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 4px;
+}
+
+.meal-icon {
+  display: flex;
+  align-items: center;
+}
+
+.meal-title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.meal-total {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-secondary);
+}
+
+/* ---------- Eintragszeilen ---------- */
+
+.entry-row {
+  gap: 11px;
+}
+
+.entry-thumb {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex: 0 0 auto;
+}
+
+.entry-source {
+  width: 30px;
+  color: var(--ink-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+/* Marke und Menge dürfen kürzen, die Makros nie — sie stehen rechts fest. */
+.entry-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.entry-origin {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.macro-inline {
+  flex: 0 0 auto;
+  color: var(--ink-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.macro-inline b {
+  font-weight: 600;
+  color: var(--ink-secondary);
+  margin-left: 6px;
+  margin-right: 1px;
+}
+
+.macro-inline b:first-child {
+  margin-left: 0;
+}
+
+.kcal-remaining {
+  font-size: 14px;
+  color: var(--ink-secondary);
+}
+
+.kcal-remaining[data-over="true"] {
+  color: var(--danger);
+  font-weight: 500;
+}
+
+/* ---------- Auswahlkacheln im Erfassungs-Dialog ---------- */
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  text-align: left;
+  transition: transform 0.12s ease;
+}
+
+.choice:active {
+  transform: scale(0.985);
+}
+
+.choice-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.choice-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.choice-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 1px;
+}
+
+.choice-chevron,
+.row-chevron {
+  color: var(--ink-tertiary);
+  flex: 0 0 auto;
+}
+
+/* Zeile, die als Schaltfläche dient (Suchtreffer) */
+.row-button {
+  width: 100%;
+  border: none;
+  border-top: 1px solid var(--hairline);
+  background: transparent;
+  text-align: left;
+}
+
+.row-button:first-of-type {
+  border-top: none;
+}
+
+.row-button:active {
+  background: var(--surface-sunken);
+}
+
+.back-btn {
+  margin-top: 12px;
+}
+
+/* ---------- Feinschliff ---------- */
+
+.btn svg {
+  flex: 0 0 auto;
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease;
+}
+
+.icon-btn:active {
+  color: var(--ink-secondary);
+}
+
+.empty {
+  margin: 0;
+}
+
+/* Karten dürfen beim Erscheinen kurz aufziehen — ruhig, nicht verspielt */
+.card {
+  animation: card-in 0.2s ease;
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+}
+
+.measure-waist {
+  width: 68px;
+  text-align: right;
+  flex: 0 0 auto;
 }

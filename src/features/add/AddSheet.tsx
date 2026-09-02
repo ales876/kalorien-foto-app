@@ -1,5 +1,6 @@
 import { Suspense, lazy, useState } from "react";
 import { Loading, Sheet } from "../../ui/components";
+import { IconBack, IconBarcode, IconCamera, IconChevron, IconSearch } from "../../ui/icons";
 import { PhotoFlow } from "./PhotoFlow";
 import { SearchFlow } from "./SearchFlow";
 
@@ -31,19 +32,22 @@ export function AddSheet({
       {mode === "choose" && (
         <>
           <ChoiceButton
-            icon="📷"
+            Icon={IconCamera}
+            color="var(--tab-today)"
             label="Foto vom Essen"
             hint="Schätzt Zutaten, Gramm und Nährwerte"
             onClick={() => setMode("photo")}
           />
           <ChoiceButton
-            icon="📊"
+            Icon={IconBarcode}
+            color="var(--tab-body)"
             label="Barcode scannen"
             hint="Verpackte Produkte aus Open Food Facts"
             onClick={() => setMode("barcode")}
           />
           <ChoiceButton
-            icon="🔍"
+            Icon={IconSearch}
+            color="var(--tab-reports)"
             label="Produkt suchen"
             hint="Nach Name oder Marke"
             onClick={() => setMode("search")}
@@ -60,12 +64,9 @@ export function AddSheet({
       {mode === "search" && <SearchFlow onSaved={onClose} />}
 
       {mode !== "choose" && (
-        <button
-          className="btn btn-ghost"
-          style={{ marginTop: 12 }}
-          onClick={() => setMode("choose")}
-        >
-          ← Zurück
+        <button className="btn btn-ghost back-btn" onClick={() => setMode("choose")}>
+          <IconBack size={18} />
+          Zurück
         </button>
       )}
     </Sheet>
@@ -73,39 +74,28 @@ export function AddSheet({
 }
 
 function ChoiceButton({
-  icon,
+  Icon,
+  color,
   label,
   hint,
   onClick,
 }: {
-  icon: string;
+  Icon: typeof IconCamera;
+  color: string;
   label: string;
   hint: string;
   onClick: () => void;
 }) {
   return (
-    <button
-      onClick={onClick}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 14,
-        width: "100%",
-        padding: 16,
-        marginBottom: 10,
-        border: "none",
-        borderRadius: "var(--radius)",
-        background: "var(--surface)",
-        boxShadow: "var(--shadow)",
-        textAlign: "left",
-      }}
-    >
-      <span style={{ fontSize: 26 }}>{icon}</span>
-      <span style={{ flex: 1 }}>
-        <span style={{ display: "block", fontWeight: 600 }}>{label}</span>
+    <button className="choice" onClick={onClick}>
+      <span className="choice-icon" style={{ color }}>
+        <Icon size={26} />
+      </span>
+      <span className="choice-text">
+        <span className="choice-label">{label}</span>
         <span className="row-sub">{hint}</span>
       </span>
-      <span className="row-sub">›</span>
+      <IconChevron size={17} className="choice-chevron" />
     </button>
   );
 }

@@ -3,6 +3,7 @@ import { searchLocal } from "../../lib/localFoods";
 import { searchProducts } from "../../lib/openfoodfacts";
 import type { NutritionCandidate } from "../../lib/types";
 import { Loading, Notice } from "../../ui/components";
+import { IconChevron } from "../../ui/icons";
 import { ConfirmStep } from "./ConfirmStep";
 
 export function SearchFlow({ onSaved }: { onSaved: () => void }) {
@@ -83,14 +84,7 @@ export function SearchFlow({ onSaved }: { onSaved: () => void }) {
             {results.map((result, index) => (
               <button
                 key={`${result.barcode}-${index}`}
-                className="row"
-                style={{
-                  width: "100%",
-                  border: "none",
-                  borderTop: index === 0 ? "none" : "1px solid var(--hairline)",
-                  background: "transparent",
-                  textAlign: "left",
-                }}
+                className="row row-button"
                 onClick={() => setSelected(result)}
               >
                 <div className="row-main">
@@ -100,7 +94,7 @@ export function SearchFlow({ onSaved }: { onSaved: () => void }) {
                     {Math.round(result.kcalPer100g)} kcal / 100 g
                   </div>
                 </div>
-                <span className="row-sub">›</span>
+                <IconChevron size={16} className="row-chevron" />
               </button>
             ))}
           </div>

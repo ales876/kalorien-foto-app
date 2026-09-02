@@ -1,10 +1,12 @@
 export type Meal = "fruehstueck" | "mittag" | "abend" | "snack";
 
-export const MEALS: { id: Meal; label: string; icon: string }[] = [
-  { id: "fruehstueck", label: "Frühstück", icon: "🌅" },
-  { id: "mittag", label: "Mittag", icon: "☀️" },
-  { id: "abend", label: "Abend", icon: "🌙" },
-  { id: "snack", label: "Snack", icon: "🍎" },
+/** Farben je Mahlzeit — wie bei Things bekommt jeder Bereich seinen
+ *  eigenen Akzent, damit man ihn im Vorbeiscrollen wiedererkennt. */
+export const MEALS: { id: Meal; label: string; color: string }[] = [
+  { id: "fruehstueck", label: "Frühstück", color: "var(--meal-morning)" },
+  { id: "mittag", label: "Mittag", color: "var(--meal-noon)" },
+  { id: "abend", label: "Abend", color: "var(--meal-evening)" },
+  { id: "snack", label: "Snack", color: "var(--meal-snack)" },
 ];
 
 export type EntrySource = "photo" | "barcode" | "search" | "manual";

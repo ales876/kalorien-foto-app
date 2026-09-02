@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { analyzePhoto, downscaleToBase64 } from "../../lib/claude";
 import type { NutritionCandidate } from "../../lib/types";
 import { Loading, Notice } from "../../ui/components";
+import { IconCamera, IconSearch } from "../../ui/icons";
 import { ConfirmStep } from "./ConfirmStep";
 
 export function PhotoFlow({
@@ -83,13 +84,15 @@ export function PhotoFlow({
         style={{ marginBottom: 10 }}
         onClick={() => cameraInput.current?.click()}
       >
-        📷 Foto aufnehmen
+        <IconCamera size={19} />
+        Foto aufnehmen
       </button>
       <button
         className="btn btn-secondary"
         onClick={() => libraryInput.current?.click()}
       >
-        🖼️ Aus Fotos wählen
+        <IconSearch size={19} />
+        Aus Fotos wählen
       </button>
     </>
   );

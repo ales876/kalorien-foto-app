@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { Totals } from "../lib/nutrition";
+import { IconClose } from "./icons";
 
 export function Card({
   title,
@@ -162,7 +163,7 @@ export function Sheet({
         <div className="sheet-header">
           <h2 className="sheet-title">{title}</h2>
           <button className="icon-btn" onClick={onClose} aria-label="Schließen">
-            ✕
+            <IconClose size={19} />
           </button>
         </div>
         {children}

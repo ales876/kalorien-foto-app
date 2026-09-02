@@ -84,4 +84,15 @@ export function candidateToEntry(
   };
 }
 
-export const round = (n: number): number => Math.round(n);
+/** Ganze Zahl in deutscher Schreibweise: 1234 wird zu „1.234". */
+export function formatNumber(value: number): string {
+  return Math.round(value).toLocaleString("de-DE");
+}
+
+/** Dezimalzahl mit Komma statt Punkt: 84.5 wird zu „84,5". */
+export function formatDecimal(value: number, digits = 1): string {
+  return value.toLocaleString("de-DE", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: digits,
+  });
+}

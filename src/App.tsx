@@ -7,6 +7,13 @@ import { BodyScreen } from "./features/body/BodyScreen";
 import { SettingsScreen } from "./features/settings/SettingsScreen";
 import { TodayScreen } from "./features/today/TodayScreen";
 import { Loading } from "./ui/components";
+import {
+  IconBody,
+  IconPlus,
+  IconReports,
+  IconSettings,
+  IconToday,
+} from "./ui/icons";
 
 // Recharts ist der größte Brocken im Bundle — erst laden, wenn die
 // Berichte auch wirklich geöffnet werden.
@@ -16,11 +23,23 @@ const ReportsScreen = lazy(() =>
   })),
 );
 
+// Jeder Bereich behält seine Farbe, auch wenn er nicht aktiv ist —
+// so erkennt man ihn am Icon statt am Zustand (wie in Things).
 const TABS = [
-  { to: "/heute", icon: "🍽️", label: "Heute" },
-  { to: "/koerper", icon: "⚖️", label: "Körper" },
-  { to: "/berichte", icon: "📈", label: "Berichte" },
-  { to: "/einstellungen", icon: "⚙️", label: "Mehr" },
+  { to: "/heute", Icon: IconToday, label: "Heute", color: "var(--tab-today)" },
+  { to: "/koerper", Icon: IconBody, label: "Körper", color: "var(--tab-body)" },
+  {
+    to: "/berichte",
+    Icon: IconReports,
+    label: "Berichte",
+    color: "var(--tab-reports)",
+  },
+  {
+    to: "/einstellungen",
+    Icon: IconSettings,
+    label: "Mehr",
+    color: "var(--tab-more)",
+  },
 ];
 
 export default function App() {
@@ -55,7 +74,7 @@ export default function App() {
           onClick={() => setAddOpen(true)}
           aria-label="Eintrag hinzufügen"
         >
-          +
+          <IconPlus size={26} />
         </button>
 
         {TABS.slice(2).map((tab) => (
@@ -75,28 +94,22 @@ export default function App() {
 
 function TabLink({
   to,
-  icon,
+  Icon,
   label,
+  color,
 }: {
   to: string;
-  icon: string;
+  Icon: typeof IconToday;
   label: string;
+  color: string;
 }) {
   return (
-    <NavLink
-      to={to}
-      className="tab"
-      // NavLink liefert den Aktiv-Zustand als Render-Prop; wir spiegeln ihn
-      // auf ein data-Attribut, damit das Styling im CSS bleibt.
-      style={undefined}
-    >
+    <NavLink to={to} className="tab-link">
       {({ isActive }) => (
-        <span
-          data-active={isActive}
-          className="tab"
-          style={{ padding: 0, gap: 2 }}
-        >
-          <span className="tab-icon">{icon}</span>
+        <span className="tab" data-active={isActive}>
+          <span className="tab-icon" style={{ color }}>
+            <Icon size={23} />
+          </span>
           {label}
         </span>
       )}

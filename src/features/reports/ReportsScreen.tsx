@@ -15,7 +15,12 @@ import {
   YAxis,
 } from "recharts";
 import { db, getSettings } from "../../lib/db";
-import { lastNDays, shortDate, sumTotals } from "../../lib/nutrition";
+import {
+  formatNumber,
+  lastNDays,
+  shortDate,
+  sumTotals,
+} from "../../lib/nutrition";
 import type { FoodEntry } from "../../lib/types";
 import { Card, ScreenHeader, Segmented } from "../../ui/components";
 
@@ -68,6 +73,12 @@ export function ReportsScreen() {
     .map((m) => ({ label: shortDate(m.date), value: m.waistCm }));
 
   const daysWithData = daily.filter((d) => d.kcal > 0);
+
+  // Skala immer bis übers Tagesziel ziehen, sonst liegt die gestrichelte
+  // Ziellinie außerhalb des sichtbaren Bereichs.
+  const kcalAxisMax = Math.ceil(
+    Math.max(settings?.kcalGoal ?? 0, ...daily.map((d) => d.kcal), 500) * 1.1,
+  );
   const avgKcal =
     daysWithData.length > 0
       ? Math.round(
@@ -89,13 +100,14 @@ export function ReportsScreen() {
         ) : (
           <>
             <div className="row-sub" style={{ marginBottom: 10 }}>
-              Ø {avgKcal} kcal an {daysWithData.length} erfassten Tagen
+              Ø {formatNumber(avgKcal)} kcal an {daysWithData.length} erfassten
+              Tagen
             </div>
             <ResponsiveContainer width="100%" height={190}>
               <BarChart data={daily} margin={{ top: 4, right: 4, bottom: 0, left: -18 }}>
                 <CartesianGrid vertical={false} stroke={GRID_COLOR} />
                 <XAxis dataKey="label" tick={AXIS_STYLE} interval="preserveStartEnd" />
-                <YAxis tick={AXIS_STYLE} />
+                <YAxis tick={AXIS_STYLE} domain={[0, kcalAxisMax]} />
                 <Tooltip formatter={(value) => [`${value} kcal`, "Kalorien"]} />
                 {settings?.kcalGoal ? (
                   <ReferenceLine

@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, upsertMeasurement } from "../../lib/db";
-import { formatDateKey, toDateKey } from "../../lib/nutrition";
+import { formatDateKey, formatDecimal, toDateKey } from "../../lib/nutrition";
 import { Card, ScreenHeader } from "../../ui/components";
+import { IconTrash } from "../../ui/icons";
 
 export function BodyScreen() {
   const today = toDateKey();
@@ -38,10 +39,10 @@ export function BodyScreen() {
         {todayEntry && (
           <div className="notice notice-info">
             Für heute schon erfasst:{" "}
-            {todayEntry.weightKg ? `${todayEntry.weightKg} kg` : ""}
+            {todayEntry.weightKg ? `${formatDecimal(todayEntry.weightKg)} kg` : ""}
             {todayEntry.weightKg && todayEntry.waistCm ? " · " : ""}
-            {todayEntry.waistCm ? `${todayEntry.waistCm} cm` : ""} — neue Werte
-            überschreiben den Eintrag.
+            {todayEntry.waistCm ? `${formatDecimal(todayEntry.waistCm)} cm` : ""} —
+            neue Werte überschreiben den Eintrag.
           </div>
         )}
         <div style={{ display: "flex", gap: 12 }}>
@@ -91,17 +92,17 @@ export function BodyScreen() {
                 <div className="row-title">{formatDateKey(m.date)}</div>
               </div>
               <span className="row-value">
-                {m.weightKg ? `${m.weightKg} kg` : "–"}
+                {m.weightKg ? `${formatDecimal(m.weightKg)} kg` : "–"}
               </span>
-              <span className="row-sub" style={{ width: 64, textAlign: "right" }}>
-                {m.waistCm ? `${m.waistCm} cm` : "–"}
+              <span className="row-sub measure-waist">
+                {m.waistCm ? `${formatDecimal(m.waistCm)} cm` : "–"}
               </span>
               <button
                 className="icon-btn"
                 aria-label="Messung löschen"
                 onClick={() => db.measurements.delete(m.id!)}
               >
-                ✕
+                <IconTrash size={17} />
               </button>
             </div>
           ))
