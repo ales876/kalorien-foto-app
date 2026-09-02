@@ -5,6 +5,7 @@ import {
   type AnimationEvent,
   type ReactNode,
 } from "react";
+import { useKeyboardInset } from "../hooks/useKeyboardInset";
 import { IconClose } from "./icons";
 
 type Phase = "closed" | "open" | "closing";
@@ -30,6 +31,7 @@ export function Sheet({
 }) {
   const [phase, setPhase] = useState<Phase>(open ? "open" : "closed");
   const sheetRef = useRef<HTMLDivElement>(null);
+  const keyboardInset = useKeyboardInset(phase === "open");
 
   // Abgeleiteter Zustand während des Renderns — das von React empfohlene
   // Muster, wenn sich State aus Props ergibt.
@@ -86,6 +88,25 @@ export function Sheet({
         aria-label={title}
         tabIndex={-1}
         ref={sheetRef}
+        style={
+          keyboardInset
+            ? {
+                marginBottom: keyboardInset,
+                maxHeight: `calc(92dvh - ${keyboardInset}px)`,
+              }
+            : undefined
+        }
+        onFocus={(event) => {
+          // Fokussiertes Feld ins Bild holen, falls es unter der Tastatur liegt.
+          const target = event.target as HTMLElement;
+          if (target.matches("input, textarea")) {
+            window.setTimeout(
+              () =>
+                target.scrollIntoView({ block: "nearest", behavior: "smooth" }),
+              250,
+            );
+          }
+        }}
       >
         <div className="sheet-grabber" aria-hidden="true" />
         <div className="sheet-header">

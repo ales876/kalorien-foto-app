@@ -258,14 +258,30 @@
 }
 
 .segmented {
+  position: relative;
   display: flex;
-  gap: 6px;
   background: var(--surface-sunken);
   padding: 4px;
   border-radius: var(--radius);
 }
 
+/* Der Marker gleitet zum gewählten Segment; die Knöpfe selbst bleiben
+   durchsichtig und liegen darüber. */
+.segmented-thumb {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc((100% - 8px) / var(--segments, 1));
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  transform: translateX(calc(var(--segment-index, 0) * 100%));
+  transition: transform var(--dur-base) var(--ease-spring);
+}
+
 .segmented button {
+  position: relative;
   flex: 1;
   border: none;
   background: transparent;
@@ -274,16 +290,11 @@
   font-size: 14px;
   font-weight: 500;
   color: var(--ink-secondary);
-  transition:
-    background var(--dur-base) var(--ease-out),
-    color var(--dur-base) var(--ease-out),
-    box-shadow var(--dur-base) var(--ease-out);
+  transition: color var(--dur-base) var(--ease-out);
 }
 
 .segmented button[aria-pressed="true"] {
-  background: var(--surface);
   color: var(--ink);
-  box-shadow: var(--shadow);
 }
 
 /* ---------- Status ---------- */
