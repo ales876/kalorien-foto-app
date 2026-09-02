@@ -13,6 +13,7 @@ import {
   YAxis,
 } from "recharts";
 import { db, getSettings } from "../../lib/db";
+import { formatDateKey } from "../../lib/nutrition";
 import {
   formatDecimal,
   formatNumber,
@@ -20,6 +21,7 @@ import {
   shortDate,
   sumTotals,
 } from "../../lib/nutrition";
+import { IconTrash } from "../../ui/icons";
 import type { FoodEntry } from "../../lib/types";
 import {
   computeEnergyBalance,
@@ -183,7 +185,7 @@ export function ReportsScreen() {
       <Card title="Gewicht (kg)">
         {weightPoints.length === 0 ? (
           <div className="empty">
-            Noch kein Gewicht erfasst — trag es unter „Fortschritt“ ein.
+            Noch kein Gewicht erfasst — über das Plus eintragen.
           </div>
         ) : (
           <>
@@ -243,6 +245,38 @@ export function ReportsScreen() {
         color="#35b37e"
         emptyHint="Noch kein Bauchumfang erfasst."
       />
+
+      <Card title="Letzte Messungen">
+        {measurements.length === 0 ? (
+          <div className="empty">
+            Noch nichts erfasst — über das Plus unter „Gewicht & Maße“.
+          </div>
+        ) : (
+          [...measurements]
+            .sort((a, b) => b.date.localeCompare(a.date))
+            .slice(0, 14)
+            .map((m) => (
+              <div className="row" key={m.id}>
+                <div className="row-main">
+                  <div className="row-title">{formatDateKey(m.date)}</div>
+                </div>
+                <span className="row-value">
+                  {m.weightKg ? `${formatDecimal(m.weightKg)} kg` : "–"}
+                </span>
+                <span className="row-sub measure-waist">
+                  {m.waistCm ? `${formatDecimal(m.waistCm)} cm` : "–"}
+                </span>
+                <button
+                  className="icon-btn"
+                  aria-label="Messung löschen"
+                  onClick={() => db.measurements.delete(m.id!)}
+                >
+                  <IconTrash size={17} />
+                </button>
+              </div>
+            ))
+        )}
+      </Card>
     </div>
   );
 }

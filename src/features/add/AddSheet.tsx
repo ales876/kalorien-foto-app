@@ -3,18 +3,26 @@ import type { Suggestion } from "../../lib/suggestions";
 import type { NutritionCandidate } from "../../lib/types";
 import { guessMeal } from "../../lib/nutrition";
 import { Loading, Sheet } from "../../ui/components";
-import { IconBack, IconBarcode, IconCamera, IconChevron, IconSearch } from "../../ui/icons";
+import {
+  IconBack,
+  IconBarcode,
+  IconBody,
+  IconCamera,
+  IconChevron,
+  IconSearch,
+} from "../../ui/icons";
 import { PhotoFlow } from "./PhotoFlow";
 import { SearchFlow } from "./SearchFlow";
 import { ConfirmStep } from "./ConfirmStep";
 import { QuickPicks } from "./QuickPicks";
+import { WeightFlow } from "./WeightFlow";
 
 // Die Scanner-Bibliothek wiegt einiges und wird nur beim Barcode gebraucht.
 const BarcodeFlow = lazy(() =>
   import("./BarcodeFlow").then((m) => ({ default: m.BarcodeFlow })),
 );
 
-type Mode = "choose" | "photo" | "barcode" | "search" | "quick";
+type Mode = "choose" | "photo" | "barcode" | "search" | "quick" | "weight";
 
 const TITLES: Record<Mode, string> = {
   choose: "Hinzufügen",
@@ -22,6 +30,7 @@ const TITLES: Record<Mode, string> = {
   photo: "Foto analysieren",
   barcode: "Barcode scannen",
   search: "Produkt suchen",
+  weight: "Gewicht & Maße",
 };
 
 export function AddSheet({
@@ -65,6 +74,13 @@ export function AddSheet({
             hint="Name oder Marke"
             onClick={() => setMode("search")}
           />
+          <ChoiceButton
+            Icon={IconBody}
+            color="var(--tab-body)"
+            label="Gewicht & Maße"
+            hint="Wiegen und messen"
+            onClick={() => setMode("weight")}
+          />
         </>
       )}
 
@@ -78,6 +94,7 @@ export function AddSheet({
         </Suspense>
       )}
       {mode === "search" && <SearchFlow onSaved={onClose} />}
+      {mode === "weight" && <WeightFlow onSaved={onClose} />}
 
       {mode !== "choose" && (
         <button className="btn btn-ghost back-btn" onClick={() => setMode("choose")}>

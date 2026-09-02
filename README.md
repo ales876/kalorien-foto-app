@@ -45,10 +45,14 @@ src/
     openfoodfacts.ts  Produktsuche + Barcode-Lookup
     claude.ts       Bildverkleinerung + Vision-Aufruf
   features/       je Bereich ein Ordner
-    today/ add/ body/ reports/ settings/
+    today/ add/ reports/ settings/
   ui/             gemeinsame Bausteine (Card, Sheet, KcalRing, …)
   styles/         Design-Tokens und globale Styles
 ```
+
+Erfasst wird ausschliesslich über das Plus — Essen wie Körperdaten.
+Ausgewertet wird in den Berichten. Diese Trennung hält die Wege kurz
+und vermeidet zwei Arten, dasselbe zu tun.
 
 Nährwerte werden **immer pro 100 g** gespeichert. Die Grammzahl ist der
 einzige veränderliche Wert — dadurch rechnet eine nachträgliche Korrektur
