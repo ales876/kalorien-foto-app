@@ -1,23 +1,26 @@
 import { Suspense, lazy, useState } from "react";
+import { formatDateKey, toDateKey } from "../../lib/date";
+import { guessMeal } from "../../lib/nutrition";
 import type { Suggestion } from "../../lib/suggestions";
 import type { NutritionCandidate } from "../../lib/types";
-import { guessMeal } from "../../lib/nutrition";
-import { Loading, Sheet } from "../../ui/components";
+import { Loading } from "../../ui/Loading";
+import { Sheet } from "../../ui/Sheet";
 import {
+  IconActivity,
   IconBack,
   IconBarcode,
   IconBody,
   IconCamera,
   IconChevron,
-  IconReports,
   IconSearch,
+  type IconComponent,
 } from "../../ui/icons";
-import { PhotoFlow } from "./PhotoFlow";
-import { SearchFlow } from "./SearchFlow";
-import { ConfirmStep } from "./ConfirmStep";
-import { QuickPicks } from "./QuickPicks";
-import { WeightFlow } from "./WeightFlow";
 import { ActivityFlow } from "./ActivityFlow";
+import { ConfirmStep } from "./ConfirmStep";
+import { PhotoFlow } from "./PhotoFlow";
+import { QuickPicks } from "./QuickPicks";
+import { SearchFlow } from "./SearchFlow";
+import { WeightFlow } from "./WeightFlow";
 
 // Die Scanner-Bibliothek wiegt einiges und wird nur beim Barcode gebraucht.
 const BarcodeFlow = lazy(() =>
@@ -25,13 +28,7 @@ const BarcodeFlow = lazy(() =>
 );
 
 type Mode =
-  | "choose"
-  | "photo"
-  | "barcode"
-  | "search"
-  | "quick"
-  | "weight"
-  | "activity";
+  "choose" | "quick" | "photo" | "barcode" | "search" | "weight" | "activity";
 
 const TITLES: Record<Mode, string> = {
   choose: "Hinzufügen",
@@ -43,110 +40,156 @@ const TITLES: Record<Mode, string> = {
   activity: "Aktivität erfassen",
 };
 
+const CHOICES: {
+  mode: Mode;
+  Icon: IconComponent;
+  color: string;
+  label: string;
+  hint: string;
+}[] = [
+  {
+    mode: "photo",
+    Icon: IconCamera,
+    color: "var(--tab-today)",
+    label: "Foto vom Essen",
+    hint: "Zutaten und Menge schätzen",
+  },
+  {
+    mode: "barcode",
+    Icon: IconBarcode,
+    color: "var(--tab-body)",
+    label: "Barcode scannen",
+    hint: "Verpackte Produkte",
+  },
+  {
+    mode: "search",
+    Icon: IconSearch,
+    color: "var(--tab-reports)",
+    label: "Produkt suchen",
+    hint: "Name oder Marke",
+  },
+  {
+    mode: "weight",
+    Icon: IconBody,
+    color: "var(--tab-body)",
+    label: "Gewicht & Maße",
+    hint: "Wiegen und messen",
+  },
+  {
+    mode: "activity",
+    Icon: IconActivity,
+    color: "var(--meal-snack)",
+    label: "Aktivität erfassen",
+    hint: "Aktive Energie aus Health",
+  },
+];
+
+/** Der eine Ort zum Eintragen — Essen wie Körperdaten. Alle Wege enden im
+ *  ConfirmStep. Erfasst wird auf `date`, also den gerade gewählten Tag. */
 export function AddSheet({
+  open,
+  date,
   apiKey,
   onClose,
 }: {
+  open: boolean;
+  date: string;
   apiKey: string;
   onClose: () => void;
 }) {
-  const [mode, setMode] = useState<Mode>("choose");
-  const [picked, setPicked] = useState<NutritionCandidate | null>(null);
-
-  function pick(suggestion: Suggestion) {
-    setPicked(suggestion);
-    setMode("quick");
-  }
-
   return (
-    <Sheet title={TITLES[mode]} onClose={onClose}>
-      {mode === "choose" && (
-        <>
-          <QuickPicks meal={guessMeal()} onPick={pick} />
-          <ChoiceButton
-            Icon={IconCamera}
-            color="var(--tab-today)"
-            label="Foto vom Essen"
-            hint="Zutaten und Menge schätzen"
-            onClick={() => setMode("photo")}
-          />
-          <ChoiceButton
-            Icon={IconBarcode}
-            color="var(--tab-body)"
-            label="Barcode scannen"
-            hint="Verpackte Produkte"
-            onClick={() => setMode("barcode")}
-          />
-          <ChoiceButton
-            Icon={IconSearch}
-            color="var(--tab-reports)"
-            label="Produkt suchen"
-            hint="Name oder Marke"
-            onClick={() => setMode("search")}
-          />
-          <ChoiceButton
-            Icon={IconBody}
-            color="var(--tab-body)"
-            label="Gewicht & Maße"
-            hint="Wiegen und messen"
-            onClick={() => setMode("weight")}
-          />
-          <ChoiceButton
-            Icon={IconReports}
-            color="var(--meal-snack)"
-            label="Aktivität erfassen"
-            hint="Aktive Energie aus Health"
-            onClick={() => setMode("activity")}
-          />
-        </>
-      )}
-
-      {mode === "quick" && picked && (
-        <ConfirmStep candidates={[picked]} onSaved={onClose} />
-      )}
-      {mode === "photo" && <PhotoFlow apiKey={apiKey} onSaved={onClose} />}
-      {mode === "barcode" && (
-        <Suspense fallback={<Loading label="Scanner wird geladen …" />}>
-          <BarcodeFlow onSaved={onClose} />
-        </Suspense>
-      )}
-      {mode === "search" && <SearchFlow onSaved={onClose} />}
-      {mode === "weight" && <WeightFlow onSaved={onClose} />}
-      {mode === "activity" && <ActivityFlow onSaved={onClose} />}
-
-      {mode !== "choose" && (
-        <button className="btn btn-ghost back-btn" onClick={() => setMode("choose")}>
-          <IconBack size={18} />
-          Zurück
-        </button>
-      )}
+    <Sheet open={open} title="Hinzufügen" onClose={onClose}>
+      <AddFlow date={date} apiKey={apiKey} onClose={onClose} />
     </Sheet>
   );
 }
 
-function ChoiceButton({
-  Icon,
-  color,
-  label,
-  hint,
-  onClick,
+function AddFlow({
+  date,
+  apiKey,
+  onClose,
 }: {
-  Icon: typeof IconCamera;
-  color: string;
-  label: string;
-  hint: string;
-  onClick: () => void;
+  date: string;
+  apiKey: string;
+  onClose: () => void;
 }) {
+  const [mode, setMode] = useState<Mode>("choose");
+  const [direction, setDirection] = useState<"forward" | "back">("forward");
+  const [picked, setPicked] = useState<NutritionCandidate | null>(null);
+
+  function go(next: Mode) {
+    setDirection(next === "choose" ? "back" : "forward");
+    setMode(next);
+  }
+
+  function pick(suggestion: Suggestion) {
+    setPicked(suggestion);
+    go("quick");
+  }
+
+  const dateLabel = date === toDateKey() ? "" : formatDateKey(date).slice(0, 6);
+  const subtitle = [mode === "choose" ? "" : TITLES[mode], dateLabel]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
-    <button className="choice" onClick={onClick}>
-      <span className="choice-icon" style={{ color }}>
-        <Icon size={26} />
-      </span>
-      <span className="choice-text">
-        <span className="choice-label">{label}</span>
-        <span className="row-sub">{hint}</span>
-      </span>
-      <IconChevron size={17} className="choice-chevron" />
-    </button>
+    <>
+      {subtitle && (
+        <h3 className="row-sub" style={{ marginTop: -10, marginBottom: 12 }}>
+          {subtitle}
+        </h3>
+      )}
+
+      <div className="step" key={mode} data-direction={direction}>
+        {mode === "choose" && (
+          <>
+            <QuickPicks meal={guessMeal()} onPick={pick} />
+            {CHOICES.map(({ mode: target, Icon, color, label, hint }) => (
+              <button
+                type="button"
+                className="choice"
+                key={target}
+                onClick={() => go(target)}
+              >
+                <span className="choice-icon" style={{ color }}>
+                  <Icon size={26} />
+                </span>
+                <span className="choice-text">
+                  <span className="choice-label">{label}</span>
+                  <span className="row-sub">{hint}</span>
+                </span>
+                <IconChevron size={17} className="choice-chevron" />
+              </button>
+            ))}
+          </>
+        )}
+
+        {mode === "quick" && picked && (
+          <ConfirmStep candidates={[picked]} date={date} onSaved={onClose} />
+        )}
+        {mode === "photo" && (
+          <PhotoFlow apiKey={apiKey} date={date} onSaved={onClose} />
+        )}
+        {mode === "barcode" && (
+          <Suspense fallback={<Loading label="Scanner wird geladen …" />}>
+            <BarcodeFlow date={date} onSaved={onClose} />
+          </Suspense>
+        )}
+        {mode === "search" && <SearchFlow date={date} onSaved={onClose} />}
+        {mode === "weight" && <WeightFlow date={date} onSaved={onClose} />}
+        {mode === "activity" && <ActivityFlow date={date} onSaved={onClose} />}
+      </div>
+
+      {mode !== "choose" && (
+        <button
+          type="button"
+          className="btn btn-ghost back-btn"
+          onClick={() => go("choose")}
+        >
+          <IconBack size={18} />
+          Zurück
+        </button>
+      )}
+    </>
   );
 }

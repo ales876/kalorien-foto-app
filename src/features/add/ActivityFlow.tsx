@@ -1,29 +1,34 @@
 import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, upsertActivity } from "../../lib/db";
-import { formatNumber, toDateKey } from "../../lib/nutrition";
-import { Notice } from "../../ui/components";
+import { formatNumber, parseNonNegative } from "../../lib/format";
+import { Notice } from "../../ui/Notice";
 
 /** Aktivitätskalorien werden von Hand aus der Health-App übertragen —
- *  iOS gibt Webseiten keinen Zugriff auf HealthKit. */
-export function ActivityFlow({ onSaved }: { onSaved: () => void }) {
-  const today = toDateKey();
+ *  iOS gibt Webseiten keinen Zugriff auf HealthKit. Alternativ per
+ *  Kurzbefehl: …/#/import?aktiv=624 öffnen. */
+export function ActivityFlow({
+  date,
+  onSaved,
+}: {
+  date: string;
+  onSaved: () => void;
+}) {
   const existing = useLiveQuery(
-    () => db.activities.where("date").equals(today).first(),
-    [today],
+    () => db.activities.where("date").equals(date).first(),
+    [date],
   );
-
   const [kcal, setKcal] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const value = Number(kcal.replace(",", "."));
-  const valid = kcal.trim() !== "" && Number.isFinite(value) && value >= 0;
+  const value = parseNonNegative(kcal);
+  const valid = value !== undefined;
 
   async function save() {
-    if (!valid) return;
+    if (value === undefined) return;
     setSaving(true);
     try {
-      await upsertActivity(today, Math.round(value));
+      await upsertActivity(date, Math.round(value));
       onSaved();
     } finally {
       setSaving(false);
@@ -31,11 +36,16 @@ export function ActivityFlow({ onSaved }: { onSaved: () => void }) {
   }
 
   return (
-    <>
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        void save();
+      }}
+    >
       {existing && (
         <Notice kind="info">
-          Für heute stehen {formatNumber(existing.kcal)} kcal — ein neuer Wert
-          ersetzt ihn.
+          Für diesen Tag stehen {formatNumber(existing.kcal)} kcal — ein neuer
+          Wert ersetzt ihn.
         </Notice>
       )}
 
@@ -53,21 +63,20 @@ export function ActivityFlow({ onSaved }: { onSaved: () => void }) {
           value={kcal}
           onChange={(e) => setKcal(e.target.value)}
         />
-        <div className="row-sub" style={{ marginTop: 6 }}>
-          Aus der Health-App übertragen: Übersicht → Aktivität → Aktive
-          Energie.
+        <div className="hint">
+          Aus der Health-App: Übersicht → Aktivität → Aktive Energie.
         </div>
       </div>
 
-      <button className="btn" onClick={save} disabled={!valid || saving}>
+      <button type="submit" className="btn" disabled={!valid || saving}>
         {saving ? "Speichern …" : "Speichern"}
       </button>
 
       <p className="explainer-note" style={{ marginTop: 16 }}>
         Der Wert wird nicht gegen deine Kalorien verrechnet: Dein
-        Erhaltungsbedarf ist aus dem tatsächlichen Gewichtsverlauf gemessen
-        und enthält deine Bewegung bereits.
+        Erhaltungsbedarf ist aus dem tatsächlichen Gewichtsverlauf gemessen und
+        enthält deine Bewegung bereits.
       </p>
-    </>
+    </form>
   );
 }

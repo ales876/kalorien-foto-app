@@ -1,17 +1,25 @@
 import { useState } from "react";
-import { db } from "../../lib/db";
-import { candidateToEntry, guessMeal } from "../../lib/nutrition";
-import { MEALS, type Meal, type NutritionCandidate } from "../../lib/types";
-import { Segmented } from "../../ui/components";
+import { addEntries } from "../../lib/db";
+import { candidateToEntry, guessMeal, kcalFor } from "../../lib/nutrition";
+import {
+  MEALS,
+  mealLabel,
+  type Meal,
+  type NutritionCandidate,
+} from "../../lib/types";
+import { Notice } from "../../ui/Notice";
+import { Segmented } from "../../ui/Segmented";
 
-/** Letzter Schritt jeder Erfassung: Mahlzeit wählen, Gramm feinjustieren,
- *  speichern. Gilt für Foto, Barcode und Suche gleichermaßen. */
+/** Letzter Schritt jeder Erfassung: Mahlzeit wählen (nach Uhrzeit
+ *  vorbelegt), Gramm justieren, speichern. Gilt für alle Wege. */
 export function ConfirmStep({
   candidates,
+  date,
   notes,
   onSaved,
 }: {
   candidates: NutritionCandidate[];
+  date: string;
   notes?: string;
   onSaved: () => void;
 }) {
@@ -20,24 +28,29 @@ export function ConfirmStep({
     candidates.map((c) => c.suggestedGrams),
   );
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
-  const kcalOf = (index: number) =>
-    Math.round((candidates[index].kcalPer100g * grams[index]) / 100);
-
+  const gramsAt = (index: number) => grams[index] ?? 0;
   const totalKcal = candidates.reduce(
-    (sum, _, index) => sum + kcalOf(index),
+    (sum, candidate, index) =>
+      sum + kcalFor(candidate.kcalPer100g, gramsAt(index)),
     0,
   );
 
   async function save() {
     setSaving(true);
+    setError("");
     try {
-      await db.entries.bulkAdd(
+      await addEntries(
         candidates.map((candidate, index) =>
-          candidateToEntry(candidate, meal, grams[index]),
+          candidateToEntry(candidate, meal, gramsAt(index), date),
         ),
       );
       onSaved();
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Speichern fehlgeschlagen.",
+      );
     } finally {
       setSaving(false);
     }
@@ -48,6 +61,7 @@ export function ConfirmStep({
       <div className="field">
         <span className="field-label">Mahlzeit</span>
         <Segmented
+          label="Mahlzeit"
           options={MEALS.map((m) => ({ value: m.id, label: m.label }))}
           value={meal}
           onChange={setMeal}
@@ -75,12 +89,12 @@ export function ConfirmStep({
               </div>
             </div>
             <input
-              className="input"
-              style={{ width: 76, padding: "8px 10px", textAlign: "center" }}
+              className="input input-compact"
               type="number"
-              inputMode="numeric"
+              inputMode="decimal"
               min={0}
-              value={grams[index]}
+              aria-label={`Menge ${candidate.name} in Gramm`}
+              value={gramsAt(index)}
               onChange={(e) => {
                 const next = [...grams];
                 next[index] = Math.max(0, Number(e.target.value) || 0);
@@ -88,17 +102,25 @@ export function ConfirmStep({
               }}
             />
             <span className="row-sub">g</span>
-            <span className="row-value">{kcalOf(index)} kcal</span>
+            <span className="row-value">
+              {kcalFor(candidate.kcalPer100g, gramsAt(index))} kcal
+            </span>
           </div>
         ))}
       </div>
 
-      {notes && <div className="notice notice-info">💬 {notes}</div>}
+      {notes && <Notice kind="info">{notes}</Notice>}
+      {error && <Notice>{error}</Notice>}
 
-      <button className="btn" onClick={save} disabled={saving}>
+      <button
+        type="button"
+        className="btn"
+        onClick={save}
+        disabled={saving || grams.every((g) => g === 0)}
+      >
         {saving
           ? "Speichern …"
-          : `${totalKcal} kcal zu ${MEALS.find((m) => m.id === meal)?.label} hinzufügen`}
+          : `${totalKcal} kcal zu ${mealLabel(meal)} hinzufügen`}
       </button>
     </>
   );

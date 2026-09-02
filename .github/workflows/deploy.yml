@@ -1,11 +1,11 @@
-name: Build & Deploy
+name: Deploy
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
-# Nur ein Deploy gleichzeitig; neuere Pushes lösen den laufenden ab.
+# Nur ein Deploy gleichzeitig; ein neuerer Push löst den laufenden ab.
 concurrency:
   group: pages
   cancel-in-progress: true
@@ -16,31 +16,29 @@ permissions:
   id-token: write
 
 jobs:
-  build:
+  check:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    needs: check
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version-file: .nvmrc
           cache: npm
 
       - run: npm ci
-      - run: npm run lint
       - run: npm run build
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
       - id: deployment
         uses: actions/deploy-pages@v4

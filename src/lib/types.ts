@@ -1,13 +1,24 @@
 export type Meal = "fruehstueck" | "mittag" | "abend" | "snack";
 
-/** Farben je Mahlzeit — wie bei Things bekommt jeder Bereich seinen
- *  eigenen Akzent, damit man ihn im Vorbeiscrollen wiedererkennt. */
-export const MEALS: { id: Meal; label: string; color: string }[] = [
+export interface MealInfo {
+  id: Meal;
+  label: string;
+  /** CSS-Variable — jede Mahlzeit behält ihre Farbe, auch inaktiv. */
+  color: string;
+}
+
+export const MEALS: readonly MealInfo[] = [
   { id: "fruehstueck", label: "Frühstück", color: "var(--meal-morning)" },
   { id: "mittag", label: "Mittag", color: "var(--meal-noon)" },
   { id: "abend", label: "Abend", color: "var(--meal-evening)" },
   { id: "snack", label: "Snack", color: "var(--meal-snack)" },
 ];
+
+export const MEAL_IDS = MEALS.map((meal) => meal.id) as [Meal, ...Meal[]];
+
+export function mealLabel(meal: Meal): string {
+  return MEALS.find((m) => m.id === meal)?.label ?? meal;
+}
 
 export type EntrySource =
   | "photo"
@@ -18,11 +29,22 @@ export type EntrySource =
    *  Lebensmittel und deshalb nicht als Vorschlag brauchbar. */
   | "import";
 
-/** Ein Eintrag im Ernährungstagebuch. Nährwerte immer pro 100 g gespeichert,
- *  damit eine spätere Gramm-Korrektur alles automatisch neu berechnet. */
+export const ENTRY_SOURCES: readonly EntrySource[] = [
+  "photo",
+  "barcode",
+  "search",
+  "manual",
+  "import",
+];
+
+/** Ein Eintrag im Ernährungstagebuch.
+ *
+ *  Invariante: Nährwerte liegen IMMER pro 100 g, die Grammzahl ist der
+ *  einzige veränderliche Mengenwert. Eine nachträgliche Korrektur der
+ *  Menge rechnet Kalorien und Makros dadurch automatisch neu. */
 export interface FoodEntry {
   id?: number;
-  /** Lokales Datum als YYYY-MM-DD — Basis für alle Tagesauswertungen. */
+  /** Lokales Datum als YYYY-MM-DD (nie toISOString — das wäre UTC). */
   date: string;
   timestamp: number;
   meal: Meal;
@@ -39,6 +61,7 @@ export interface FoodEntry {
   thumb?: string;
 }
 
+/** Höchstens eine Messung pro Tag. */
 export interface BodyMeasurement {
   id?: number;
   date: string;
@@ -47,14 +70,9 @@ export interface BodyMeasurement {
   waistCm?: number;
 }
 
-/** Die Mifflin-St-Jeor-Formel kennt nur zwei Varianten. Das ist eine
- *  Eigenschaft der Formel, keine Aussage über Menschen. */
-export type FormulaSex = "m" | "w";
-
-/** Verbrauch durch Bewegung, aus der Health-App übertragen.
- *  Bewusst getrennt von der Energiebilanz: der gemessene
- *  Erhaltungsbedarf enthält die Bewegung bereits, eine Verrechnung
- *  würde sie doppelt zählen. */
+/** Aktive Energie aus der Health-App, höchstens ein Wert pro Tag.
+ *  Bewusst NICHT gegen die Kalorien verrechnet: der gemessene
+ *  Erhaltungsbedarf enthält die Bewegung bereits. */
 export interface Activity {
   id?: number;
   date: string;
@@ -63,10 +81,18 @@ export interface Activity {
   note?: string;
 }
 
+/** Die Mifflin-St-Jeor-Formel kennt nur zwei Varianten. Das ist eine
+ *  Eigenschaft der Formel, keine Aussage über Menschen — in der
+ *  Oberfläche heißt das Feld deshalb „Formel-Variante". */
+export type FormulaSex = "m" | "w";
+
+export type PaletteId = "gelb" | "salbei" | "terrakotta" | "tinte";
+
 export interface Settings {
-  id: string;
+  id: "settings";
+  /** Anthropic-Key, nur lokal in IndexedDB. */
   apiKey: string;
-  palette: string;
+  palette: PaletteId;
   heightCm?: number;
   birthYear?: number;
   sex?: FormulaSex;
@@ -86,7 +112,10 @@ export const DEFAULT_SETTINGS: Settings = {
   fatGoal: 70,
 };
 
-/** Was Suche, Barcode-Scan und Foto-Analyse einheitlich zurückgeben. */
+export type Confidence = "hoch" | "mittel" | "niedrig";
+
+/** Was Suche, Barcode-Scan, Foto-Analyse und Vorschläge einheitlich
+ *  liefern — der ConfirmStep macht daraus einen FoodEntry. */
 export interface NutritionCandidate {
   name: string;
   brand?: string;
@@ -100,5 +129,5 @@ export interface NutritionCandidate {
   source: EntrySource;
   thumb?: string;
   /** Nur Foto-Analyse: wie sicher das Modell die Zutat erkannt hat. */
-  confidence?: "hoch" | "mittel" | "niedrig";
+  confidence?: Confidence;
 }

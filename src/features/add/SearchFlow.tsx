@@ -2,11 +2,18 @@ import { useState } from "react";
 import { searchLocal } from "../../lib/localFoods";
 import { searchProducts } from "../../lib/openfoodfacts";
 import type { NutritionCandidate } from "../../lib/types";
-import { Loading, Notice } from "../../ui/components";
+import { Loading } from "../../ui/Loading";
+import { Notice } from "../../ui/Notice";
 import { IconChevron } from "../../ui/icons";
 import { ConfirmStep } from "./ConfirmStep";
 
-export function SearchFlow({ onSaved }: { onSaved: () => void }) {
+export function SearchFlow({
+  date,
+  onSaved,
+}: {
+  date: string;
+  onSaved: () => void;
+}) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<NutritionCandidate[] | null>(null);
   const [selected, setSelected] = useState<NutritionCandidate | null>(null);
@@ -15,55 +22,61 @@ export function SearchFlow({ onSaved }: { onSaved: () => void }) {
   const [usedFallback, setUsedFallback] = useState(false);
 
   async function runSearch() {
-    if (query.trim().length < 2) return;
+    const term = query.trim();
+    if (term.length < 2) return;
     setBusy(true);
     setError("");
     setUsedFallback(false);
     try {
-      // Zuerst der mitgelieferte Index: sofort da, auch offline. Fehlt er
-      // (erster Start ohne Netz, Deploy ohne Index), zählt das wie „nichts
-      // gefunden" — die Suche darf daran nicht scheitern.
-      const local = await searchLocal(query.trim()).catch(() => []);
+      // Zuerst der mitgelieferte Index: sofort da, auch offline. Fehlt er,
+      // zählt das wie „nichts gefunden" — die Suche darf daran nicht scheitern.
+      const local = await searchLocal(term).catch(() => []);
       if (local.length > 0) {
         setResults(local);
         return;
       }
-      // Nur wenn lokal nichts passt, die (wacklige) Online-Suche versuchen.
+      // Nur wenn lokal nichts passt, die (wacklige) Live-Suche versuchen.
       setUsedFallback(true);
-      setResults(await searchProducts(query.trim()));
+      setResults(await searchProducts(term));
     } catch (err) {
+      setResults([]);
       setError(err instanceof Error ? err.message : "Suche fehlgeschlagen.");
     } finally {
       setBusy(false);
     }
   }
 
-  if (selected) {
-    return <ConfirmStep candidates={[selected]} onSaved={onSaved} />;
-  }
+  if (selected)
+    return (
+      <ConfirmStep candidates={[selected]} date={date} onSaved={onSaved} />
+    );
 
   return (
     <>
-      <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
+      <form
+        className="search-bar"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void runSearch();
+        }}
+      >
         <input
           className="input"
-          placeholder="z.B. Skyr, Haferflocken, Vollkornbrot"
+          type="search"
+          placeholder="z. B. Skyr, Haferflocken, Vollkornbrot"
+          aria-label="Produkt suchen"
           value={query}
           autoFocus
           onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") void runSearch();
-          }}
         />
         <button
+          type="submit"
           className="btn"
-          style={{ width: "auto", padding: "12px 18px" }}
-          onClick={runSearch}
-          disabled={busy}
+          disabled={busy || query.trim().length < 2}
         >
           Suchen
         </button>
-      </div>
+      </form>
 
       {error && <Notice>{error}</Notice>}
       {busy && <Loading label="Suche läuft …" />}
@@ -76,14 +89,15 @@ export function SearchFlow({ onSaved }: { onSaved: () => void }) {
             </Notice>
           )}
           <div className="card">
-            {results.length === 0 && (
-              <div className="empty">
+            {results.length === 0 && !error && (
+              <p className="empty">
                 Nichts gefunden. Andere Schreibweise oder Markenname versuchen.
-              </div>
+              </p>
             )}
             {results.map((result, index) => (
               <button
-                key={`${result.barcode}-${index}`}
+                type="button"
+                key={`${result.barcode ?? result.name}-${index}`}
                 className="row row-button"
                 onClick={() => setSelected(result)}
               >

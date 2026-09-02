@@ -1,93 +1,111 @@
 # Plate
 
-Persönliche Ernährungs-App: Kalorien und Makros per Foto, Barcode oder
-Produktsuche erfassen, dazu Gewicht und Bauchumfang tracken.
+Persönliche Ernährungs-App für **einen** Nutzer: Kalorien und Makros per Foto,
+Barcode, Produktsuche oder Schnellzugriff erfassen, dazu Gewicht, Bauchumfang
+und Aktivität. Die Berichte leiten den Erhaltungsbedarf aus echten Daten ab.
 
-Live: https://ales876.github.io/kalorien-foto-app/
+|             |                                                   |
+| ----------- | ------------------------------------------------- |
+| **Live**    | https://ales876.github.io/kalorien-foto-app/      |
+| **Daten**   | rein lokal in IndexedDB, kein Backend, kein Konto |
+| **Nutzung** | PWA auf dem iPhone-Home-Bildschirm                |
+
+Der Repo-Name bleibt `kalorien-foto-app`, obwohl die App „Plate" heißt — die
+veröffentlichte URL und der Basispfad in `vite.config.ts` hängen daran.
 
 ## Stack
 
-| Baustein | Wahl |
-| --- | --- |
-| Build | Vite 8 |
-| UI | React 19 + TypeScript |
-| PWA | vite-plugin-pwa (Workbox) |
-| Datenhaltung | Dexie / IndexedDB (rein lokal) |
-| Charts | Recharts |
-| Barcode | html5-qrcode |
-| Produktdaten | Open Food Facts (lokaler DE-Index + Live-Barcode) |
-| Foto-Analyse | Claude Vision (Anthropic API) |
+| Baustein     | Wahl                                                                   |
+| ------------ | ---------------------------------------------------------------------- |
+| Build        | Vite 8                                                                 |
+| UI           | React 19 + TypeScript (strict)                                         |
+| Routing      | react-router-dom, **HashRouter** (GitHub Pages kennt keine Unterpfade) |
+| PWA          | vite-plugin-pwa (Workbox)                                              |
+| Datenhaltung | Dexie / IndexedDB                                                      |
+| Validierung  | zod (Backup-Dateien, Modellantworten)                                  |
+| Charts       | Recharts                                                               |
+| Barcode      | html5-qrcode                                                           |
+| Foto-Analyse | Anthropic SDK, strukturierte Ausgabe                                   |
+| Qualität     | oxlint, Prettier, Vitest + Testing Library                             |
 
 ## Entwicklung
 
 ```bash
 npm install
-npm run dev      # Dev-Server auf :5173
-npm run lint     # oxlint
-npm run build    # Typecheck + Produktions-Build nach dist/
+npm run dev          # http://localhost:5173/kalorien-foto-app/
+npm run check        # lint + typecheck + test + format:check
+npm run test:watch
+npm run build        # Produktions-Build nach dist/
 ```
 
-## Deployment
-
-Push auf `main` löst den Workflow `.github/workflows/deploy.yml` aus:
-lint → build → Deploy nach GitHub Pages. Die Pages-Quelle muss in den
-Repo-Einstellungen auf **GitHub Actions** stehen (nicht auf "Deploy from a
-branch").
+Node-Version steht in `.nvmrc`.
 
 ## Architektur
 
 ```
 src/
-  lib/            Datenschicht ohne UI-Bezug
-    db.ts           Dexie-Schema, Migrationen, Settings
-    types.ts        Domänentypen (FoodEntry, BodyMeasurement, …)
-    nutrition.ts    Berechnungen: Tagesbilanz, Makros, Datumsschlüssel
-    openfoodfacts.ts  Produktsuche + Barcode-Lookup
-    claude.ts       Bildverkleinerung + Vision-Aufruf
-  features/       je Bereich ein Ordner
-    today/ add/ reports/ settings/
-  ui/             gemeinsame Bausteine (Card, Sheet, KcalRing, …)
-  styles/         Design-Tokens und globale Styles
+  app/          App-Shell: Routen, Tab-Leiste, Fehlergrenze
+  lib/          Datenschicht und Domänenlogik, ohne UI-Bezug, getestet
+    types.ts      Domänentypen, MEALS, DEFAULT_SETTINGS
+    db.ts         Dexie-Schema (Name "KcalScanner" bleibt — dort liegen die Daten)
+    date.ts       Datumsschlüssel (lokal, nie toISOString)
+    nutrition.ts  Summen, Kandidat → Eintrag, Mahlzeit nach Uhrzeit
+    analysis.ts   Energiebilanz, Gewichtsglättung, Grundumsatz
+    suggestions.ts  Vorschläge aus der Historie, Tag/Mahlzeit übernehmen
+    backup.ts     Export/Import mit Schema-Prüfung und Dublettenerkennung
+    vision.ts     Foto-Analyse über das Anthropic SDK
+    openfoodfacts.ts  Live-Barcode und Live-Suche (Fallback)
+    localFoods.ts     Suche im mitgelieferten Produktindex
+    palettes.ts   Vier Akzentfarben, Kontrast per Test geprüft
+  features/     je Bereich ein Ordner: today, add, reports, settings, import
+  ui/           gemeinsame Bausteine: Card, Sheet, Segmented, KcalRing, MacroGoals, Icons
+  styles/       tokens (Farben, Bewegung), base, components, features
+scripts/
+  build-de-index.py   Produktindex aus dem Open-Food-Facts-CSV-Export
+  make-icons.mjs      App-Icons als PNG, ohne Abhängigkeiten
+public/de-foods.json  50.000 deutsche Produkte, wird monatlich erneuert
 ```
 
-Erfasst wird ausschliesslich über das Plus — Essen wie Körperdaten.
-Ausgewertet wird in den Berichten. Diese Trennung hält die Wege kurz
-und vermeidet zwei Arten, dasselbe zu tun.
+**Invariante:** Nährwerte liegen immer pro 100 g, die Grammzahl ist der einzige
+veränderliche Mengenwert. Eine Korrektur der Menge rechnet alles neu.
 
-Nährwerte werden **immer pro 100 g** gespeichert. Die Grammzahl ist der
-einzige veränderliche Wert — dadurch rechnet eine nachträgliche Korrektur
-Kalorien und Makros automatisch neu.
+Die Begründungen hinter den wichtigen Entscheidungen (lokaler Produktindex,
+gemessener Erhaltungsbedarf, Aktivität nicht verrechnen, HashRouter, Deep-Link
+statt HealthKit) stehen in [docs/DECISIONS.md](docs/DECISIONS.md).
 
-## Produktdaten
+## Deployment
 
-Die Live-Suche von Open Food Facts ist für eine Browser-App unbrauchbar:
-die moderne Such-API (`search.openfoodfacts.org`) sendet keine CORS-Header,
-der veraltete Ersatz (`cgi/search.pl`) antwortet unter Last regelmäßig mit
-503 und ist auf 10 Anfragen/Minute begrenzt.
+Push auf `main` löst `.github/workflows/deploy.yml` aus: erst die vollständige
+Prüfung aus `ci.yml` (lint, typecheck, format, test, build), dann der Deploy
+nach GitHub Pages. Die Pages-Quelle muss auf **GitHub Actions** stehen.
+Jeder andere Branch und jeder Pull Request läuft nur durch `ci.yml`.
 
-Deshalb liegt die Suche lokal: `scripts/build-de-index.py` zieht die
-populärsten deutschen Produkte mit vollständigen Nährwerten aus dem
-Open-Food-Facts-Datensatz (Parquet auf Hugging Face, per DuckDB gefiltert)
-nach `public/de-foods.json`. Die App lädt diese Datei beim ersten Suchlauf,
-danach liegt sie im Service-Worker-Cache — Suche funktioniert damit sofort
-und offline.
+Der Produktindex wird am 1. jedes Monats durch `refresh-index.yml` erneuert;
+manuell:
 
-Aktualisiert wird der Index monatlich durch
-`.github/workflows/refresh-index.yml`; manuell geht es per
-`python scripts/build-de-index.py`.
+```bash
+python scripts/build-de-index.py
+OFF_CSV=/pfad/zur/datei.csv.gz python scripts/build-de-index.py   # lokale Kopie
+INDEX_SIZE=20000 python scripts/build-de-index.py                 # andere Größe
+```
 
-Reihenfolge zur Laufzeit:
+## Apple Health
 
-1. **Suche** → lokaler Index; nur wenn dort nichts passt, die Live-Suche.
-2. **Barcode** → lokaler Index; sonst der Live-Produktendpunkt
-   (der ist CORS-fähig und stabil).
+HealthKit hat keine Web-Schnittstelle. Die aktive Energie wird von Hand
+eingetragen oder per Kurzbefehl übergeben, der diese URL öffnet:
 
-## Bekannte Einschränkungen
+```
+https://ales876.github.io/kalorien-foto-app/#/import?aktiv=624
+```
 
-- **Datenqualität schwankt.** Open Food Facts ist crowd-sourced; Einträge
-  ohne hinterlegte Nährwerte fliegen beim Indexbau und in der Live-Suche
-  raus.
-- **Der Index deckt nicht alles ab.** Er enthält die populärsten deutschen
-  Produkte; alles andere landet beim Live-Fallback.
-- **Der API-Key liegt lokal im Browser** (IndexedDB), nicht im Code. Für
-  eine private Ein-Personen-App ist das in Ordnung.
+Der Wert landet als Tageswert für heute; ein bestehender Wert wird ersetzt.
+
+## Bekannte Grenzen
+
+- **Datenqualität schwankt.** Open Food Facts ist crowd-sourced; Produkte ohne
+  Nährwerte fliegen beim Indexbau und beim Live-Fallback raus.
+- **Der Index deckt nicht alles ab.** Fehlt ein Produkt, greift die wacklige
+  Live-Suche; sie antwortet unter Last mit 503.
+- **Der API-Key liegt im Browser** (IndexedDB), nicht im Code. Für eine
+  Ein-Personen-App in Ordnung; ein Backup enthält ihn nicht.
+- **Kein Sync.** Ein Export unter Mehr → Daten ist die einzige Sicherung.

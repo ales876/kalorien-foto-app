@@ -1,12 +1,17 @@
+import { daysBetween, toDateKey } from "./date";
+import { groupByDate, sumTotals } from "./nutrition";
 import type { BodyMeasurement, FoodEntry, FormulaSex } from "./types";
-import { sumTotals, toDateKey } from "./nutrition";
 
-/** Rund 7000 kcal entsprechen einem Kilogramm Körperfett — die übliche
- *  Faustzahl. Sie ist eine Näherung, keine Naturkonstante. */
-const KCAL_PRO_KG = 7000;
+/** Rund 7000 kcal je Kilogramm Körperfett — die übliche Faustzahl,
+ *  eine Näherung, keine Naturkonstante. */
+export const KCAL_PER_KG = 7000;
+
+/** Schutzgrenzen: darunter wird nichts behauptet, sondern benannt, was fehlt. */
+export const BALANCE_MIN_WEIGHINGS = 2;
+export const BALANCE_MIN_DAYS = 14;
+export const BALANCE_MIN_LOGGED_DAYS = 10;
 
 export interface EnergyBalance {
-  /** Erste und letzte Wiegung im Zeitraum. */
   fromDate: string;
   toDate: string;
   days: number;
@@ -25,64 +30,69 @@ export interface BalanceGap {
   detail: string;
 }
 
+export function isBalanceGap(
+  value: EnergyBalance | BalanceGap,
+): value is BalanceGap {
+  return "reason" in value;
+}
+
 /** Leitet den Erhaltungsbedarf aus tatsächlicher Aufnahme und
- *  Gewichtsverlauf ab, statt ihn aus Körperdaten zu schätzen.
+ *  Gewichtsverlauf ab, statt ihn aus Körperdaten zu schätzen:
  *
- *  Der laufende Tag bleibt außen vor: er ist meist erst halb erfasst und
- *  würde den Schnitt nach unten ziehen. */
+ *    Bilanz/Tag        = (Δkg × 7000) / Tage
+ *    Erhaltungsbedarf  = Ø Aufnahme − Bilanz/Tag
+ *
+ *  Der laufende Tag bleibt außen vor — er ist meist erst halb erfasst.
+ *  Aktivität wird NICHT verrechnet: der Erhaltungsbedarf kommt aus dem
+ *  realen Gewichtsverlauf und enthält die Bewegung bereits. */
 export function computeEnergyBalance(
-  entries: FoodEntry[],
-  measurements: BodyMeasurement[],
+  entries: readonly FoodEntry[],
+  measurements: readonly BodyMeasurement[],
+  today: string = toDateKey(),
 ): EnergyBalance | BalanceGap {
   const weighings = measurements
-    .filter((m) => typeof m.weightKg === "number")
+    .filter(
+      (m): m is BodyMeasurement & { weightKg: number } =>
+        typeof m.weightKg === "number",
+    )
     .sort((a, b) => a.date.localeCompare(b.date));
 
-  if (weighings.length < 2) {
+  const first = weighings[0];
+  const last = weighings[weighings.length - 1];
+  if (!first || !last || weighings.length < BALANCE_MIN_WEIGHINGS) {
     return {
       reason: "zu-wenig-wiegungen",
       detail: "Dafür braucht es mindestens zwei Wiegungen.",
     };
   }
 
-  const first = weighings[0];
-  const last = weighings[weighings.length - 1];
   const days = daysBetween(first.date, last.date);
-
-  if (days < 14) {
+  if (days < BALANCE_MIN_DAYS) {
     return {
       reason: "zu-kurzer-zeitraum",
-      detail: `Der Zeitraum umfasst ${days} Tage — aussagekräftig wird es ab etwa 14.`,
+      detail: `Der Zeitraum umfasst ${days} Tage — aussagekräftig wird es ab etwa ${BALANCE_MIN_DAYS}.`,
     };
   }
 
-  const today = toDateKey();
-  const relevant = entries.filter(
-    (e) => e.date >= first.date && e.date <= last.date && e.date !== today,
+  const perDay = groupByDate(
+    entries.filter(
+      (e) => e.date >= first.date && e.date <= last.date && e.date !== today,
+    ),
   );
-
-  const perDay = new Map<string, FoodEntry[]>();
-  for (const entry of relevant) {
-    const list = perDay.get(entry.date) ?? [];
-    list.push(entry);
-    perDay.set(entry.date, list);
-  }
-
-  if (perDay.size < 10) {
+  if (perDay.size < BALANCE_MIN_LOGGED_DAYS) {
     return {
       reason: "zu-wenig-tage",
-      detail: `Bisher ${perDay.size} erfasste Tage — ab etwa 10 wird die Rechnung belastbar.`,
+      detail: `Bisher ${perDay.size} erfasste Tage — ab etwa ${BALANCE_MIN_LOGGED_DAYS} wird die Rechnung belastbar.`,
     };
   }
 
-  const totalIntake = [...perDay.values()].reduce(
-    (sum, dayEntries) => sum + sumTotals(dayEntries).kcal,
-    0,
-  );
+  let totalIntake = 0;
+  for (const dayEntries of perDay.values())
+    totalIntake += sumTotals(dayEntries).kcal;
   const averageIntake = totalIntake / perDay.size;
 
-  const weightChange = (last.weightKg ?? 0) - (first.weightKg ?? 0);
-  const dailyBalance = (weightChange * KCAL_PRO_KG) / days;
+  const weightChange = last.weightKg - first.weightKg;
+  const dailyBalance = (weightChange * KCAL_PER_KG) / days;
 
   return {
     fromDate: first.date,
@@ -96,73 +106,65 @@ export function computeEnergyBalance(
   };
 }
 
-export function isBalanceGap(
-  value: EnergyBalance | BalanceGap,
-): value is BalanceGap {
-  return "reason" in value;
-}
-
 export interface WeightPoint {
   date: string;
-  label: string;
   raw: number;
   /** Gleitender Durchschnitt über die zurückliegenden sieben Kalendertage. */
   trend: number;
 }
 
-/** Glättet die Gewichtskurve. Tageswerte schwanken um bis zu einem Kilo,
- *  meist Wasser — der gleitende Schnitt zeigt die eigentliche Richtung. */
+/** Tageswerte schwanken um bis zu einem Kilo, meist Wasser — der gleitende
+ *  Schnitt zeigt die eigentliche Richtung. */
 export function smoothWeights(
-  measurements: BodyMeasurement[],
+  measurements: readonly BodyMeasurement[],
   windowDays = 7,
 ): WeightPoint[] {
   const points = measurements
-    .filter((m) => typeof m.weightKg === "number")
+    .filter(
+      (m): m is BodyMeasurement & { weightKg: number } =>
+        typeof m.weightKg === "number",
+    )
     .sort((a, b) => a.date.localeCompare(b.date));
 
   return points.map((point, index) => {
-    const window: number[] = [];
+    let sum = 0;
+    let count = 0;
     for (let i = index; i >= 0; i--) {
-      if (daysBetween(points[i].date, point.date) >= windowDays) break;
-      window.push(points[i].weightKg!);
+      const earlier = points[i];
+      if (!earlier || daysBetween(earlier.date, point.date) >= windowDays)
+        break;
+      sum += earlier.weightKg;
+      count++;
     }
-    const trend = window.reduce((a, b) => a + b, 0) / window.length;
-    const [, month, day] = point.date.split("-");
     return {
       date: point.date,
-      label: `${day}.${month}.`,
-      raw: point.weightKg!,
-      trend: Math.round(trend * 100) / 100,
+      raw: point.weightKg,
+      trend: Math.round((sum / count) * 100) / 100,
     };
   });
 }
 
-function daysBetween(from: string, to: string): number {
-  const a = new Date(`${from}T00:00:00`);
-  const b = new Date(`${to}T00:00:00`);
-  return Math.round((b.getTime() - a.getTime()) / 86_400_000);
-}
-
-/** Grundumsatz nach Mifflin-St Jeor — was der Körper in völliger Ruhe
- *  verbraucht. Alles darüber kommt durch Bewegung und Verdauung dazu. */
+/** Grundumsatz nach Mifflin-St Jeor — Verbrauch in völliger Ruhe. */
 export function computeBMR(params: {
   weightKg: number;
   heightCm: number;
   age: number;
   sex: FormulaSex;
 }): number {
-  const base =
-    10 * params.weightKg + 6.25 * params.heightCm - 5 * params.age;
+  const base = 10 * params.weightKg + 6.25 * params.heightCm - 5 * params.age;
   return params.sex === "m" ? base + 5 : base - 161;
 }
 
+export type DeficitLabel =
+  "Aufbau" | "Erhaltung" | "moderat" | "deutlich" | "aggressiv";
+
 export interface DeficitAssessment {
+  /** Positiv = Defizit, negativ = Überschuss. */
   deficit: number;
-  /** Rechnerische Gewichtsänderung pro Woche. */
+  /** Rechnerische Gewichtsänderung pro Woche (positiv = Abnahme). */
   kgPerWeek: number;
-  /** Liegt das Ziel unter dem Grundumsatz? */
   belowBMR: boolean;
-  label: "moderat" | "deutlich" | "aggressiv" | "Aufbau" | "Erhaltung";
+  label: DeficitLabel;
 }
 
 /** Ordnet ein Kaloriendefizit ein — rein rechnerisch, ohne Empfehlung. */
@@ -172,10 +174,10 @@ export function assessDeficit(
   bmr?: number,
 ): DeficitAssessment {
   const deficit = maintenance - goal;
-  const kgPerWeek = (deficit * 7) / KCAL_PRO_KG;
+  const kgPerWeek = (deficit * 7) / KCAL_PER_KG;
   const belowBMR = bmr !== undefined && goal < bmr;
 
-  let label: DeficitAssessment["label"];
+  let label: DeficitLabel;
   if (deficit < -100) label = "Aufbau";
   else if (deficit <= 100) label = "Erhaltung";
   else if (deficit <= 350) label = "moderat";

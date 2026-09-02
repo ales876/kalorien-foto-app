@@ -1,23 +1,25 @@
-/** Akzentfarben zur Auswahl. Der Rest der Oberfläche bleibt unberührt —
+import type { PaletteId } from "./types";
+
+/** Vier wählbare Akzente. Der Rest der Oberfläche bleibt unberührt —
  *  heller Untergrund, weiße Karten, Haarlinien. Nur der Akzent wechselt.
  *
- *  Die Schriftfarbe auf dem Akzent ist je Palette festgelegt und auf
- *  mindestens 4,5:1 Kontrast geprüft (WCAG AA für Fließtext). */
+ *  Jede Palette hat eine Gegenfarbe, die in der Wochenleiste die Auswahl
+ *  trägt, damit sie sich vom Fortschrittsring absetzt. Alle Kombinationen
+ *  sind auf mindestens 4,5:1 Kontrast geprüft (siehe palettes.test.ts). */
 export interface Palette {
-  id: string;
+  id: PaletteId;
   label: string;
   hint: string;
   accent: string;
   accentSoft: string;
   accentDeep: string;
+  /** Schriftfarbe auf dem Akzent. */
   onAccent: string;
-  /** Gegenfarbe auf dem Farbkreis — trägt die Auswahl in der
-   *  Wochenleiste, damit sie sich vom Fortschrittsring absetzt. */
   complement: string;
   complementSoft: string;
 }
 
-export const PALETTES: Palette[] = [
+export const PALETTES: readonly Palette[] = [
   {
     id: "gelb",
     label: "Sonnengelb",
@@ -32,7 +34,7 @@ export const PALETTES: Palette[] = [
   {
     id: "salbei",
     label: "Salbei",
-    hint: "Ruhig, passt zum Thema Ernährung",
+    hint: "Ruhig, passt zum Thema",
     accent: "#7cbfa0",
     accentSoft: "#e6f3ec",
     accentDeep: "#5ea588",
@@ -64,21 +66,28 @@ export const PALETTES: Palette[] = [
   },
 ];
 
-export const DEFAULT_PALETTE = PALETTES[0];
+export const DEFAULT_PALETTE: Palette = PALETTES[0] as Palette;
+
+export function isPaletteId(value: unknown): value is PaletteId {
+  return PALETTES.some((p) => p.id === value);
+}
 
 export function getPalette(id: string | undefined): Palette {
   return PALETTES.find((p) => p.id === id) ?? DEFAULT_PALETTE;
 }
 
 /** Schreibt die Palette als CSS-Variablen auf das Wurzelelement. */
-export function applyPalette(id: string | undefined): Palette {
+export function applyPalette(
+  id: string | undefined,
+  root: HTMLElement = document.documentElement,
+): Palette {
   const palette = getPalette(id);
-  const root = document.documentElement.style;
-  root.setProperty("--accent", palette.accent);
-  root.setProperty("--accent-soft", palette.accentSoft);
-  root.setProperty("--accent-deep", palette.accentDeep);
-  root.setProperty("--on-accent", palette.onAccent);
-  root.setProperty("--complement", palette.complement);
-  root.setProperty("--complement-soft", palette.complementSoft);
+  const style = root.style;
+  style.setProperty("--accent", palette.accent);
+  style.setProperty("--accent-soft", palette.accentSoft);
+  style.setProperty("--accent-deep", palette.accentDeep);
+  style.setProperty("--on-accent", palette.onAccent);
+  style.setProperty("--complement", palette.complement);
+  style.setProperty("--complement-soft", palette.complementSoft);
   return palette;
 }
