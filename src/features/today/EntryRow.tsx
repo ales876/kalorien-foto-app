@@ -1,30 +1,39 @@
-import { deleteEntry } from "../../lib/db";
+import { useState } from "react";
 import { formatNumber } from "../../lib/format";
 import { entryTotals } from "../../lib/nutrition";
 import type { FoodEntry } from "../../lib/types";
-import { DeleteButton } from "../../ui/DeleteButton";
 import { SOURCE_ICONS } from "../../ui/mealIcons";
 import { IconSearchLine } from "../../ui/icons";
+import { EntryEditor } from "./EntryEditor";
+
+const FLASH_WINDOW_MS = 3000;
 
 export function EntryRow({
   entry,
-  onEdit,
+  expanded,
+  onToggle,
 }: {
   entry: FoodEntry;
-  onEdit: (entry: FoodEntry) => void;
+  expanded: boolean;
+  onToggle: (id: number | null) => void;
 }) {
   const totals = entryTotals(entry);
   // Importdateien sind fremde Eingabe — eine unbekannte Quelle darf die
   // Anzeige nicht zum Absturz bringen.
   const SourceIcon = SOURCE_ICONS[entry.source] ?? IconSearchLine;
+  // Frisch gespeicherte Zeilen blitzen kurz auf, wie in Things nach dem
+  // Anlegen einer Aufgabe. Einmal beim Einhängen entschieden.
+  const [isNew] = useState(
+    () => Date.now() - entry.timestamp < FLASH_WINDOW_MS,
+  );
 
   return (
-    <div className="row entry-row">
+    <div className="row entry-row" data-expanded={expanded} data-new={isNew}>
       <button
         type="button"
         className="entry-main"
-        onClick={() => onEdit(entry)}
-        aria-label={`${entry.name} bearbeiten`}
+        aria-expanded={expanded}
+        onClick={() => onToggle(expanded ? null : (entry.id ?? null))}
       >
         {entry.thumb ? (
           <img
@@ -53,15 +62,22 @@ export function EntryRow({
             </span>
           </span>
         </span>
+        <span className="row-value">{formatNumber(totals.kcal)}</span>
       </button>
 
-      <span className="row-value">{formatNumber(totals.kcal)}</span>
-      <DeleteButton
-        label={`${entry.name} löschen`}
-        onDelete={() =>
-          entry.id !== undefined ? deleteEntry(entry.id) : undefined
-        }
-      />
+      {/* Immer im Baum, damit das Zuklappen animieren kann; der Inhalt
+          wird bei jedem Aufklappen frisch aus dem Eintrag aufgebaut. */}
+      <div className="entry-editor" inert={!expanded} aria-hidden={!expanded}>
+        <div className="entry-editor-clip">
+          {expanded && (
+            <EntryEditor
+              key={entry.id}
+              entry={entry}
+              onDone={() => onToggle(null)}
+            />
+          )}
+        </div>
+      </div>
     </div>
   );
 }

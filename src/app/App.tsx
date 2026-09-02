@@ -69,6 +69,7 @@ export function App() {
       <button
         type="button"
         className="fab"
+        data-hidden={addOpen}
         onClick={() => setAddOpen(true)}
         aria-label="Eintrag hinzufügen"
       >

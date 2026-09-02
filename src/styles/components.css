@@ -439,6 +439,87 @@
   transform: scale(0.92);
 }
 
+/* Das Plus wächst in den Dialog hinein: es schrumpft weg, während das
+   Sheet aufsteigt, und springt beim Schließen zurück. Während eine Zeile
+   bearbeitet wird, übernimmt die Werkzeugleiste seinen Platz. */
+.fab[data-hidden="true"],
+body[data-editing="true"] .fab {
+  transform: scale(0.2);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--dur-base) var(--ease-in-out),
+    opacity var(--dur-fast) var(--ease-out);
+}
+
+/* ---------- Push-Übergang zwischen den Bereichen ---------- */
+
+@supports (view-transition-name: root) {
+  .tabbar {
+    view-transition-name: tabbar;
+  }
+
+  .fab {
+    view-transition-name: fab;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: var(--dur-base);
+    animation-timing-function: var(--ease-out);
+  }
+
+  ::view-transition-old(root) {
+    animation-name: push-out-forward;
+  }
+
+  ::view-transition-new(root) {
+    animation-name: push-in-forward;
+  }
+
+  html[data-nav="back"]::view-transition-old(root) {
+    animation-name: push-out-back;
+  }
+
+  html[data-nav="back"]::view-transition-new(root) {
+    animation-name: push-in-back;
+  }
+
+  /* Leiste und Plus bleiben stehen — nur der Inhalt bewegt sich. */
+  ::view-transition-old(tabbar),
+  ::view-transition-new(tabbar),
+  ::view-transition-old(fab),
+  ::view-transition-new(fab) {
+    animation: none;
+  }
+}
+
+@keyframes push-in-forward {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes push-out-forward {
+  to {
+    transform: translateX(-28%);
+    opacity: 0.5;
+  }
+}
+
+@keyframes push-in-back {
+  from {
+    transform: translateX(-28%);
+    opacity: 0.5;
+  }
+}
+
+@keyframes push-out-back {
+  to {
+    transform: translateX(100%);
+  }
+}
+
 /* ---------- Sheet ---------- */
 
 .sheet-backdrop {
