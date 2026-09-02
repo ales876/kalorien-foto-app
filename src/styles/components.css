@@ -200,12 +200,6 @@
   color: var(--danger);
 }
 
-.btn-inline {
-  width: auto;
-  padding: 10px 14px;
-  font-size: 14px;
-}
-
 .icon-btn {
   display: flex;
   align-items: center;

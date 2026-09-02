@@ -636,48 +636,6 @@
   margin-top: 14px;
 }
 
-.choice {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  width: 100%;
-  padding: 14px 16px;
-  margin-bottom: 10px;
-  border: none;
-  border-radius: var(--radius);
-  background: var(--surface);
-  box-shadow: var(--shadow);
-  text-align: left;
-  transition: transform var(--dur-base) var(--ease-spring);
-}
-
-.choice:active {
-  transform: scale(0.985);
-}
-
-.choice-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-}
-
-.choice-text {
-  flex: 1;
-  min-width: 0;
-}
-
-.choice-label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 1px;
-}
-
-.choice-chevron {
-  color: var(--ink-tertiary);
-  flex: 0 0 auto;
-}
-
 .quickpicks .card-title {
   margin-bottom: 8px;
 }
