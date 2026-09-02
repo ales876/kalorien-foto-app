@@ -20,9 +20,10 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.svg", "apple-touch-icon.png"],
       manifest: {
-        name: "Kcal-Scanner",
-        short_name: "Kcal",
-        description: "Kalorien und Makros per Foto, Barcode oder Suche erfassen",
+        name: "Plate",
+        short_name: "Plate",
+        description:
+          "Kalorien und Makros per Foto, Barcode oder Suche erfassen",
         lang: "de",
         theme_color: "#FFD400",
         background_color: "#FAFAF8",

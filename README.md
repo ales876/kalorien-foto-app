@@ -1,4 +1,4 @@
-# Kcal-Scanner
+# Plate
 
 Persönliche Ernährungs-App: Kalorien und Makros per Foto, Barcode oder
 Produktsuche erfassen, dazu Gewicht und Bauchumfang tracken.
