@@ -11,6 +11,10 @@ export interface Palette {
   accentSoft: string;
   accentDeep: string;
   onAccent: string;
+  /** Gegenfarbe auf dem Farbkreis — trägt die Auswahl in der
+   *  Wochenleiste, damit sie sich vom Fortschrittsring absetzt. */
+  complement: string;
+  complementSoft: string;
 }
 
 export const PALETTES: Palette[] = [
@@ -22,6 +26,8 @@ export const PALETTES: Palette[] = [
     accentSoft: "#fff6cc",
     accentDeep: "#e6be00",
     onAccent: "#1c1c1e",
+    complement: "#4759c9",
+    complementSoft: "#e8eafb",
   },
   {
     id: "salbei",
@@ -31,6 +37,8 @@ export const PALETTES: Palette[] = [
     accentSoft: "#e6f3ec",
     accentDeep: "#5ea588",
     onAccent: "#14352a",
+    complement: "#8f4a70",
+    complementSoft: "#f7ebf1",
   },
   {
     id: "terrakotta",
@@ -40,6 +48,8 @@ export const PALETTES: Palette[] = [
     accentSoft: "#fbe9e3",
     accentDeep: "#c9634a",
     onAccent: "#3a1d14",
+    complement: "#256d82",
+    complementSoft: "#e4f2f6",
   },
   {
     id: "tinte",
@@ -49,6 +59,8 @@ export const PALETTES: Palette[] = [
     accentSoft: "#e3edfb",
     accentDeep: "#2c5fac",
     onAccent: "#ffffff",
+    complement: "#8a5a1c",
+    complementSoft: "#f8eede",
   },
 ];
 
@@ -66,5 +78,7 @@ export function applyPalette(id: string | undefined): Palette {
   root.setProperty("--accent-soft", palette.accentSoft);
   root.setProperty("--accent-deep", palette.accentDeep);
   root.setProperty("--on-accent", palette.onAccent);
+  root.setProperty("--complement", palette.complement);
+  root.setProperty("--complement-soft", palette.complementSoft);
   return palette;
 }

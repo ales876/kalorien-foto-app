@@ -11,7 +11,7 @@ import {
 } from "../../lib/nutrition";
 import { MEALS, type FoodEntry, type Meal } from "../../lib/types";
 import { Card, KcalRing, MacroBar } from "../../ui/components";
-import { IconBack, IconChevron } from "../../ui/icons";
+import { WeekStrip, type DayStat } from "./WeekStrip";
 import {
   IconBarcodeLine,
   IconCameraLine,
@@ -22,17 +22,21 @@ import {
 import { MEAL_ICONS } from "../../ui/mealIcons";
 
 export function TodayScreen() {
-  // 0 = heute, 1 = gestern, … Damit lassen sich auch importierte Tage
-  // im Detail ansehen, nicht nur als Kurve im Bericht.
-  const [daysBack, setDaysBack] = useState(0);
-  const shownDate = dateFromOffset(daysBack);
-  const dateKey = toDateKey(shownDate);
+  const [dateKey, setDateKey] = useState(toDateKey());
+  const week = weekOf(dateKey);
 
-  const entries = useLiveQuery(
-    () => db.entries.where("date").equals(dateKey).toArray(),
-    [dateKey],
+  // Eine Abfrage für die ganze Woche: daraus kommen sowohl die Ringe in
+  // der Kopfzeile als auch die Einträge des gewählten Tages.
+  const weekEntries = useLiveQuery(
+    () =>
+      db.entries
+        .where("date")
+        .between(week[0], week[6], true, true)
+        .toArray(),
+    [week[0], week[6]],
     [] as FoodEntry[],
   );
+  const entries = weekEntries.filter((entry) => entry.date === dateKey);
   const settings = useLiveQuery(() => getSettings(), []);
   const activity = useLiveQuery(
     () => db.activities.where("date").equals(dateKey).first(),
@@ -43,39 +47,26 @@ export function TodayScreen() {
   const goal = settings?.kcalGoal ?? 2000;
   const remaining = Math.round(goal - totals.kcal);
 
+  const dayStats: DayStat[] = week.map((date) => {
+    const ofDay = weekEntries.filter((entry) => entry.date === date);
+    return {
+      date,
+      kcal: sumTotals(ofDay).kcal,
+      hasData: ofDay.length > 0,
+    };
+  });
+
   return (
     <div className="screen">
-      <header className="screen-header day-header">
-        <button
-          className="icon-btn day-nav"
-          onClick={() => setDaysBack(daysBack + 1)}
-          aria-label="Vorheriger Tag"
-        >
-          <IconBack size={20} />
-        </button>
+      <WeekStrip
+        days={dayStats}
+        selected={dateKey}
+        goal={goal}
+        onSelect={setDateKey}
+        onShiftWeek={(richtung) => setDateKey(shiftDays(dateKey, richtung * 7))}
+      />
 
-        <div className="day-label">
-          <h1 className="screen-title">{dayTitle(daysBack)}</h1>
-          <div className="screen-subtitle">
-            {shownDate.toLocaleDateString("de-DE", {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-            })}
-          </div>
-        </div>
-
-        <button
-          className="icon-btn day-nav"
-          onClick={() => setDaysBack(daysBack - 1)}
-          disabled={daysBack === 0}
-          aria-label="Nächster Tag"
-        >
-          <IconChevron size={20} />
-        </button>
-      </header>
-
-      {daysBack > 0 && entries.length > 0 && (
+      {dateKey !== toDateKey() && entries.length > 0 && (
         <button
           className="btn btn-secondary take-over-day"
           onClick={() => copyDay(dateKey, toDateKey())}
@@ -186,17 +177,22 @@ function EmptyMeal({ meal, date }: { meal: Meal; date: string }) {
   );
 }
 
-function dateFromOffset(daysBack: number): Date {
-  const date = new Date();
-  date.setDate(date.getDate() - daysBack);
-  return date;
+function shiftDays(date: string, delta: number): string {
+  const d = new Date(`${date}T00:00:00`);
+  d.setDate(d.getDate() + delta);
+  return toDateKey(d);
 }
 
-function dayTitle(daysBack: number): string {
-  if (daysBack === 0) return "Heute";
-  if (daysBack === 1) return "Gestern";
-  if (daysBack === 2) return "Vorgestern";
-  return `vor ${daysBack} Tagen`;
+/** Die sieben Tage der Woche, in der `date` liegt — Montag zuerst. */
+function weekOf(date: string): string[] {
+  const d = new Date(`${date}T00:00:00`);
+  const offsetToMonday = (d.getDay() + 6) % 7;
+  d.setDate(d.getDate() - offsetToMonday);
+  return Array.from({ length: 7 }, (_, i) => {
+    const day = new Date(d);
+    day.setDate(d.getDate() + i);
+    return toDateKey(day);
+  });
 }
 
 const SOURCE_ICONS: Record<string, typeof IconSearchLine> = {

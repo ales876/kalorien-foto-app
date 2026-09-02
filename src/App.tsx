@@ -7,13 +7,7 @@ import { AddSheet } from "./features/add/AddSheet";
 import { SettingsScreen } from "./features/settings/SettingsScreen";
 import { TodayScreen } from "./features/today/TodayScreen";
 import { Loading } from "./ui/components";
-import {
-  IconMenu,
-  IconPlus,
-  IconReports,
-  IconSettings,
-  IconToday,
-} from "./ui/icons";
+import { IconPlus, IconReports, IconSettings, IconToday } from "./ui/icons";
 
 // Recharts ist der größte Brocken im Bundle — erst laden, wenn die
 // Berichte auch wirklich geöffnet werden.
@@ -43,7 +37,6 @@ const TABS = [
 
 export default function App() {
   const [addOpen, setAddOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const settings = useLiveQuery(() => getSettings(), []);
 
   // Beim Laden und bei jedem Wechsel die Akzentfarben setzen.
@@ -66,16 +59,6 @@ export default function App() {
         <Route path="*" element={<Navigate to="/heute" replace />} />
       </Routes>
 
-      {/* Zwei schwebende Knöpfe: Navigation oben links, Erfassen unten
-          rechts. So bleibt dem Inhalt die volle Breite. */}
-      <button
-        className="menu-btn"
-        onClick={() => setMenuOpen(true)}
-        aria-label="Navigation öffnen"
-      >
-        <IconMenu size={22} />
-      </button>
-
       <button
         className="fab"
         onClick={() => setAddOpen(true)}
@@ -84,20 +67,11 @@ export default function App() {
         <IconPlus size={26} />
       </button>
 
-      {menuOpen && (
-        <div
-          className="drawer-backdrop"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setMenuOpen(false);
-          }}
-        >
-          <nav className="drawer">
-            {TABS.map((tab) => (
-              <TabLink key={tab.to} {...tab} onNavigate={() => setMenuOpen(false)} />
-            ))}
-          </nav>
-        </div>
-      )}
+      <nav className="tabbar">
+        {TABS.map((tab) => (
+          <TabLink key={tab.to} {...tab} />
+        ))}
+      </nav>
 
       {addOpen && (
         <AddSheet
@@ -114,20 +88,18 @@ function TabLink({
   Icon,
   label,
   color,
-  onNavigate,
 }: {
   to: string;
   Icon: typeof IconToday;
   label: string;
   color: string;
-  onNavigate: () => void;
 }) {
   return (
-    <NavLink to={to} className="drawer-link" onClick={onNavigate}>
+    <NavLink to={to} className="tab-link">
       {({ isActive }) => (
-        <span className="drawer-item" data-active={isActive}>
-          <span className="drawer-icon" style={{ color }}>
-            <Icon size={22} />
+        <span className="tab" data-active={isActive}>
+          <span className="tab-icon" style={{ color }}>
+            <Icon size={23} />
           </span>
           {label}
         </span>
