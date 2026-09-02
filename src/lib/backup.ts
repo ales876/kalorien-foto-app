@@ -1,10 +1,5 @@
 import { z } from "zod";
-import {
-  db,
-  upsertActivity,
-  upsertMeasurement,
-  type AppDatabase,
-} from "./db";
+import { db, upsertActivity, upsertMeasurement, type AppDatabase } from "./db";
 import {
   ENTRY_SOURCES,
   MEAL_IDS,
@@ -125,7 +120,9 @@ export async function importBackup(
 
   const parsed = backupSchema.safeParse(json);
   if (!parsed.success)
-    throw new Error("Die Datei hat nicht das Format eines Sunny-Orbit-Backups.");
+    throw new Error(
+      "Die Datei hat nicht das Format eines Sunny-Orbit-Backups.",
+    );
 
   const entries = collect(entrySchema, parsed.data.entries);
   const measurements = collect(measurementSchema, parsed.data.measurements);
