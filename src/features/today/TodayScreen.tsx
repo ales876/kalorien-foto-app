@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, getSettings } from "../../lib/db";
+import { copyDay, copyMeal, findPreviousMeal } from "../../lib/suggestions";
 import {
   entryTotals,
+  formatDateKey,
   formatNumber,
   sumTotals,
   toDateKey,
 } from "../../lib/nutrition";
-import { MEALS, type FoodEntry } from "../../lib/types";
+import { MEALS, type FoodEntry, type Meal } from "../../lib/types";
 import { Card, KcalRing, MacroBar } from "../../ui/components";
 import { IconBack, IconChevron } from "../../ui/icons";
 import {
@@ -15,6 +17,7 @@ import {
   IconCameraLine,
   IconSearchLine,
   IconTrash,
+  IconUpload,
 } from "../../ui/icons";
 import { MEAL_ICONS } from "../../ui/mealIcons";
 
@@ -68,6 +71,15 @@ export function TodayScreen() {
         </button>
       </header>
 
+      {daysBack > 0 && entries.length > 0 && (
+        <button
+          className="btn btn-secondary take-over-day"
+          onClick={() => copyDay(dateKey, toDateKey())}
+        >
+          Diesen Tag auf heute übernehmen
+        </button>
+      )}
+
       <Card>
         <div className="kcal-hero">
           <KcalRing value={totals.kcal} goal={goal} />
@@ -107,9 +119,7 @@ export function TodayScreen() {
             </header>
 
             {mealEntries.length === 0 ? (
-              <p className="empty">
-                {daysBack === 0 ? "Noch nichts erfasst" : "Nichts erfasst"}
-              </p>
+              <EmptyMeal meal={meal.id} date={dateKey} />
             ) : (
               mealEntries.map((entry) => (
                 <EntryRow key={entry.id} entry={entry} />
@@ -119,6 +129,47 @@ export function TodayScreen() {
         );
       })}
     </div>
+  );
+}
+
+/** Statt nur „nichts erfasst" zu melden, bietet eine leere Mahlzeit an,
+ *  die letzte gleichartige zu übernehmen — der häufigste Fall bei
+ *  wiederkehrenden Mahlzeiten. */
+function EmptyMeal({ meal, date }: { meal: Meal; date: string }) {
+  const [previous, setPrevious] = useState<{
+    date: string;
+    names: string;
+    count: number;
+  } | null>(null);
+
+  useEffect(() => {
+    let aktiv = true;
+    findPreviousMeal(meal, date).then((result) => {
+      if (!aktiv || !result) return;
+      setPrevious({
+        date: result.date,
+        names: result.entries.map((e) => e.name).join(", "),
+        count: result.entries.length,
+      });
+    });
+    return () => {
+      aktiv = false;
+    };
+  }, [meal, date]);
+
+  if (!previous) return <p className="empty">Noch nichts erfasst</p>;
+
+  return (
+    <button
+      className="take-over"
+      onClick={() => copyMeal(previous.date, meal, date)}
+    >
+      <span className="take-over-label">
+        Wie am {formatDateKey(previous.date).slice(0, 6)}
+      </span>
+      <span className="take-over-names">{previous.names}</span>
+      <span className="take-over-action">übernehmen</span>
+    </button>
   );
 }
 
@@ -135,16 +186,19 @@ function dayTitle(daysBack: number): string {
   return `vor ${daysBack} Tagen`;
 }
 
-const SOURCE_ICONS = {
+const SOURCE_ICONS: Record<string, typeof IconSearchLine> = {
   barcode: IconBarcodeLine,
   search: IconSearchLine,
   photo: IconCameraLine,
   manual: IconSearchLine,
-} as const;
+  import: IconUpload,
+};
 
 function EntryRow({ entry }: { entry: FoodEntry }) {
   const totals = entryTotals(entry);
-  const SourceIcon = SOURCE_ICONS[entry.source];
+  // Importdateien sind fremde Eingabe — unbekannte Quellen dürfen
+  // die Anzeige nicht zum Absturz bringen.
+  const SourceIcon = SOURCE_ICONS[entry.source] ?? IconSearchLine;
 
   return (
     <div className="row entry-row">

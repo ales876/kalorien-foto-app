@@ -1,18 +1,24 @@
 import { Suspense, lazy, useState } from "react";
+import type { Suggestion } from "../../lib/suggestions";
+import type { NutritionCandidate } from "../../lib/types";
+import { guessMeal } from "../../lib/nutrition";
 import { Loading, Sheet } from "../../ui/components";
 import { IconBack, IconBarcode, IconCamera, IconChevron, IconSearch } from "../../ui/icons";
 import { PhotoFlow } from "./PhotoFlow";
 import { SearchFlow } from "./SearchFlow";
+import { ConfirmStep } from "./ConfirmStep";
+import { QuickPicks } from "./QuickPicks";
 
 // Die Scanner-Bibliothek wiegt einiges und wird nur beim Barcode gebraucht.
 const BarcodeFlow = lazy(() =>
   import("./BarcodeFlow").then((m) => ({ default: m.BarcodeFlow })),
 );
 
-type Mode = "choose" | "photo" | "barcode" | "search";
+type Mode = "choose" | "photo" | "barcode" | "search" | "quick";
 
 const TITLES: Record<Mode, string> = {
   choose: "Hinzufügen",
+  quick: "Übernehmen",
   photo: "Foto analysieren",
   barcode: "Barcode scannen",
   search: "Produkt suchen",
@@ -26,35 +32,45 @@ export function AddSheet({
   onClose: () => void;
 }) {
   const [mode, setMode] = useState<Mode>("choose");
+  const [picked, setPicked] = useState<NutritionCandidate | null>(null);
+
+  function pick(suggestion: Suggestion) {
+    setPicked(suggestion);
+    setMode("quick");
+  }
 
   return (
     <Sheet title={TITLES[mode]} onClose={onClose}>
       {mode === "choose" && (
         <>
+          <QuickPicks meal={guessMeal()} onPick={pick} />
           <ChoiceButton
             Icon={IconCamera}
             color="var(--tab-today)"
             label="Foto vom Essen"
-            hint="Schätzt Zutaten, Gramm und Nährwerte"
+            hint="Zutaten und Menge schätzen"
             onClick={() => setMode("photo")}
           />
           <ChoiceButton
             Icon={IconBarcode}
             color="var(--tab-body)"
             label="Barcode scannen"
-            hint="Verpackte Produkte aus Open Food Facts"
+            hint="Verpackte Produkte"
             onClick={() => setMode("barcode")}
           />
           <ChoiceButton
             Icon={IconSearch}
             color="var(--tab-reports)"
             label="Produkt suchen"
-            hint="Nach Name oder Marke"
+            hint="Name oder Marke"
             onClick={() => setMode("search")}
           />
         </>
       )}
 
+      {mode === "quick" && picked && (
+        <ConfirmStep candidates={[picked]} onSaved={onClose} />
+      )}
       {mode === "photo" && <PhotoFlow apiKey={apiKey} onSaved={onClose} />}
       {mode === "barcode" && (
         <Suspense fallback={<Loading label="Scanner wird geladen …" />}>

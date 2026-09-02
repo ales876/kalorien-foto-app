@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { db } from "../../lib/db";
-import { candidateToEntry } from "../../lib/nutrition";
+import { candidateToEntry, guessMeal } from "../../lib/nutrition";
 import { MEALS, type Meal, type NutritionCandidate } from "../../lib/types";
 import { Segmented } from "../../ui/components";
 
@@ -102,13 +102,4 @@ export function ConfirmStep({
       </button>
     </>
   );
-}
-
-/** Tageszeit als Vorauswahl — spart bei den meisten Einträgen einen Tap. */
-function guessMeal(): Meal {
-  const hour = new Date().getHours();
-  if (hour < 10) return "fruehstueck";
-  if (hour < 15) return "mittag";
-  if (hour < 21) return "abend";
-  return "snack";
 }

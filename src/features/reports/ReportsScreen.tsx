@@ -21,6 +21,11 @@ import {
   sumTotals,
 } from "../../lib/nutrition";
 import type { FoodEntry } from "../../lib/types";
+import {
+  computeEnergyBalance,
+  isBalanceGap,
+  smoothWeights,
+} from "../../lib/analysis";
 import { getPalette } from "../../lib/palettes";
 import { Card, ScreenHeader, Segmented } from "../../ui/components";
 
@@ -62,9 +67,18 @@ export function ReportsScreen() {
     };
   });
 
-  const weightSeries = measurements
-    .filter((m) => typeof m.weightKg === "number")
-    .map((m) => ({ label: shortDate(m.date), value: m.weightKg }));
+  const balance = computeEnergyBalance(entries, measurements);
+  const weightPoints = smoothWeights(measurements);
+
+  // Achsengrenzen selbst rechnen: Recharts kommt mit der String-Domain
+  // ("dataMin - 0.6") bei zwei Datenreihen durcheinander.
+  const weightValues = weightPoints.flatMap((p) => [p.raw, p.trend]);
+  const weightDomain: [number, number] = weightValues.length
+    ? [
+        Math.floor((Math.min(...weightValues) - 0.5) * 2) / 2,
+        Math.ceil((Math.max(...weightValues) + 0.5) * 2) / 2,
+      ]
+    : [0, 1];
 
   const waistSeries = measurements
     .filter((m) => typeof m.waistCm === "number")
@@ -95,6 +109,48 @@ export function ReportsScreen() {
         <Segmented options={RANGES} value={days} onChange={setDays} />
       </div>
 
+      <Card title="Energiebilanz">
+        {isBalanceGap(balance) ? (
+          <div className="empty">{balance.detail}</div>
+        ) : (
+          <>
+            <div className="balance-hero">
+              <span className="balance-figure">
+                {formatNumber(balance.maintenance)}
+              </span>
+              <span className="balance-unit">kcal/Tag</span>
+            </div>
+            <div className="row-sub balance-lead">
+              Dein rechnerischer Erhaltungsbedarf — abgeleitet aus dem, was du
+              tatsächlich gegessen hast, und deiner Gewichtsentwicklung.
+            </div>
+
+            <div className="balance-facts">
+              <BalanceFact
+                label="Ø Aufnahme"
+                value={`${formatNumber(balance.averageIntake)} kcal`}
+                note={`an ${balance.loggedDays} Tagen`}
+              />
+              <BalanceFact
+                label="Gewicht"
+                value={`${balance.weightChange > 0 ? "+" : "−"}${formatDecimal(Math.abs(balance.weightChange))} kg`}
+                note={`in ${balance.days} Tagen`}
+              />
+              <BalanceFact
+                label={balance.dailyBalance < 0 ? "Defizit" : "Überschuss"}
+                value={`${formatNumber(Math.abs(balance.dailyBalance))} kcal`}
+                note="pro Tag"
+              />
+            </div>
+
+            <div className="row-sub balance-note">
+              Gerechnet mit rund 7.000 kcal je Kilogramm Körperfett — eine
+              Faustzahl, kein exakter Wert.
+            </div>
+          </>
+        )}
+      </Card>
+
       <Card title="Kalorien pro Tag">
         {daysWithData.length === 0 ? (
           <div className="empty">Noch keine Einträge in diesem Zeitraum.</div>
@@ -124,13 +180,61 @@ export function ReportsScreen() {
         )}
       </Card>
 
-      <MeasurementChart
-        title="Gewicht (kg)"
-        unit="kg"
-        data={weightSeries}
-        color="#1c1c1e"
-        emptyHint="Noch kein Gewicht erfasst — trag es unter „Fortschritt“ ein."
-      />
+      <Card title="Gewicht (kg)">
+        {weightPoints.length === 0 ? (
+          <div className="empty">
+            Noch kein Gewicht erfasst — trag es unter „Fortschritt“ ein.
+          </div>
+        ) : (
+          <>
+            <div className="row-sub" style={{ marginBottom: 10 }}>
+              {weightTrendText(weightPoints)}
+            </div>
+            <ResponsiveContainer width="100%" height={180}>
+              <LineChart
+                data={weightPoints}
+                margin={{ top: 4, right: 6, bottom: 0, left: -18 }}
+              >
+                <CartesianGrid vertical={false} stroke={GRID_COLOR} />
+                <XAxis dataKey="label" tick={AXIS_STYLE} interval="preserveStartEnd" />
+                <YAxis
+                  tick={AXIS_STYLE}
+                  domain={weightDomain}
+                  tickFormatter={(v: number) => formatDecimal(v)}
+                />
+                <Tooltip
+                  formatter={(value, name) => [
+                    `${formatDecimal(Number(value))} kg`,
+                    name === "trend" ? "Trend" : "Gemessen",
+                  ]}
+                />
+                {/* Rohwerte nur als Punkte — sie zeigen die Streuung,
+                    ohne die Trendlinie zu übertönen. */}
+                <Line
+                  type="monotone"
+                  dataKey="raw"
+                  name="raw"
+                  stroke="none"
+                  dot={{ r: 2.5, fill: "#c9c9c4" }}
+                  isAnimationActive={false}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="trend"
+                  name="trend"
+                  stroke="#1c1c1e"
+                  strokeWidth={2.2}
+                  dot={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+            <div className="row-sub chart-legend">
+              <span className="legend-dot legend-raw" /> Tageswert
+              <span className="legend-dot legend-trend" /> 7-Tage-Trend
+            </div>
+          </>
+        )}
+      </Card>
 
       <MeasurementChart
         title="Bauchumfang (cm)"
@@ -141,6 +245,33 @@ export function ReportsScreen() {
       />
     </div>
   );
+}
+
+function BalanceFact({
+  label,
+  value,
+  note,
+}: {
+  label: string;
+  value: string;
+  note: string;
+}) {
+  return (
+    <div className="balance-fact">
+      <span className="balance-fact-label">{label}</span>
+      <span className="balance-fact-value">{value}</span>
+      <span className="balance-fact-note">{note}</span>
+    </div>
+  );
+}
+
+/** Beschreibt die Richtung anhand des geglätteten Werts, nicht anhand
+ *  zweier Tageswerte — sonst entscheidet ein Wassertag über die Aussage. */
+function weightTrendText(points: { trend: number }[]): string {
+  if (points.length < 2) return "Noch zu wenig Messungen für einen Trend";
+  const delta = points[points.length - 1].trend - points[0].trend;
+  if (Math.abs(delta) < 0.1) return "Im Zeitraum unverändert";
+  return `${delta > 0 ? "+" : "−"}${formatDecimal(Math.abs(delta))} kg im Zeitraum (geglättet)`;
 }
 
 function MeasurementChart({

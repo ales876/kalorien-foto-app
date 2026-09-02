@@ -792,3 +792,140 @@ select {
   color: var(--ink-secondary);
   line-height: 1.3;
 }
+
+/* ---------- Energiebilanz ---------- */
+
+.balance-hero {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.balance-figure {
+  font-size: 36px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.05;
+}
+
+.balance-unit {
+  font-size: 15px;
+  color: var(--ink-secondary);
+}
+
+.balance-lead {
+  margin-top: 6px;
+}
+
+.balance-facts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--hairline);
+}
+
+.balance-fact {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.balance-fact-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-tertiary);
+}
+
+.balance-fact-value {
+  font-size: 16px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.balance-fact-note {
+  font-size: 11px;
+  color: var(--ink-tertiary);
+}
+
+.balance-note {
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--ink-tertiary);
+}
+
+/* ---------- Diagramm-Legende ---------- */
+
+.chart-legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.legend-raw {
+  background: #c9c9c4;
+}
+
+.legend-trend {
+  background: var(--ink);
+  margin-left: 10px;
+}
+
+/* ---------- Übernehmen ---------- */
+
+.take-over {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 6px 0 2px;
+}
+
+.take-over-label {
+  display: block;
+  font-size: 13px;
+  color: var(--ink-tertiary);
+}
+
+.take-over-names {
+  display: block;
+  font-size: 14px;
+  color: var(--ink-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 1px 0 3px;
+}
+
+.take-over-action {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-deep);
+}
+
+.take-over-day {
+  margin-bottom: 16px;
+}
+
+/* ---------- Schnellzugriff ---------- */
+
+.quickpicks .card-title {
+  margin-bottom: 8px;
+}
+
+.quickpicks .card {
+  padding: 4px 16px;
+}

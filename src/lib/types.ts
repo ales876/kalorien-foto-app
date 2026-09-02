@@ -9,7 +9,14 @@ export const MEALS: { id: Meal; label: string; color: string }[] = [
   { id: "snack", label: "Snack", color: "var(--meal-snack)" },
 ];
 
-export type EntrySource = "photo" | "barcode" | "search" | "manual";
+export type EntrySource =
+  | "photo"
+  | "barcode"
+  | "search"
+  | "manual"
+  /** Aus einer anderen App übernommene Tagessumme — kein einzelnes
+   *  Lebensmittel und deshalb nicht als Vorschlag brauchbar. */
+  | "import";
 
 /** Ein Eintrag im Ernährungstagebuch. Nährwerte immer pro 100 g gespeichert,
  *  damit eine spätere Gramm-Korrektur alles automatisch neu berechnet. */

@@ -1,4 +1,4 @@
-import type { FoodEntry, NutritionCandidate } from "./types";
+import type { FoodEntry, Meal, NutritionCandidate } from "./types";
 
 export interface Totals {
   kcal: number;
@@ -95,4 +95,14 @@ export function formatDecimal(value: number, digits = 1): string {
     minimumFractionDigits: 0,
     maximumFractionDigits: digits,
   });
+}
+
+/** Tageszeit als Vorauswahl für die Mahlzeit — spart bei den meisten
+ *  Einträgen einen Tap. */
+export function guessMeal(date = new Date()): Meal {
+  const hour = date.getHours();
+  if (hour < 10) return "fruehstueck";
+  if (hour < 15) return "mittag";
+  if (hour < 21) return "abend";
+  return "snack";
 }
