@@ -1,16 +1,18 @@
 import { readFileSync } from "node:fs";
-import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
+import { defineConfig } from "vitest/config";
 
 const { version } = JSON.parse(readFileSync("./package.json", "utf-8")) as {
   version: string;
 };
 
-// Repo-Name als Basis, weil die App unter
-// https://<user>.github.io/kalorien-foto-app/ liegt.
+// Der Repo-Name bleibt "kalorien-foto-app", auch wenn die App "Plate" heißt:
+// die veröffentlichte URL https://ales876.github.io/kalorien-foto-app/ hängt daran.
+const BASE = "/kalorien-foto-app/";
+
 export default defineConfig({
-  base: "/kalorien-foto-app/",
+  base: BASE,
   define: {
     __APP_VERSION__: JSON.stringify(version),
   },
@@ -29,8 +31,8 @@ export default defineConfig({
         background_color: "#FAFAF8",
         display: "standalone",
         orientation: "portrait",
-        start_url: "/kalorien-foto-app/",
-        scope: "/kalorien-foto-app/",
+        start_url: BASE,
+        scope: BASE,
         icons: [
           { src: "icon-192.png", sizes: "192x192", type: "image/png" },
           { src: "icon-512.png", sizes: "512x512", type: "image/png" },
@@ -47,7 +49,7 @@ export default defineConfig({
         runtimeCaching: [
           {
             // Der Produktindex ändert sich nur beim Deploy — einmal laden,
-            // danach aus dem Cache. Hält die Suche offline funktionsfähig.
+            // danach aus dem Cache. So funktioniert die Suche offline.
             urlPattern: /de-foods\.json$/,
             handler: "CacheFirst",
             options: {
@@ -57,8 +59,7 @@ export default defineConfig({
             },
           },
           {
-            // Produktdaten dürfen ruhig aus dem Cache kommen, wenn offline.
-            urlPattern: /^https:\/\/(world|search)\.openfoodfacts\.org\/.*/i,
+            urlPattern: /^https:\/\/world\.openfoodfacts\.org\/.*/i,
             handler: "NetworkFirst",
             options: {
               cacheName: "openfoodfacts",
@@ -70,4 +71,25 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        // Große, selten gebrauchte Bibliotheken bekommen eigene Chunks,
+        // damit der erste Start nur lädt, was der Heute-Screen braucht.
+        codeSplitting: {
+          groups: [
+            { name: "charts", test: /node_modules[\\/]recharts/ },
+            { name: "scanner", test: /node_modules[\\/]html5-qrcode/ },
+            { name: "anthropic", test: /node_modules[\\/]@anthropic-ai/ },
+          ],
+        },
+      },
+    },
+  },
+  test: {
+    environment: "jsdom",
+    setupFiles: ["./src/test/setup.ts"],
+    include: ["src/**/*.test.{ts,tsx}"],
+    clearMocks: true,
+  },
 });

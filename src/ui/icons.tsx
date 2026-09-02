@@ -6,11 +6,14 @@ import type { ReactNode } from "react";
  *     Details im Inneren. Jeder Bereich hat seine eigene Farbe.
  *  2. Struktur und Aktionen (Schließen, Zurück, Löschen …): dünne graue
  *     Outlines, die sich zurücknehmen.
- */
-interface IconProps {
+ *
+ *  Handgeschrieben, bewusst ohne Bibliothek. */
+export interface IconProps {
   size?: number;
   className?: string;
 }
+
+export type IconComponent = (props: IconProps) => ReactNode;
 
 function Filled({
   size = 24,
@@ -34,8 +37,9 @@ function Filled({
 function Outline({
   size = 24,
   className,
+  strokeWidth = 1.6,
   children,
-}: IconProps & { children: ReactNode }) {
+}: IconProps & { strokeWidth?: number; children: ReactNode }) {
   return (
     <svg
       width={size}
@@ -43,7 +47,7 @@ function Outline({
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.6}
+      strokeWidth={strokeWidth}
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
@@ -61,13 +65,19 @@ export function IconToday(props: IconProps) {
   return (
     <Filled {...props}>
       <circle cx="12" cy="12" r="9.5" />
-      <circle cx="12" cy="12" r="6" fill="none" stroke="#fff" strokeWidth="1.4" />
+      <circle
+        cx="12"
+        cy="12"
+        r="6"
+        fill="none"
+        stroke="#fff"
+        strokeWidth="1.4"
+      />
     </Filled>
   );
 }
 
-/** Silhouette statt Waage: eine Personenwaage wird bei 23 px zum Klecks,
- *  eine Figur bleibt erkennbar. Das Maßband greift den Bauchumfang auf. */
+/** Figur statt Waage: eine Personenwaage wird bei 23 px zum Klecks. */
 export function IconBody(props: IconProps) {
   return (
     <Filled {...props}>
@@ -97,6 +107,15 @@ export function IconSettings(props: IconProps) {
       <circle cx="16" cy="6.3" r="3.3" />
       <rect x="3" y="16.6" width="18" height="2.2" rx="1.1" opacity="0.45" />
       <circle cx="8" cy="17.7" r="3.3" />
+    </Filled>
+  );
+}
+
+/** Blitz für aktive Energie. */
+export function IconActivity(props: IconProps) {
+  return (
+    <Filled {...props}>
+      <path d="M13.6 2.2 4.8 13.4h6.1l-1.5 8.4 8.8-11.2h-6.1z" />
     </Filled>
   );
 }
@@ -137,10 +156,38 @@ export function IconSun(props: IconProps) {
       <rect x="11" y="18.7" width="2" height="3.8" rx="1" />
       <rect x="1.5" y="11" width="3.8" height="2" rx="1" />
       <rect x="18.7" y="11" width="3.8" height="2" rx="1" />
-      <rect x="4" y="4.6" width="2" height="3.6" rx="1" transform="rotate(-45 5 6.4)" />
-      <rect x="18" y="15.8" width="2" height="3.6" rx="1" transform="rotate(-45 19 17.6)" />
-      <rect x="18" y="4.6" width="2" height="3.6" rx="1" transform="rotate(45 19 6.4)" />
-      <rect x="4" y="15.8" width="2" height="3.6" rx="1" transform="rotate(45 5 17.6)" />
+      <rect
+        x="4"
+        y="4.6"
+        width="2"
+        height="3.6"
+        rx="1"
+        transform="rotate(-45 5 6.4)"
+      />
+      <rect
+        x="18"
+        y="15.8"
+        width="2"
+        height="3.6"
+        rx="1"
+        transform="rotate(-45 19 17.6)"
+      />
+      <rect
+        x="18"
+        y="4.6"
+        width="2"
+        height="3.6"
+        rx="1"
+        transform="rotate(45 19 6.4)"
+      />
+      <rect
+        x="4"
+        y="15.8"
+        width="2"
+        height="3.6"
+        rx="1"
+        transform="rotate(45 5 17.6)"
+      />
     </Filled>
   );
 }
@@ -168,13 +215,20 @@ export function IconSnack(props: IconProps) {
   );
 }
 
-/* ---------- Erfassungswege: gefüllt, im Dialog farbig hinterlegt ---------- */
+/* ---------- Erfassungswege: gefüllt, im Dialog farbig ---------- */
 
 export function IconCamera(props: IconProps) {
   return (
     <Filled {...props}>
       <path d="M9.2 3.5h5.6l1.3 2.2H19a2.5 2.5 0 0 1 2.5 2.5v9.3A2.5 2.5 0 0 1 19 20H5a2.5 2.5 0 0 1-2.5-2.5V8.2A2.5 2.5 0 0 1 5 5.7h2.9z" />
-      <circle cx="12" cy="13" r="4" fill="none" stroke="#fff" strokeWidth="1.5" />
+      <circle
+        cx="12"
+        cy="13"
+        r="4"
+        fill="none"
+        stroke="#fff"
+        strokeWidth="1.5"
+      />
     </Filled>
   );
 }
@@ -211,30 +265,22 @@ export function IconSearch(props: IconProps) {
   );
 }
 
-/* ---------- Struktur und Aktionen: dünne Outlines ---------- */
-
-export function IconPlus({ size = 24, className }: IconProps) {
+export function IconImage(props: IconProps) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2.6}
-      strokeLinecap="round"
-      className={className}
-      aria-hidden="true"
-    >
-      <path d="M12 5.5v13M5.5 12h13" />
-    </svg>
+    <Filled {...props}>
+      <rect x="2.5" y="4" width="19" height="16" rx="3" />
+      <path d="M5 17.5l4.2-5 3 3.4 2.3-2.6 4.5 4.2z" fill="#fff" />
+      <circle cx="16" cy="9" r="1.8" fill="#fff" />
+    </Filled>
   );
 }
 
-export function IconMenu(props: IconProps) {
+/* ---------- Struktur und Aktionen: dünne Outlines ---------- */
+
+export function IconPlus(props: IconProps) {
   return (
-    <Outline {...props}>
-      <path d="M4 7h16M4 12h16M4 17h16" />
+    <Outline {...props} strokeWidth={2.6}>
+      <path d="M12 5.5v13M5.5 12h13" />
     </Outline>
   );
 }
@@ -273,6 +319,23 @@ export function IconTrash(props: IconProps) {
   );
 }
 
+export function IconPencil(props: IconProps) {
+  return (
+    <Outline {...props}>
+      <path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17z" />
+      <path d="M13.5 8.5l2 2" />
+    </Outline>
+  );
+}
+
+export function IconCheck(props: IconProps) {
+  return (
+    <Outline {...props} strokeWidth={2.2}>
+      <path d="M5 12.5l4.5 4.5L19 7.5" />
+    </Outline>
+  );
+}
+
 export function IconUpload(props: IconProps) {
   return (
     <Outline {...props}>
@@ -292,7 +355,6 @@ export function IconDownload(props: IconProps) {
     </Outline>
   );
 }
-
 
 /* ---------- Quellen-Marker in Eintragszeilen: zurückgenommen ---------- */
 

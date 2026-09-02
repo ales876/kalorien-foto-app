@@ -1,28 +1,25 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import { db, getSettings } from "../../lib/db";
 import {
   assessDeficit,
   computeBMR,
   computeEnergyBalance,
   isBalanceGap,
 } from "../../lib/analysis";
-import { formatDecimal, formatNumber } from "../../lib/nutrition";
-import { Card } from "../../ui/components";
+import { db } from "../../lib/db";
+import { formatDecimal, formatNumber } from "../../lib/format";
+import type { Settings } from "../../lib/types";
+import { Card } from "../../ui/Card";
 
 /** Erklärt, woraus sich das Tagesziel rechnerisch ergibt: Grundumsatz,
  *  tatsächlicher Verbrauch, Defizit. Keine Empfehlung — nur die Zahlen
  *  und was sie bedeuten. */
-export function EnergyExplainer() {
-  const settings = useLiveQuery(() => getSettings(), []);
+export function EnergyExplainer({ settings }: { settings: Settings }) {
   const entries = useLiveQuery(() => db.entries.toArray(), [], []);
   const measurements = useLiveQuery(() => db.measurements.toArray(), [], []);
-
-  if (!settings) return null;
 
   const latestWeight = [...measurements]
     .filter((m) => typeof m.weightKg === "number")
     .sort((a, b) => b.date.localeCompare(a.date))[0]?.weightKg;
-
   const age =
     settings.birthYear !== undefined
       ? new Date().getFullYear() - settings.birthYear
@@ -57,7 +54,7 @@ export function EnergyExplainer() {
           note={
             bmr !== undefined
               ? "Was der Körper in völliger Ruhe verbraucht"
-              : "Größe, Jahrgang und Geschlecht fehlen noch"
+              : "Größe, Jahrgang, Formel-Variante und eine Wiegung fehlen noch"
           }
         />
         <Line
@@ -80,7 +77,7 @@ export function EnergyExplainer() {
         />
         {assessment && (
           <Line
-            label="Defizit"
+            label={assessment.deficit >= 0 ? "Defizit" : "Überschuss"}
             value={`${assessment.deficit >= 0 ? "−" : "+"}${formatNumber(Math.abs(assessment.deficit))} kcal`}
             note={`${assessment.label} · rechnerisch ${formatDecimal(Math.abs(assessment.kgPerWeek), 2)} kg pro Woche`}
           />
@@ -114,9 +111,9 @@ export function EnergyExplainer() {
         </p>
         <p className="explainer-text">
           Diese App schätzt deinen Erhaltungsbedarf nicht aus einer Formel,
-          sondern misst ihn: aus dem, was du tatsächlich gegessen hast, und
-          wie sich dein Gewicht dabei entwickelt hat. Das ist genauer als jede
-          Faustformel — braucht aber ein paar Wochen Daten.
+          sondern misst ihn: aus dem, was du tatsächlich gegessen hast, und wie
+          sich dein Gewicht dabei entwickelt hat. Die erfasste Aktivität wird
+          dabei nicht abgezogen — sie steckt im Gewichtsverlauf schon drin.
         </p>
         <p className="explainer-note">
           Alles hier ist Arithmetik auf deinen Zahlen, keine
