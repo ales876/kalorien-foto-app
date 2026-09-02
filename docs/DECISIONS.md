@@ -112,6 +112,15 @@ Vorlage war eine Bildschirmaufnahme von Things 3 (2026-09-02). Daraus
   Blätterrichtung, Ringe und Balken animieren ihren Füllstand.
   `prefers-reduced-motion` schaltet alles ab.
 
+## 10a. Drei Farben, drei Rollen
+
+Der Akzent (Vanille) war zu präsent. Deshalb hat jede Farbe genau eine
+Aufgabe: **Akzent** für Aktionen (Plus, Knöpfe), **Flieder**
+(`--tertiary`, aus dem App-Icon) für Fortschritt und Hinweise (Ringe,
+Balken im Bericht, Info-Hinweise, Fokus), **Gegenfarbe** für Auswahl
+(Wochenleiste, „übernehmen"). Flieder ist fest, unabhängig von der
+gewählten Palette.
+
 ## 11. Dark Mode folgt dem System
 
 Keine eigene Umschaltung: `prefers-color-scheme` entscheidet, wie bei

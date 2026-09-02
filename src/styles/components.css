@@ -253,8 +253,8 @@
 }
 
 .input:focus {
-  border-color: var(--accent-deep);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  border-color: var(--tertiary-deep);
+  box-shadow: 0 0 0 3px var(--tertiary-soft);
 }
 
 .input-compact {
@@ -322,7 +322,7 @@
   width: 18px;
   height: 18px;
   border: 2px solid var(--hairline);
-  border-top-color: var(--accent-deep);
+  border-top-color: var(--tertiary-deep);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }

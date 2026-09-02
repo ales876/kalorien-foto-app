@@ -79,7 +79,11 @@ export function KcalChart({
                   strokeDasharray="4 4"
                 />
               )}
-              <Bar dataKey="kcal" fill="var(--accent)" radius={[4, 4, 0, 0]} />
+              <Bar
+                dataKey="kcal"
+                fill="var(--tertiary)"
+                radius={[4, 4, 0, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
         </>

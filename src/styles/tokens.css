@@ -41,11 +41,17 @@
      dunklen Karten lesbar bleibt. Wird von applyPalette() gesetzt. */
   --complement-ink: #4759c9;
 
+  /* Dritte Farbe, bewusst leise: Flieder aus dem App-Icon. Trägt den
+     Fortschritt (Ringe) und Hinweise — der Akzent bleibt den Aktionen. */
+  --tertiary: #c4a7e7;
+  --tertiary-deep: #a98ad4;
+  --tertiary-soft: #f1ebf9;
+
   --tabbar-bg: rgba(255, 255, 255, 0.92);
   --notice-error-bg: #fdecec;
   --notice-error-ink: #a32227;
-  --notice-info-bg: var(--accent-soft);
-  --notice-info-ink: #6b5600;
+  --notice-info-bg: var(--tertiary-soft);
+  --notice-info-ink: #4b3a6b;
   --notice-success-bg: #e3f5ec;
   --notice-success-ink: #1e7a52;
 
@@ -92,7 +98,8 @@
     --tabbar-bg: rgba(22, 24, 30, 0.9);
     --notice-error-bg: rgba(229, 72, 77, 0.18);
     --notice-error-ink: #ff8f93;
-    --notice-info-ink: var(--ink);
+    --tertiary-soft: rgba(196, 167, 231, 0.2);
+    --notice-info-ink: #d9c8f2;
     --notice-success-bg: rgba(53, 179, 126, 0.18);
     --notice-success-ink: #7fd6ac;
 

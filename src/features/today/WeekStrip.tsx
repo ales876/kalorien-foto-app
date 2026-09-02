@@ -122,7 +122,7 @@ function DayButton({
                 cy="17"
                 r={RADIUS}
                 fill="none"
-                stroke={over ? "var(--danger)" : "var(--accent)"}
+                stroke={over ? "var(--danger)" : "var(--tertiary)"}
                 strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeDasharray={CIRCUMFERENCE}

@@ -345,8 +345,8 @@
 @keyframes row-flash {
   0%,
   35% {
-    background: var(--accent-soft);
-    box-shadow: 0 0 0 8px var(--accent-soft);
+    background: var(--tertiary-soft);
+    box-shadow: 0 0 0 8px var(--tertiary-soft);
   }
   100% {
     background: transparent;
