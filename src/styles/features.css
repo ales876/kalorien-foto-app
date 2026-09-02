@@ -151,31 +151,81 @@
 
 /* ---------- Tageskarte ---------- */
 
-.kcal-hero {
+.day-hero {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 18px;
 }
 
-.kcal-figure {
-  font-size: 34px;
+.ring-wrap {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.ring-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.ring-big {
+  font-size: 30px;
   font-weight: 700;
+  line-height: 1;
   font-variant-numeric: tabular-nums;
-  line-height: 1.1;
+  letter-spacing: -0.02em;
 }
 
-.kcal-goal {
+.ring-sub {
+  font-size: 12px;
   color: var(--ink-secondary);
-  font-size: 14px;
+  margin-top: 3px;
 }
 
-.kcal-remaining {
-  font-size: 14px;
-  color: var(--ink-secondary);
-}
-
-.kcal-remaining[data-over="true"] {
+.ring-wrap[data-over="true"] .ring-big {
   color: var(--danger);
+}
+
+.day-kv {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.day-kv > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  padding-top: 7px;
+  border-top: 1px solid var(--hairline);
+}
+
+.day-kv > div:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.day-kv dt {
+  font-size: 13px;
+  color: var(--ink-secondary);
+}
+
+.day-kv dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.day-kv dd.muted {
+  color: var(--ink-tertiary);
   font-weight: 500;
 }
 
@@ -194,13 +244,15 @@
 .macro-goal {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
 }
 
 .macro-goal-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   color: var(--ink-secondary);
 }
 
@@ -208,6 +260,10 @@
   font-size: 13px;
   font-variant-numeric: tabular-nums;
   color: var(--ink);
+}
+
+.macro-track {
+  width: 100%;
 }
 
 .macro-goal-value span {
@@ -229,17 +285,6 @@
 
 .macro-goal[data-over="true"] .macro-fill {
   background: var(--danger) !important;
-}
-
-.activity-line {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid var(--hairline);
-  font-size: 13px;
-  color: var(--ink-secondary);
 }
 
 /* ---------- Mahlzeiten ---------- */
