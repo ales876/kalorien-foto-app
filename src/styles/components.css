@@ -200,12 +200,6 @@
   color: var(--danger);
 }
 
-.btn-inline {
-  width: auto;
-  padding: 10px 14px;
-  font-size: 14px;
-}
-
 .icon-btn {
   display: flex;
   align-items: center;
@@ -253,8 +247,8 @@
 }
 
 .input:focus {
-  border-color: var(--accent-deep);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  border-color: var(--tertiary-deep);
+  box-shadow: 0 0 0 3px var(--tertiary-soft);
 }
 
 .input-compact {
@@ -303,18 +297,18 @@
 }
 
 .notice-error {
-  background: var(--danger-soft);
-  color: #a32227;
+  background: var(--notice-error-bg);
+  color: var(--notice-error-ink);
 }
 
 .notice-info {
-  background: var(--accent-soft);
-  color: #6b5600;
+  background: var(--notice-info-bg);
+  color: var(--notice-info-ink);
 }
 
 .notice-success {
-  background: #e3f5ec;
-  color: #1e7a52;
+  background: var(--notice-success-bg);
+  color: var(--notice-success-ink);
 }
 
 .spinner {
@@ -322,7 +316,7 @@
   width: 18px;
   height: 18px;
   border: 2px solid var(--hairline);
-  border-top-color: var(--accent-deep);
+  border-top-color: var(--tertiary-deep);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -348,16 +342,16 @@
 }
 
 .badge-hoch {
-  background: #e3f5ec;
-  color: #1e7a52;
+  background: var(--notice-success-bg);
+  color: var(--notice-success-ink);
 }
 .badge-mittel {
-  background: var(--accent-soft);
-  color: #6b5600;
+  background: var(--notice-info-bg);
+  color: var(--notice-info-ink);
 }
 .badge-niedrig {
-  background: var(--danger-soft);
-  color: #a32227;
+  background: var(--notice-error-bg);
+  color: var(--notice-error-ink);
 }
 
 /* ---------- Tab-Leiste & Plus ---------- */
@@ -372,7 +366,7 @@
   display: flex;
   align-items: center;
   justify-content: space-around;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--tabbar-bg);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-top: 1px solid var(--hairline);
@@ -426,7 +420,7 @@
   border: none;
   border-radius: 50%;
   background: var(--accent);
-  color: var(--on-accent);
+  color: #ffffff; /* Wunsch: weißes Plus, auch auf Vanille */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -439,12 +433,93 @@
   transform: scale(0.92);
 }
 
+/* Das Plus wächst in den Dialog hinein: es schrumpft weg, während das
+   Sheet aufsteigt, und springt beim Schließen zurück. Während eine Zeile
+   bearbeitet wird, übernimmt die Werkzeugleiste seinen Platz. */
+.fab[data-hidden="true"],
+body[data-editing="true"] .fab {
+  transform: scale(0.2);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--dur-base) var(--ease-in-out),
+    opacity var(--dur-fast) var(--ease-out);
+}
+
+/* ---------- Push-Übergang zwischen den Bereichen ---------- */
+
+@supports (view-transition-name: root) {
+  .tabbar {
+    view-transition-name: tabbar;
+  }
+
+  .fab {
+    view-transition-name: fab;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: var(--dur-base);
+    animation-timing-function: var(--ease-out);
+  }
+
+  ::view-transition-old(root) {
+    animation-name: push-out-forward;
+  }
+
+  ::view-transition-new(root) {
+    animation-name: push-in-forward;
+  }
+
+  html[data-nav="back"]::view-transition-old(root) {
+    animation-name: push-out-back;
+  }
+
+  html[data-nav="back"]::view-transition-new(root) {
+    animation-name: push-in-back;
+  }
+
+  /* Leiste und Plus bleiben stehen — nur der Inhalt bewegt sich. */
+  ::view-transition-old(tabbar),
+  ::view-transition-new(tabbar),
+  ::view-transition-old(fab),
+  ::view-transition-new(fab) {
+    animation: none;
+  }
+}
+
+@keyframes push-in-forward {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes push-out-forward {
+  to {
+    transform: translateX(-28%);
+    opacity: 0.5;
+  }
+}
+
+@keyframes push-in-back {
+  from {
+    transform: translateX(-28%);
+    opacity: 0.5;
+  }
+}
+
+@keyframes push-out-back {
+  to {
+    transform: translateX(100%);
+  }
+}
+
 /* ---------- Sheet ---------- */
 
 .sheet-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.28);
+  background: rgba(0, 0, 0, 0.4);
   z-index: 30;
   display: flex;
   align-items: flex-end;

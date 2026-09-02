@@ -22,11 +22,11 @@ export interface Palette {
 export const PALETTES: readonly Palette[] = [
   {
     id: "gelb",
-    label: "Sonnengelb",
-    hint: "Wach und freundlich",
-    accent: "#ffd400",
-    accentSoft: "#fff6cc",
-    accentDeep: "#e6be00",
+    label: "Vanille",
+    hint: "Weich und freundlich",
+    accent: "#ffe680",
+    accentSoft: "#fff8d6",
+    accentDeep: "#e3c65a",
     onAccent: "#1c1c1e",
     complement: "#4759c9",
     complementSoft: "#e8eafb",
@@ -76,18 +76,46 @@ export function getPalette(id: string | undefined): Palette {
   return PALETTES.find((p) => p.id === id) ?? DEFAULT_PALETTE;
 }
 
-/** Schreibt die Palette als CSS-Variablen auf das Wurzelelement. */
+export function prefersDark(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    !!window.matchMedia?.("(prefers-color-scheme: dark)").matches
+  );
+}
+
+/** Schreibt die Palette als CSS-Variablen auf das Wurzelelement.
+ *
+ *  Im Dunkeln werden die hellen Tönungen durch transparente Anteile der
+ *  Farbe ersetzt und die Gegenfarbe als Text aufgehellt — sonst stünde
+ *  eine Pastellscheibe auf dunkler Karte. */
 export function applyPalette(
   id: string | undefined,
   root: HTMLElement = document.documentElement,
+  dark: boolean = prefersDark(),
 ): Palette {
   const palette = getPalette(id);
   const style = root.style;
   style.setProperty("--accent", palette.accent);
-  style.setProperty("--accent-soft", palette.accentSoft);
   style.setProperty("--accent-deep", palette.accentDeep);
   style.setProperty("--on-accent", palette.onAccent);
   style.setProperty("--complement", palette.complement);
-  style.setProperty("--complement-soft", palette.complementSoft);
+  if (dark) {
+    style.setProperty(
+      "--accent-soft",
+      `color-mix(in srgb, ${palette.accent} 22%, transparent)`,
+    );
+    style.setProperty(
+      "--complement-soft",
+      `color-mix(in srgb, ${palette.complement} 32%, transparent)`,
+    );
+    style.setProperty(
+      "--complement-ink",
+      `color-mix(in srgb, ${palette.complement} 60%, white)`,
+    );
+  } else {
+    style.setProperty("--accent-soft", palette.accentSoft);
+    style.setProperty("--complement-soft", palette.complementSoft);
+    style.setProperty("--complement-ink", palette.complement);
+  }
   return palette;
 }

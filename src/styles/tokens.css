@@ -2,9 +2,9 @@
    Haarlinien statt Rahmen, weiche Schatten, ein Akzent. */
 :root {
   /* Akzent wird beim Start aus der gewählten Palette überschrieben. */
-  --accent: #ffd400;
-  --accent-soft: #fff6cc;
-  --accent-deep: #e6be00;
+  --accent: #ffe680;
+  --accent-soft: #fff8d6;
+  --accent-deep: #e3c65a;
   --on-accent: #1c1c1e;
   --complement: #4759c9;
   --complement-soft: #e8eafb;
@@ -20,10 +20,17 @@
   --hairline: #e8e8e4;
 
   /* Jeder Bereich behält seine Farbe, auch inaktiv. */
-  --tab-today: #f0b429;
+  --tab-today: #a98ad4; /* Flieder wie der Fortschrittsring — kein weiteres Gelb */
   --tab-body: #4a90d9;
   --tab-reports: #35b37e;
   --tab-more: #9aa0a6;
+
+  /* Erfassungswege: jede Aktion ihre eigene Farbe, keine doppelt. */
+  --action-photo: #a98ad4;
+  --action-barcode: #4a90d9;
+  --action-search: #35b37e;
+  --action-weight: #f2994a;
+  --action-activity: #e2795b;
 
   --meal-morning: #f2994a;
   --meal-noon: #f0b429;
@@ -36,6 +43,24 @@
   --danger: #e5484d;
   --danger-soft: #fdecec;
   --success: #35b37e;
+
+  /* Gegenfarbe als Textfarbe — im Dunkeln aufgehellt, damit sie auf
+     dunklen Karten lesbar bleibt. Wird von applyPalette() gesetzt. */
+  --complement-ink: #4759c9;
+
+  /* Dritte Farbe, bewusst leise: Flieder aus dem App-Icon. Trägt den
+     Fortschritt (Ringe) und Hinweise — der Akzent bleibt den Aktionen. */
+  --tertiary: #c4a7e7;
+  --tertiary-deep: #a98ad4;
+  --tertiary-soft: #f1ebf9;
+
+  --tabbar-bg: rgba(255, 255, 255, 0.92);
+  --notice-error-bg: #fdecec;
+  --notice-error-ink: #a32227;
+  --notice-info-bg: var(--tertiary-soft);
+  --notice-info-ink: #4b3a6b;
+  --notice-success-bg: #e3f5ec;
+  --notice-success-ink: #1e7a52;
 
   --radius-sm: 8px;
   --radius: 12px;
@@ -57,4 +82,34 @@
   --dur-slow: 480ms;
 
   color-scheme: light;
+}
+
+/* Dark Mode folgt der Systemeinstellung — Things-Nachtfarben: tiefes
+   Blaugrau statt Schwarz, Karten eine Stufe heller, Haarlinien bleiben. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14161b;
+    --surface: #1f2229;
+    --surface-sunken: #2a2e37;
+
+    --ink: #f2f2f5;
+    --ink-secondary: #a3a7b0;
+    --ink-tertiary: #6e727c;
+
+    --hairline: #30343d;
+    --danger-soft: rgba(229, 72, 77, 0.18);
+
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-lifted: 0 8px 24px rgba(0, 0, 0, 0.55);
+
+    --tabbar-bg: rgba(22, 24, 30, 0.9);
+    --notice-error-bg: rgba(229, 72, 77, 0.18);
+    --notice-error-ink: #ff8f93;
+    --tertiary-soft: rgba(196, 167, 231, 0.2);
+    --notice-info-ink: #d9c8f2;
+    --notice-success-bg: rgba(53, 179, 126, 0.18);
+    --notice-success-ink: #7fd6ac;
+
+    color-scheme: dark;
+  }
 }

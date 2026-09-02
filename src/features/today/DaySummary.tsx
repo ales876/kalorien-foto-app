@@ -4,6 +4,9 @@ import { Card } from "../../ui/Card";
 import { KcalRing } from "../../ui/KcalRing";
 import { MacroGoals, type MacroGoalValues } from "../../ui/MacroGoals";
 
+/** Tageskarte: die Zahl, nach der man handelt — was noch übrig ist —
+ *  steht im Ring. Gegessen, Ziel und Aktivität bleiben als ruhige Liste
+ *  daneben. */
 export function DaySummary({
   totals,
   goal,
@@ -16,30 +19,39 @@ export function DaySummary({
   activityKcal?: number | undefined;
 }) {
   const remaining = Math.round(goal - totals.kcal);
+  const over = remaining < 0;
 
   return (
     <Card>
-      <div className="kcal-hero">
-        <KcalRing value={totals.kcal} goal={goal} />
-        <div>
-          <div className="kcal-figure">{formatNumber(totals.kcal)}</div>
-          <div className="kcal-goal">von {formatNumber(goal)} kcal</div>
-          <div className="kcal-remaining" data-over={remaining < 0}>
-            {remaining >= 0
-              ? `noch ${formatNumber(remaining)} kcal übrig`
-              : `${formatNumber(Math.abs(remaining))} kcal drüber`}
+      <div className="day-hero">
+        <div className="ring-wrap" data-over={over}>
+          <KcalRing value={totals.kcal} goal={goal} size={124} stroke={11} />
+          <div className="ring-inner" aria-live="polite">
+            <div className="ring-big">{formatNumber(Math.abs(remaining))}</div>
+            <div className="ring-sub">
+              {over ? "kcal drüber" : "kcal übrig"}
+            </div>
           </div>
         </div>
+        <dl className="day-kv">
+          <div>
+            <dt>Gegessen</dt>
+            <dd>{formatNumber(totals.kcal)}</dd>
+          </div>
+          <div>
+            <dt>Ziel</dt>
+            <dd className="muted">{formatNumber(goal)}</dd>
+          </div>
+          {activityKcal !== undefined && (
+            <div>
+              <dt>Aktiv</dt>
+              <dd className="muted">{formatNumber(activityKcal)}</dd>
+            </div>
+          )}
+        </dl>
       </div>
 
       <MacroGoals totals={totals} goals={macroGoals} />
-
-      {activityKcal !== undefined && (
-        <div className="activity-line">
-          <span>Aktive Energie</span>
-          <span className="row-value">{formatNumber(activityKcal)} kcal</span>
-        </div>
-      )}
     </Card>
   );
 }

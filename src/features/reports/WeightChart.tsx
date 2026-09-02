@@ -16,6 +16,8 @@ import {
   AXIS_STYLE,
   CHART_MARGIN,
   GRID_COLOR,
+  INK_COLOR,
+  MUTED_COLOR,
   paddedDomain,
 } from "./chartStyle";
 
@@ -81,14 +83,14 @@ export function WeightChart({
                 dataKey="raw"
                 name="raw"
                 stroke="none"
-                dot={{ r: 2.5, fill: "#c9c9c4" }}
+                dot={{ r: 2.5, fill: MUTED_COLOR }}
                 isAnimationActive={false}
               />
               <Line
                 type="monotone"
                 dataKey="trend"
                 name="trend"
-                stroke="#1c1c1e"
+                stroke={INK_COLOR}
                 strokeWidth={2.2}
                 dot={false}
               />

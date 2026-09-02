@@ -23,6 +23,7 @@ describe("Paletten", () => {
 
   it("fällt bei unbekannter ID auf Gelb zurück", () => {
     expect(getPalette("neon").id).toBe("gelb");
+    expect(getPalette("gelb").accent).toBe("#ffe680");
     expect(getPalette(undefined).id).toBe("gelb");
   });
 

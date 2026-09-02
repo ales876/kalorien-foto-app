@@ -11,18 +11,26 @@ export function MealSection({
   meal,
   date,
   entries,
+  editingId,
   onEdit,
 }: {
   meal: MealInfo;
   date: string;
   entries: FoodEntry[];
-  onEdit: (entry: FoodEntry) => void;
+  editingId: number | null;
+  onEdit: (id: number | null) => void;
 }) {
   const MealIcon = MEAL_ICONS[meal.id];
   const kcal = sumTotals(entries).kcal;
+  const hasEditing =
+    editingId !== null && entries.some((entry) => entry.id === editingId);
 
   return (
-    <section className="card" aria-label={meal.label}>
+    <section
+      className="card"
+      aria-label={meal.label}
+      data-has-editing={hasEditing}
+    >
       <header className="meal-header">
         <span className="meal-icon" style={{ color: meal.color }}>
           <MealIcon size={18} />
@@ -37,7 +45,12 @@ export function MealSection({
         <EmptyMeal meal={meal.id} date={date} />
       ) : (
         entries.map((entry) => (
-          <EntryRow key={entry.id} entry={entry} onEdit={onEdit} />
+          <EntryRow
+            key={entry.id}
+            entry={entry}
+            expanded={entry.id === editingId}
+            onToggle={onEdit}
+          />
         ))
       )}
     </section>

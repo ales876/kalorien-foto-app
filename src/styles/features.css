@@ -55,6 +55,7 @@
 
 .week-day[data-future="true"] {
   opacity: 0.4;
+  cursor: default;
 }
 
 .week-circle {
@@ -110,7 +111,7 @@
 }
 
 .week-day[data-selected="true"] .week-number {
-  color: var(--complement);
+  color: var(--complement-ink);
   font-weight: 700;
 }
 
@@ -122,7 +123,7 @@
 }
 
 .week-day[data-selected="true"] .week-weekday {
-  color: var(--complement);
+  color: var(--complement-ink);
   font-weight: 600;
 }
 
@@ -151,31 +152,81 @@
 
 /* ---------- Tageskarte ---------- */
 
-.kcal-hero {
+.day-hero {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 18px;
 }
 
-.kcal-figure {
-  font-size: 34px;
+.ring-wrap {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.ring-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.ring-big {
+  font-size: 30px;
   font-weight: 700;
+  line-height: 1;
   font-variant-numeric: tabular-nums;
-  line-height: 1.1;
+  letter-spacing: -0.02em;
 }
 
-.kcal-goal {
+.ring-sub {
+  font-size: 12px;
   color: var(--ink-secondary);
-  font-size: 14px;
+  margin-top: 3px;
 }
 
-.kcal-remaining {
-  font-size: 14px;
-  color: var(--ink-secondary);
-}
-
-.kcal-remaining[data-over="true"] {
+.ring-wrap[data-over="true"] .ring-big {
   color: var(--danger);
+}
+
+.day-kv {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.day-kv > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  padding-top: 7px;
+  border-top: 1px solid var(--hairline);
+}
+
+.day-kv > div:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.day-kv dt {
+  font-size: 13px;
+  color: var(--ink-secondary);
+}
+
+.day-kv dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.day-kv dd.muted {
+  color: var(--ink-tertiary);
   font-weight: 500;
 }
 
@@ -194,13 +245,15 @@
 .macro-goal {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
 }
 
 .macro-goal-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   color: var(--ink-secondary);
 }
 
@@ -208,6 +261,10 @@
   font-size: 13px;
   font-variant-numeric: tabular-nums;
   color: var(--ink);
+}
+
+.macro-track {
+  width: 100%;
 }
 
 .macro-goal-value span {
@@ -229,17 +286,6 @@
 
 .macro-goal[data-over="true"] .macro-fill {
   background: var(--danger) !important;
-}
-
-.activity-line {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid var(--hairline);
-  font-size: 13px;
-  color: var(--ink-secondary);
 }
 
 /* ---------- Mahlzeiten ---------- */
@@ -335,6 +381,162 @@
   margin-left: 0;
 }
 
+/* Frisch gespeicherte Zeile: kurzer Nachhall, der verblasst. */
+.entry-row[data-new="true"] {
+  animation:
+    card-in var(--dur-base) var(--ease-out) both,
+    row-flash 1.6s var(--ease-out) both;
+}
+
+@keyframes row-flash {
+  0%,
+  35% {
+    background: var(--tertiary-soft);
+    box-shadow: 0 0 0 8px var(--tertiary-soft);
+  }
+  100% {
+    background: transparent;
+    box-shadow: 0 0 0 8px transparent;
+  }
+}
+
+.entry-main:active {
+  opacity: 0.6;
+}
+
+/* ---------- Bearbeiten an Ort und Stelle (wie in Things) ---------- */
+
+.entry-row {
+  flex-wrap: wrap;
+  transition:
+    border-radius var(--dur-fast) var(--ease-out),
+    background var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    margin var(--dur-base) var(--ease-out),
+    padding var(--dur-base) var(--ease-out),
+    opacity var(--dur-base) var(--ease-out);
+}
+
+.entry-row[data-expanded="true"] {
+  border-radius: var(--radius);
+  background: var(--surface-sunken);
+  box-shadow: inset 0 0 0 1px var(--hairline);
+  margin: 6px -8px;
+  padding: 12px 8px;
+  border-top-color: transparent;
+}
+
+.entry-row[data-expanded="true"] + .entry-row {
+  border-top-color: transparent;
+}
+
+/* Höhe animiert über Grid-Zeilen: 0fr → 1fr, ohne Messen. */
+.entry-editor {
+  flex: 1 0 100%;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--dur-slow) var(--ease-out);
+}
+
+.entry-row[data-expanded="true"] .entry-editor {
+  grid-template-rows: 1fr;
+}
+
+.entry-editor-clip {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.entry-editor-inner {
+  padding-top: 12px;
+  animation: fade-in var(--dur-slow) var(--ease-out) both;
+}
+
+.entry-editor-inner .field {
+  margin-bottom: 10px;
+}
+
+.entry-editor-sum {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  padding-bottom: 4px;
+}
+
+/* Alles andere tritt zurück, solange eine Zeile offen ist. */
+.screen[data-editing="true"] .weekstrip,
+.screen[data-editing="true"] .take-over-day,
+.screen[data-editing="true"]
+  .day-content
+  > .card:not([data-has-editing="true"]),
+.card[data-has-editing="true"] .meal-header,
+.card[data-has-editing="true"] .entry-row:not([data-expanded="true"]) {
+  opacity: 0.35;
+}
+
+.weekstrip,
+.take-over-day,
+.day-content > .card,
+.meal-header {
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+/* Werkzeugleiste unten, wie in Things: taucht auf, wo sonst das Plus
+   sitzt, mit dem Popover-Einblenden aus dem Video (leicht skaliert). */
+.edit-toolbar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--tabbar-height) + 18px + var(--safe-bottom));
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  padding: 5px;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: var(--shadow-lifted);
+  z-index: 25;
+  animation: popover-in var(--dur-base) var(--ease-spring) both;
+}
+
+@keyframes popover-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px) scale(0.9);
+  }
+}
+
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  padding: 9px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-secondary);
+  white-space: nowrap;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.toolbar-btn:active {
+  background: var(--surface-sunken);
+}
+
+.toolbar-btn:disabled {
+  opacity: 0.4;
+}
+
+.toolbar-primary {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.toolbar-danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
 /* Löschen in zwei Schritten: erst fragen, dann tun. */
 .confirm-delete {
   display: flex;
@@ -381,7 +583,7 @@
   display: inline-block;
   font-size: 13px;
   font-weight: 600;
-  color: var(--complement);
+  color: var(--complement-ink);
 }
 
 .take-over-day {
@@ -390,46 +592,49 @@
 
 /* ---------- Erfassen ---------- */
 
-.choice {
+/* Reihe runder Icon-Knöpfe, wie ein Teilen-Blatt: kompakt, damit die
+   Vorschläge darunter ohne Scrollen erreichbar bleiben. */
+.icon-row {
   display: flex;
+  justify-content: space-between;
+  padding: 2px 2px 6px;
+}
+
+.icon-choice {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 14px;
-  width: 100%;
-  padding: 14px 16px;
-  margin-bottom: 10px;
+  gap: 6px;
+  width: 60px;
   border: none;
-  border-radius: var(--radius);
+  background: transparent;
+  padding: 0;
+}
+
+.icon-circle {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
   background: var(--surface);
   box-shadow: var(--shadow);
-  text-align: left;
-  transition: transform var(--dur-base) var(--ease-spring);
-}
-
-.choice:active {
-  transform: scale(0.985);
-}
-
-.choice-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 auto;
+  transition: transform var(--dur-base) var(--ease-spring);
 }
 
-.choice-text {
-  flex: 1;
-  min-width: 0;
+.icon-choice:active .icon-circle {
+  transform: scale(0.92);
 }
 
-.choice-label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 1px;
+.icon-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-secondary);
 }
 
-.choice-chevron {
-  color: var(--ink-tertiary);
-  flex: 0 0 auto;
+.quickpicks {
+  margin-top: 14px;
 }
 
 .quickpicks .card-title {
@@ -558,7 +763,7 @@
 }
 
 .legend-raw {
-  background: #c9c9c4;
+  background: var(--ink-tertiary);
 }
 
 .legend-trend {
@@ -665,4 +870,86 @@
   background: var(--surface);
   padding: 12px;
   border-radius: var(--radius-sm);
+}
+
+/* ---------- Leerer Tag: großer, blasser Glyph wie die leere Inbox ---------- */
+
+.empty-day {
+  text-align: center;
+  padding: 28px 16px 20px;
+}
+
+.empty-day-glyph {
+  display: flex;
+  justify-content: center;
+  color: var(--ink-tertiary);
+  opacity: 0.35;
+  margin-bottom: 10px;
+}
+
+.empty-day-text {
+  color: var(--ink-tertiary);
+  font-size: 14px;
+  margin-bottom: 18px;
+}
+
+.empty-day .row {
+  text-align: left;
+}
+
+.empty-day .take-over {
+  padding: 0;
+}
+
+/* ---------- Verschieben-Popover über der Werkzeugleiste ---------- */
+
+.move-popover {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--tabbar-height) + 72px + var(--safe-bottom));
+  transform: translateX(-50%);
+  width: min(320px, calc(100vw - 32px));
+  padding: 12px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-lifted);
+  z-index: 26;
+  animation: popover-in var(--dur-base) var(--ease-spring) both;
+}
+
+.move-popover .card-title {
+  margin-bottom: 8px;
+}
+
+.move-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.move-options:last-child {
+  margin-bottom: 0;
+}
+
+.move-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  padding: 10px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  transition: filter var(--dur-fast) var(--ease-out);
+}
+
+.move-option:active {
+  filter: brightness(0.94);
+}
+
+.move-option:disabled {
+  opacity: 0.35;
 }

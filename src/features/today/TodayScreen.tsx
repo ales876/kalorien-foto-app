@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSettings } from "../../hooks/useSettings";
@@ -9,7 +9,7 @@ import { copyDay } from "../../lib/suggestions";
 import { MEALS, type FoodEntry } from "../../lib/types";
 import { Notice } from "../../ui/Notice";
 import { DaySummary } from "./DaySummary";
-import { EditEntrySheet } from "./EditEntrySheet";
+import { EmptyDay } from "./EmptyDay";
 import { MealSection } from "./MealSection";
 import { WeekStrip, type DayStat } from "./WeekStrip";
 
@@ -25,7 +25,31 @@ export function TodayScreen({
   const weekStart = week[0] ?? dateKey;
   const weekEnd = week[6] ?? dateKey;
   const [direction, setDirection] = useState<"forward" | "back">("forward");
-  const [editing, setEditing] = useState<FoodEntry | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
+
+  // Solange eine Zeile aufgeklappt ist: Plus ausblenden (Werkzeugleiste
+  // übernimmt), Escape klappt zu.
+  useEffect(() => {
+    if (editingId === null) return;
+    document.body.dataset.editing = "true";
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setEditingId(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      delete document.body.dataset.editing;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [editingId]);
+
+  // Tipp neben die aufgeklappte Zeile klappt sie zu (und speichert).
+  function collapseIfOutside(event: MouseEvent<HTMLDivElement>) {
+    if (editingId === null) return;
+    const target = event.target as HTMLElement;
+    if (target.closest('[data-expanded="true"], .entry-main, .move-popover'))
+      return;
+    setEditingId(null);
+  }
 
   // Hinweis aus dem Import-Deep-Link (#/import?aktiv=…), einmalig.
   const location = useLocation();
@@ -72,7 +96,11 @@ export function TodayScreen({
   }
 
   return (
-    <div className="screen">
+    <div
+      className="screen"
+      data-editing={editingId !== null}
+      onClick={collapseIfOutside}
+    >
       <WeekStrip
         days={dayStats}
         selected={dateKey}
@@ -105,18 +133,21 @@ export function TodayScreen({
           activityKcal={activity?.kcal}
         />
 
-        {MEALS.map((meal) => (
-          <MealSection
-            key={meal.id}
-            meal={meal}
-            date={dateKey}
-            entries={entries.filter((entry) => entry.meal === meal.id)}
-            onEdit={setEditing}
-          />
-        ))}
+        {entries.length === 0 ? (
+          <EmptyDay date={dateKey} />
+        ) : (
+          MEALS.map((meal) => (
+            <MealSection
+              key={meal.id}
+              meal={meal}
+              date={dateKey}
+              entries={entries.filter((entry) => entry.meal === meal.id)}
+              editingId={editingId}
+              onEdit={setEditingId}
+            />
+          ))
+        )}
       </div>
-
-      <EditEntrySheet entry={editing} onClose={() => setEditing(null)} />
     </div>
   );
 }

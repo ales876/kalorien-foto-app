@@ -11,7 +11,6 @@ import {
   IconBarcode,
   IconBody,
   IconCamera,
-  IconChevron,
   IconSearch,
   type IconComponent,
 } from "../../ui/icons";
@@ -45,42 +44,36 @@ const CHOICES: {
   Icon: IconComponent;
   color: string;
   label: string;
-  hint: string;
 }[] = [
   {
     mode: "photo",
     Icon: IconCamera,
-    color: "var(--tab-today)",
-    label: "Foto vom Essen",
-    hint: "Zutaten und Menge schätzen",
+    color: "var(--action-photo)",
+    label: "Foto",
   },
   {
     mode: "barcode",
     Icon: IconBarcode,
-    color: "var(--tab-body)",
-    label: "Barcode scannen",
-    hint: "Verpackte Produkte",
+    color: "var(--action-barcode)",
+    label: "Barcode",
   },
   {
     mode: "search",
     Icon: IconSearch,
-    color: "var(--tab-reports)",
-    label: "Produkt suchen",
-    hint: "Name oder Marke",
+    color: "var(--action-search)",
+    label: "Suchen",
   },
   {
     mode: "weight",
     Icon: IconBody,
-    color: "var(--tab-body)",
-    label: "Gewicht & Maße",
-    hint: "Wiegen und messen",
+    color: "var(--action-weight)",
+    label: "Gewicht",
   },
   {
     mode: "activity",
     Icon: IconActivity,
-    color: "var(--meal-snack)",
-    label: "Aktivität erfassen",
-    hint: "Aktive Energie aus Health",
+    color: "var(--action-activity)",
+    label: "Aktivität",
   },
 ];
 
@@ -143,24 +136,22 @@ function AddFlow({
       <div className="step" key={mode} data-direction={direction}>
         {mode === "choose" && (
           <>
+            <div className="icon-row" role="group" aria-label="Erfassen">
+              {CHOICES.map(({ mode: target, Icon, color, label }) => (
+                <button
+                  type="button"
+                  className="icon-choice"
+                  key={target}
+                  onClick={() => go(target)}
+                >
+                  <span className="icon-circle" style={{ color }}>
+                    <Icon size={26} />
+                  </span>
+                  <span className="icon-label">{label}</span>
+                </button>
+              ))}
+            </div>
             <QuickPicks meal={guessMeal()} onPick={pick} />
-            {CHOICES.map(({ mode: target, Icon, color, label, hint }) => (
-              <button
-                type="button"
-                className="choice"
-                key={target}
-                onClick={() => go(target)}
-              >
-                <span className="choice-icon" style={{ color }}>
-                  <Icon size={26} />
-                </span>
-                <span className="choice-text">
-                  <span className="choice-label">{label}</span>
-                  <span className="row-sub">{hint}</span>
-                </span>
-                <IconChevron size={17} className="choice-chevron" />
-              </button>
-            ))}
           </>
         )}
 

@@ -1,4 +1,5 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
+import { rememberNavDirection } from "../lib/navigation";
 import {
   IconReports,
   IconSettings,
@@ -24,11 +25,30 @@ const TABS: {
   { to: "/mehr", Icon: IconSettings, label: "Mehr", color: "var(--tab-more)" },
 ];
 
+const tabIndex = (path: string) =>
+  TABS.findIndex((tab) => path.startsWith(tab.to));
+
+/** Bildschirmwechsel als Push wie in Things: der alte Screen gleitet
+ *  hinaus, der neue kommt aus der Richtung, in der der Tab liegt. Läuft
+ *  über die View-Transition-API; Browser ohne sie wechseln hart. */
 export function TabBar() {
+  const location = useLocation();
+
+  function rememberDirection(to: string) {
+    const from = tabIndex(location.pathname);
+    rememberNavDirection(tabIndex(to) < from ? "back" : "forward");
+  }
+
   return (
     <nav className="tabbar" aria-label="Hauptnavigation">
       {TABS.map(({ to, Icon, label, color }) => (
-        <NavLink key={to} to={to} className="tab-link">
+        <NavLink
+          key={to}
+          to={to}
+          className="tab-link"
+          viewTransition
+          onClick={() => rememberDirection(to)}
+        >
           {({ isActive }) => (
             <span className="tab" data-active={isActive}>
               <span className="tab-icon" style={{ color }}>

@@ -1,10 +1,5 @@
 import { z } from "zod";
-import {
-  db,
-  upsertActivity,
-  upsertMeasurement,
-  type PlateDatabase,
-} from "./db";
+import { db, upsertActivity, upsertMeasurement, type AppDatabase } from "./db";
 import {
   ENTRY_SOURCES,
   MEAL_IDS,
@@ -69,7 +64,7 @@ export interface ImportResult {
 }
 
 export async function exportBackup(
-  database: PlateDatabase = db,
+  database: AppDatabase = db,
 ): Promise<BackupFile> {
   const [entries, measurements, activities] = await Promise.all([
     database.entries.toArray(),
@@ -87,7 +82,7 @@ export async function exportBackup(
 
 export function backupFileName(date: Date = new Date()): string {
   const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-  return `plate-backup-${key}.json`;
+  return `sunny-orbit-backup-${key}.json`;
 }
 
 /** Erkennt Dubletten unabhängig von der ID — ein zweimal eingespielter
@@ -114,7 +109,7 @@ function collect<T>(
 
 export async function importBackup(
   raw: string,
-  database: PlateDatabase = db,
+  database: AppDatabase = db,
 ): Promise<ImportResult> {
   let json: unknown;
   try {
@@ -125,7 +120,9 @@ export async function importBackup(
 
   const parsed = backupSchema.safeParse(json);
   if (!parsed.success)
-    throw new Error("Die Datei hat nicht das Format eines Plate-Backups.");
+    throw new Error(
+      "Die Datei hat nicht das Format eines Sunny-Orbit-Backups.",
+    );
 
   const entries = collect(entrySchema, parsed.data.entries);
   const measurements = collect(measurementSchema, parsed.data.measurements);

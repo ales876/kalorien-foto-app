@@ -13,7 +13,12 @@ import { formatNumber } from "../../lib/format";
 import { groupByDate, sumTotals } from "../../lib/nutrition";
 import type { FoodEntry } from "../../lib/types";
 import { Card } from "../../ui/Card";
-import { AXIS_STYLE, CHART_MARGIN, GRID_COLOR } from "./chartStyle";
+import {
+  AXIS_STYLE,
+  CHART_MARGIN,
+  GRID_COLOR,
+  MUTED_COLOR,
+} from "./chartStyle";
 
 export function KcalChart({
   range,
@@ -70,11 +75,15 @@ export function KcalChart({
               {goal > 0 && (
                 <ReferenceLine
                   y={goal}
-                  stroke="#a1a1a6"
+                  stroke={MUTED_COLOR}
                   strokeDasharray="4 4"
                 />
               )}
-              <Bar dataKey="kcal" fill="var(--accent)" radius={[4, 4, 0, 0]} />
+              <Bar
+                dataKey="kcal"
+                fill="var(--tertiary)"
+                radius={[4, 4, 0, 0]}
+              />
             </BarChart>
           </ResponsiveContainer>
         </>

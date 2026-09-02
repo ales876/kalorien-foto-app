@@ -88,13 +88,55 @@ Cent.
 Mifflin-St Jeor kennt zwei Varianten. Das ist eine Eigenschaft der Formel,
 keine Aussage über Menschen. Die Formulierung bitte beibehalten.
 
-## 10. Bewegung
+## 10. Bewegung — nach Things 3
 
-Things bewegt Inhalte zusammenhängend statt sie auszutauschen. Deshalb:
-eigene Kurven (`--ease-out`, `--ease-spring`) statt `ease`, Sheet gleitet
-von unten herein und wieder hinaus, Dialogschritte und Tageswechsel gleiten
-in Blätterrichtung, Ringe und Balken animieren ihren Füllstand.
-`prefers-reduced-motion` schaltet alles ab.
+Vorlage war eine Bildschirmaufnahme von Things 3 (2026-09-02). Daraus
+übernommen:
+
+- **Bearbeiten an Ort und Stelle.** Eine Zeile klappt zur Karte auf
+  (Höhe über `grid-template-rows: 0fr → 1fr`), der Rest dimmt auf 35 %,
+  unten erscheint eine Werkzeugleiste (Löschen · Fertig) mit
+  Popover-Einblenden; das Plus verschwindet solange. Zuklappen speichert
+  automatisch — Fertig, Escape oder ein Tipp daneben.
+- **Push zwischen den Bereichen.** View-Transition-API: der alte Screen
+  gleitet um 28 % nach links und dimmt, der neue kommt von rechts;
+  zurück umgekehrt. Tab-Leiste und Plus haben eigene
+  `view-transition-name`s und bleiben stehen. Ohne API-Unterstützung
+  wechselt der Browser hart.
+- **Plus wächst in den Dialog.** Der Knopf schrumpft weg, während das
+  Sheet aufsteigt, und springt beim Schließen zurück.
+- **Neue Zeile blitzt auf.** Einträge, die jünger als drei Sekunden sind,
+  erscheinen mit einem Nachhall in `--accent-soft`, der verblasst.
+- Eigene Kurven (`--ease-out`, `--ease-spring`) statt `ease`, Sheet
+  gleitet herein und hinaus, Dialogschritte und Tageswechsel gleiten in
+  Blätterrichtung, Ringe und Balken animieren ihren Füllstand.
+  `prefers-reduced-motion` schaltet alles ab.
+
+## 10a. Drei Farben, drei Rollen
+
+Der Akzent (Vanille) war zu präsent. Deshalb hat jede Farbe genau eine
+Aufgabe: **Akzent** für Aktionen (Plus, Knöpfe), **Flieder**
+(`--tertiary`, aus dem App-Icon) für Fortschritt und Hinweise (Ringe,
+Balken im Bericht, Info-Hinweise, Fokus), **Gegenfarbe** für Auswahl
+(Wochenleiste, „übernehmen"). Flieder ist fest, unabhängig von der
+gewählten Palette.
+
+## 11. Dark Mode folgt dem System
+
+Keine eigene Umschaltung: `prefers-color-scheme` entscheidet, wie bei
+Things. Die Nachtfarben sind tiefes Blaugrau (`#14161b`), Karten eine
+Stufe heller, Haarlinien bleiben. Die Palette bleibt gleich, nur die
+Tönungen werden zu transparenten Anteilen der Farbe (`color-mix`) und
+die Gegenfarbe wird als Text aufgehellt (`--complement-ink`) —
+`applyPalette()` setzt beides, `App` hört auf den Schemawechsel.
+Diagramme nutzen dieselben Tokens über `var()` in SVG-Attributen.
+
+## 12. Suche: eigene Einträge zuerst
+
+„Produkt suchen" zeigt zuerst Treffer aus den eigenen Einträgen der
+letzten 365 Tage (auch Foto und Hand, keine Tagessummen), zusammengefasst
+je Lebensmittel mit der zuletzt genutzten Menge — dann den Produktindex,
+zuletzt die Live-Suche. Ersetzt ein eigenes „Quick Find".
 
 ## Fallstricke
 

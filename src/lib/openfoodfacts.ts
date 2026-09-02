@@ -3,7 +3,7 @@ import type { NutritionCandidate } from "./types";
 /** Open Food Facts bittet um eine Client-Kennung. Der User-Agent-Header
  *  ist im Browser verboten (löst einen CORS-Preflight aus), deshalb geht
  *  die Kennung als Query-Parameter mit. */
-const APP_ID = "Plate";
+const APP_ID = "SunnyOrbit";
 
 /** Der Produktendpunkt ist CORS-fähig und stabil. */
 const PRODUCT_API = "https://world.openfoodfacts.org/api/v2/product";

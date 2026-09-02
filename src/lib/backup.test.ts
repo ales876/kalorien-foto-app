@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { entryFingerprint, exportBackup, importBackup } from "./backup";
-import { createDatabase, type PlateDatabase } from "./db";
+import { createDatabase, type AppDatabase } from "./db";
 
 const validEntry = {
   date: "2026-09-01",
@@ -15,7 +15,7 @@ const validEntry = {
 };
 
 describe("importBackup", () => {
-  let db: PlateDatabase;
+  let db: AppDatabase;
 
   beforeEach(() => {
     db = createDatabase(`test-${Math.random()}`);

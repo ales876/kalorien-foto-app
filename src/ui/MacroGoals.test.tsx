@@ -10,12 +10,12 @@ describe("MacroGoals", () => {
         goals={{ protein: 130, carbs: 200, fat: 70 }}
       />,
     );
-    const protein = screen.getByRole("progressbar", { name: "PROTEINE" });
+    const protein = screen.getByRole("progressbar", { name: "Proteine" });
     expect(protein).toHaveAttribute("aria-valuenow", "65");
     expect(protein).toHaveAttribute("aria-valuemax", "130");
     expect(protein.firstElementChild).toHaveStyle({ width: "50%" });
 
-    const carbs = screen.getByRole("progressbar", { name: "KH" });
+    const carbs = screen.getByRole("progressbar", { name: "Kohlenhydrate" });
     expect(carbs.firstElementChild).toHaveStyle({ width: "100%" });
     expect(carbs.closest(".macro-goal")).toHaveAttribute("data-over", "true");
   });

@@ -9,7 +9,6 @@ import { Segmented } from "../../ui/Segmented";
 import { EnergyBalanceCard } from "./EnergyBalanceCard";
 import { KcalChart } from "./KcalChart";
 import { MeasurementsCard } from "./MeasurementsCard";
-import { WaistChart } from "./WaistChart";
 import { WeightChart } from "./WeightChart";
 
 const RANGES = [
@@ -55,7 +54,6 @@ export function ReportsScreen() {
         goal={settings?.kcalGoal ?? 0}
       />
       <WeightChart measurements={measurements} />
-      <WaistChart measurements={measurements} />
       <MeasurementsCard measurements={measurements} />
     </div>
   );

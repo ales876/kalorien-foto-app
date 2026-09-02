@@ -31,7 +31,7 @@ export function KcalRing({
         cy={size / 2}
         r={radius}
         fill="none"
-        stroke={over ? "var(--danger)" : "var(--accent)"}
+        stroke={over ? "var(--danger)" : "var(--tertiary)"}
         strokeWidth={stroke}
         strokeLinecap="round"
         strokeDasharray={circumference}

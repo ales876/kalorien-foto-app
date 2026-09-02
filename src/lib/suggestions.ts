@@ -1,5 +1,5 @@
 import { daysBetween, shiftDays, toDateKey } from "./date";
-import { db, type PlateDatabase } from "./db";
+import { db, type AppDatabase } from "./db";
 import type { FoodEntry, Meal, NutritionCandidate } from "./types";
 
 /** Wie weit zurück Vorschläge gesucht werden. */
@@ -78,8 +78,8 @@ export function rankSuggestions(
  *  gepflegt werden muss, sondern abgeleitet aus dem, was gegessen wird. */
 export async function getSuggestions(
   meal: Meal,
-  limit = 6,
-  database: PlateDatabase = db,
+  limit = 8,
+  database: AppDatabase = db,
 ): Promise<Suggestion[]> {
   const today = toDateKey();
   const since = shiftDays(today, -LOOKBACK_DAYS);
@@ -99,7 +99,7 @@ function copyOf(entry: FoodEntry, targetDate: string): FoodEntry {
 export async function findPreviousMeal(
   meal: Meal,
   before: string,
-  database: PlateDatabase = db,
+  database: AppDatabase = db,
 ): Promise<{ date: string; entries: FoodEntry[] } | null> {
   const candidates = await database.entries
     .where("date")
@@ -122,7 +122,7 @@ export async function copyMeal(
   from: string,
   meal: Meal,
   to: string,
-  database: PlateDatabase = db,
+  database: AppDatabase = db,
 ): Promise<number> {
   const entries = await database.entries
     .where("date")
@@ -137,7 +137,7 @@ export async function copyMeal(
 export async function copyDay(
   from: string,
   to: string,
-  database: PlateDatabase = db,
+  database: AppDatabase = db,
 ): Promise<number> {
   const entries = await database.entries.where("date").equals(from).toArray();
   if (entries.length === 0) return 0;
