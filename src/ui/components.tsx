@@ -127,15 +127,15 @@ export function MacroBar({ totals }: { totals: Totals }) {
       <div className="macro-legend">
         <span>
           <i className="macro-dot" style={{ background: MACRO_COLORS.protein }} />
-          Eiweiß {Math.round(totals.protein)} g
+          PROTEINE {Math.round(totals.protein)} g
         </span>
         <span>
           <i className="macro-dot" style={{ background: MACRO_COLORS.carbs }} />
-          Kohlenh. {Math.round(totals.carbs)} g
+          KH {Math.round(totals.carbs)} g
         </span>
         <span>
           <i className="macro-dot" style={{ background: MACRO_COLORS.fat }} />
-          Fett {Math.round(totals.fat)} g
+          FETT {Math.round(totals.fat)} g
         </span>
       </div>
     </>

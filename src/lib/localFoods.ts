@@ -7,7 +7,7 @@ interface IndexEntry {
   n: string; // Name
   b: string; // Marke
   k: number; // kcal / 100 g
-  p: number; // Eiweiß
+  p: number; // Proteine
   ch: number; // Kohlenhydrate
   f: number; // Fett
 }

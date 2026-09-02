@@ -34,6 +34,10 @@ export function TodayScreen() {
     [] as FoodEntry[],
   );
   const settings = useLiveQuery(() => getSettings(), []);
+  const activity = useLiveQuery(
+    () => db.activities.where("date").equals(dateKey).first(),
+    [dateKey],
+  );
 
   const totals = sumTotals(entries);
   const goal = settings?.kcalGoal ?? 2000;
@@ -97,6 +101,15 @@ export function TodayScreen() {
           </div>
         </div>
         <MacroBar totals={totals} />
+
+        {activity && (
+          <div className="activity-line">
+            <span>Aktive Energie</span>
+            <span className="row-value">
+              {formatNumber(activity.kcal)} kcal
+            </span>
+          </div>
+        )}
       </Card>
 
       {MEALS.map((meal) => {
@@ -222,8 +235,8 @@ function EntryRow({ entry }: { entry: FoodEntry }) {
             {formatNumber(entry.grams)} g
           </span>
           <span className="macro-inline">
-            <b>{formatNumber(totals.protein)}</b> E
-            <b>{formatNumber(totals.carbs)}</b> K
+            <b>{formatNumber(totals.protein)}</b> P
+            <b>{formatNumber(totals.carbs)}</b> KH
             <b>{formatNumber(totals.fat)}</b> F
           </span>
         </div>

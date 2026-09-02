@@ -9,6 +9,7 @@ import {
   IconBody,
   IconCamera,
   IconChevron,
+  IconReports,
   IconSearch,
 } from "../../ui/icons";
 import { PhotoFlow } from "./PhotoFlow";
@@ -16,13 +17,21 @@ import { SearchFlow } from "./SearchFlow";
 import { ConfirmStep } from "./ConfirmStep";
 import { QuickPicks } from "./QuickPicks";
 import { WeightFlow } from "./WeightFlow";
+import { ActivityFlow } from "./ActivityFlow";
 
 // Die Scanner-Bibliothek wiegt einiges und wird nur beim Barcode gebraucht.
 const BarcodeFlow = lazy(() =>
   import("./BarcodeFlow").then((m) => ({ default: m.BarcodeFlow })),
 );
 
-type Mode = "choose" | "photo" | "barcode" | "search" | "quick" | "weight";
+type Mode =
+  | "choose"
+  | "photo"
+  | "barcode"
+  | "search"
+  | "quick"
+  | "weight"
+  | "activity";
 
 const TITLES: Record<Mode, string> = {
   choose: "Hinzufügen",
@@ -31,6 +40,7 @@ const TITLES: Record<Mode, string> = {
   barcode: "Barcode scannen",
   search: "Produkt suchen",
   weight: "Gewicht & Maße",
+  activity: "Aktivität erfassen",
 };
 
 export function AddSheet({
@@ -81,6 +91,13 @@ export function AddSheet({
             hint="Wiegen und messen"
             onClick={() => setMode("weight")}
           />
+          <ChoiceButton
+            Icon={IconReports}
+            color="var(--meal-snack)"
+            label="Aktivität erfassen"
+            hint="Aktive Energie aus Health"
+            onClick={() => setMode("activity")}
+          />
         </>
       )}
 
@@ -95,6 +112,7 @@ export function AddSheet({
       )}
       {mode === "search" && <SearchFlow onSaved={onClose} />}
       {mode === "weight" && <WeightFlow onSaved={onClose} />}
+      {mode === "activity" && <ActivityFlow onSaved={onClose} />}
 
       {mode !== "choose" && (
         <button className="btn btn-ghost back-btn" onClick={() => setMode("choose")}>

@@ -47,10 +47,29 @@ export interface BodyMeasurement {
   waistCm?: number;
 }
 
+/** Die Mifflin-St-Jeor-Formel kennt nur zwei Varianten. Das ist eine
+ *  Eigenschaft der Formel, keine Aussage über Menschen. */
+export type FormulaSex = "m" | "w";
+
+/** Verbrauch durch Bewegung, aus der Health-App übertragen.
+ *  Bewusst getrennt von der Energiebilanz: der gemessene
+ *  Erhaltungsbedarf enthält die Bewegung bereits, eine Verrechnung
+ *  würde sie doppelt zählen. */
+export interface Activity {
+  id?: number;
+  date: string;
+  timestamp: number;
+  kcal: number;
+  note?: string;
+}
+
 export interface Settings {
   id: string;
   apiKey: string;
   palette: string;
+  heightCm?: number;
+  birthYear?: number;
+  sex?: FormulaSex;
   kcalGoal: number;
   proteinGoal: number;
   carbsGoal: number;

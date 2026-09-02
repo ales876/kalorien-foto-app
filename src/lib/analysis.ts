@@ -1,4 +1,4 @@
-import type { BodyMeasurement, FoodEntry } from "./types";
+import type { BodyMeasurement, FoodEntry, FormulaSex } from "./types";
 import { sumTotals, toDateKey } from "./nutrition";
 
 /** Rund 7000 kcal entsprechen einem Kilogramm Körperfett — die übliche
@@ -141,4 +141,46 @@ function daysBetween(from: string, to: string): number {
   const a = new Date(`${from}T00:00:00`);
   const b = new Date(`${to}T00:00:00`);
   return Math.round((b.getTime() - a.getTime()) / 86_400_000);
+}
+
+/** Grundumsatz nach Mifflin-St Jeor — was der Körper in völliger Ruhe
+ *  verbraucht. Alles darüber kommt durch Bewegung und Verdauung dazu. */
+export function computeBMR(params: {
+  weightKg: number;
+  heightCm: number;
+  age: number;
+  sex: FormulaSex;
+}): number {
+  const base =
+    10 * params.weightKg + 6.25 * params.heightCm - 5 * params.age;
+  return params.sex === "m" ? base + 5 : base - 161;
+}
+
+export interface DeficitAssessment {
+  deficit: number;
+  /** Rechnerische Gewichtsänderung pro Woche. */
+  kgPerWeek: number;
+  /** Liegt das Ziel unter dem Grundumsatz? */
+  belowBMR: boolean;
+  label: "moderat" | "deutlich" | "aggressiv" | "Aufbau" | "Erhaltung";
+}
+
+/** Ordnet ein Kaloriendefizit ein — rein rechnerisch, ohne Empfehlung. */
+export function assessDeficit(
+  goal: number,
+  maintenance: number,
+  bmr?: number,
+): DeficitAssessment {
+  const deficit = maintenance - goal;
+  const kgPerWeek = (deficit * 7) / KCAL_PRO_KG;
+  const belowBMR = bmr !== undefined && goal < bmr;
+
+  let label: DeficitAssessment["label"];
+  if (deficit < -100) label = "Aufbau";
+  else if (deficit <= 100) label = "Erhaltung";
+  else if (deficit <= 350) label = "moderat";
+  else if (deficit <= 600) label = "deutlich";
+  else label = "aggressiv";
+
+  return { deficit, kgPerWeek, belowBMR, label };
 }
