@@ -20,7 +20,7 @@
   --hairline: #e8e8e4;
 
   /* Jeder Bereich behält seine Farbe, auch inaktiv. */
-  --tab-today: #f0b429;
+  --tab-today: #a98ad4; /* Flieder wie der Fortschrittsring — kein weiteres Gelb */
   --tab-body: #4a90d9;
   --tab-reports: #35b37e;
   --tab-more: #9aa0a6;
