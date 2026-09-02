@@ -78,7 +78,7 @@ export function rankSuggestions(
  *  gepflegt werden muss, sondern abgeleitet aus dem, was gegessen wird. */
 export async function getSuggestions(
   meal: Meal,
-  limit = 6,
+  limit = 8,
   database: AppDatabase = db,
 ): Promise<Suggestion[]> {
   const today = toDateKey();

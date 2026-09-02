@@ -45,42 +45,36 @@ const CHOICES: {
   Icon: IconComponent;
   color: string;
   label: string;
-  hint: string;
 }[] = [
   {
     mode: "photo",
     Icon: IconCamera,
     color: "var(--tab-today)",
     label: "Foto vom Essen",
-    hint: "Zutaten und Menge schätzen",
   },
   {
     mode: "barcode",
     Icon: IconBarcode,
     color: "var(--tab-body)",
     label: "Barcode scannen",
-    hint: "Verpackte Produkte",
   },
   {
     mode: "search",
     Icon: IconSearch,
     color: "var(--tab-reports)",
     label: "Produkt suchen",
-    hint: "Name oder Marke",
   },
   {
     mode: "weight",
     Icon: IconBody,
     color: "var(--tab-body)",
     label: "Gewicht & Maße",
-    hint: "Wiegen und messen",
   },
   {
     mode: "activity",
     Icon: IconActivity,
     color: "var(--meal-snack)",
     label: "Aktivität erfassen",
-    hint: "Aktive Energie aus Health",
   },
 ];
 
@@ -144,7 +138,7 @@ function AddFlow({
         {mode === "choose" && (
           <>
             <QuickPicks meal={guessMeal()} onPick={pick} />
-            {CHOICES.map(({ mode: target, Icon, color, label, hint }) => (
+            {CHOICES.map(({ mode: target, Icon, color, label }) => (
               <button
                 type="button"
                 className="choice"
@@ -156,7 +150,6 @@ function AddFlow({
                 </span>
                 <span className="choice-text">
                   <span className="choice-label">{label}</span>
-                  <span className="row-sub">{hint}</span>
                 </span>
                 <IconChevron size={17} className="choice-chevron" />
               </button>
