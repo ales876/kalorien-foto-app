@@ -1,24 +1,13 @@
 export type Meal = "fruehstueck" | "mittag" | "abend" | "snack";
 
-export interface MealInfo {
-  id: Meal;
-  label: string;
-  /** CSS-Variable — jede Mahlzeit behält ihre Farbe, auch inaktiv. */
-  color: string;
-}
-
-export const MEALS: readonly MealInfo[] = [
+/** Farben je Mahlzeit — wie bei Things bekommt jeder Bereich seinen
+ *  eigenen Akzent, damit man ihn im Vorbeiscrollen wiedererkennt. */
+export const MEALS: { id: Meal; label: string; color: string }[] = [
   { id: "fruehstueck", label: "Frühstück", color: "var(--meal-morning)" },
   { id: "mittag", label: "Mittag", color: "var(--meal-noon)" },
   { id: "abend", label: "Abend", color: "var(--meal-evening)" },
   { id: "snack", label: "Snack", color: "var(--meal-snack)" },
 ];
-
-export const MEAL_IDS = MEALS.map((meal) => meal.id) as [Meal, ...Meal[]];
-
-export function mealLabel(meal: Meal): string {
-  return MEALS.find((m) => m.id === meal)?.label ?? meal;
-}
 
 export type EntrySource =
   | "photo"
@@ -29,22 +18,11 @@ export type EntrySource =
    *  Lebensmittel und deshalb nicht als Vorschlag brauchbar. */
   | "import";
 
-export const ENTRY_SOURCES: readonly EntrySource[] = [
-  "photo",
-  "barcode",
-  "search",
-  "manual",
-  "import",
-];
-
-/** Ein Eintrag im Ernährungstagebuch.
- *
- *  Invariante: Nährwerte liegen IMMER pro 100 g, die Grammzahl ist der
- *  einzige veränderliche Mengenwert. Eine nachträgliche Korrektur der
- *  Menge rechnet Kalorien und Makros dadurch automatisch neu. */
+/** Ein Eintrag im Ernährungstagebuch. Nährwerte immer pro 100 g gespeichert,
+ *  damit eine spätere Gramm-Korrektur alles automatisch neu berechnet. */
 export interface FoodEntry {
   id?: number;
-  /** Lokales Datum als YYYY-MM-DD (nie toISOString — das wäre UTC). */
+  /** Lokales Datum als YYYY-MM-DD — Basis für alle Tagesauswertungen. */
   date: string;
   timestamp: number;
   meal: Meal;
@@ -61,7 +39,6 @@ export interface FoodEntry {
   thumb?: string;
 }
 
-/** Höchstens eine Messung pro Tag. */
 export interface BodyMeasurement {
   id?: number;
   date: string;
@@ -70,9 +47,14 @@ export interface BodyMeasurement {
   waistCm?: number;
 }
 
-/** Aktive Energie aus der Health-App, höchstens ein Wert pro Tag.
- *  Bewusst NICHT gegen die Kalorien verrechnet: der gemessene
- *  Erhaltungsbedarf enthält die Bewegung bereits. */
+/** Die Mifflin-St-Jeor-Formel kennt nur zwei Varianten. Das ist eine
+ *  Eigenschaft der Formel, keine Aussage über Menschen. */
+export type FormulaSex = "m" | "w";
+
+/** Verbrauch durch Bewegung, aus der Health-App übertragen.
+ *  Bewusst getrennt von der Energiebilanz: der gemessene
+ *  Erhaltungsbedarf enthält die Bewegung bereits, eine Verrechnung
+ *  würde sie doppelt zählen. */
 export interface Activity {
   id?: number;
   date: string;
@@ -81,18 +63,10 @@ export interface Activity {
   note?: string;
 }
 
-/** Die Mifflin-St-Jeor-Formel kennt nur zwei Varianten. Das ist eine
- *  Eigenschaft der Formel, keine Aussage über Menschen — in der
- *  Oberfläche heißt das Feld deshalb „Formel-Variante". */
-export type FormulaSex = "m" | "w";
-
-export type PaletteId = "gelb" | "salbei" | "terrakotta" | "tinte";
-
 export interface Settings {
-  id: "settings";
-  /** Anthropic-Key, nur lokal in IndexedDB. */
+  id: string;
   apiKey: string;
-  palette: PaletteId;
+  palette: string;
   heightCm?: number;
   birthYear?: number;
   sex?: FormulaSex;
@@ -112,10 +86,7 @@ export const DEFAULT_SETTINGS: Settings = {
   fatGoal: 70,
 };
 
-export type Confidence = "hoch" | "mittel" | "niedrig";
-
-/** Was Suche, Barcode-Scan, Foto-Analyse und Vorschläge einheitlich
- *  liefern — der ConfirmStep macht daraus einen FoodEntry. */
+/** Was Suche, Barcode-Scan und Foto-Analyse einheitlich zurückgeben. */
 export interface NutritionCandidate {
   name: string;
   brand?: string;
@@ -129,5 +100,5 @@ export interface NutritionCandidate {
   source: EntrySource;
   thumb?: string;
   /** Nur Foto-Analyse: wie sicher das Modell die Zutat erkannt hat. */
-  confidence?: Confidence;
+  confidence?: "hoch" | "mittel" | "niedrig";
 }

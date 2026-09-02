@@ -1,38 +1,39 @@
 import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, upsertMeasurement } from "../../lib/db";
-import { formatDecimal, parsePositive } from "../../lib/format";
-import { Notice } from "../../ui/Notice";
+import { formatDecimal, toDateKey } from "../../lib/nutrition";
+import { Notice } from "../../ui/components";
 
 /** Gewicht und Bauchumfang werden wie Essen über das Plus erfasst —
- *  ein Ort zum Eintragen, egal worum es geht. Ein Wert pro Tag. */
-export function WeightFlow({
-  date,
-  onSaved,
-}: {
-  date: string;
-  onSaved: () => void;
-}) {
+ *  ein Ort zum Eintragen, egal worum es geht. */
+export function WeightFlow({ onSaved }: { onSaved: () => void }) {
+  const today = toDateKey();
   const existing = useLiveQuery(
-    () => db.measurements.where("date").equals(date).first(),
-    [date],
+    () => db.measurements.where("date").equals(today).first(),
+    [today],
   );
+
   const [weight, setWeight] = useState("");
   const [waist, setWaist] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const weightValue = parsePositive(weight);
-  const waistValue = parsePositive(waist);
+  const parse = (value: string) => {
+    const num = Number(value.replace(",", "."));
+    return value.trim() && Number.isFinite(num) && num > 0 ? num : undefined;
+  };
+
+  const weightValue = parse(weight);
+  const waistValue = parse(waist);
   const nothingEntered = weightValue === undefined && waistValue === undefined;
 
   async function save() {
     if (nothingEntered) return;
     setSaving(true);
     try {
-      const values: { weightKg?: number; waistCm?: number } = {};
-      if (weightValue !== undefined) values.weightKg = weightValue;
-      if (waistValue !== undefined) values.waistCm = waistValue;
-      await upsertMeasurement(date, values);
+      await upsertMeasurement(today, {
+        weightKg: weightValue,
+        waistCm: waistValue,
+      });
       onSaved();
     } finally {
       setSaving(false);
@@ -40,27 +41,19 @@ export function WeightFlow({
   }
 
   return (
-    <form
-      onSubmit={(event) => {
-        event.preventDefault();
-        void save();
-      }}
-    >
+    <>
       {existing && (
         <Notice kind="info">
-          Für diesen Tag schon erfasst:{" "}
-          {[
-            existing.weightKg ? `${formatDecimal(existing.weightKg)} kg` : "",
-            existing.waistCm ? `${formatDecimal(existing.waistCm)} cm` : "",
-          ]
-            .filter(Boolean)
-            .join(" · ")}{" "}
-          — neue Werte überschreiben den Eintrag.
+          Für heute schon erfasst:{" "}
+          {existing.weightKg ? `${formatDecimal(existing.weightKg)} kg` : ""}
+          {existing.weightKg && existing.waistCm ? " · " : ""}
+          {existing.waistCm ? `${formatDecimal(existing.waistCm)} cm` : ""} —
+          neue Werte überschreiben den Eintrag.
         </Notice>
       )}
 
-      <div className="split">
-        <div className="field">
+      <div style={{ display: "flex", gap: 12 }}>
+        <div className="field" style={{ flex: 1 }}>
           <label className="field-label" htmlFor="weight">
             Gewicht (kg)
           </label>
@@ -76,7 +69,7 @@ export function WeightFlow({
             onChange={(e) => setWeight(e.target.value)}
           />
         </div>
-        <div className="field">
+        <div className="field" style={{ flex: 1 }}>
           <label className="field-label" htmlFor="waist">
             Bauchumfang (cm)
           </label>
@@ -93,9 +86,9 @@ export function WeightFlow({
         </div>
       </div>
 
-      <button type="submit" className="btn" disabled={nothingEntered || saving}>
+      <button className="btn" onClick={save} disabled={nothingEntered || saving}>
         {saving ? "Speichern …" : "Speichern"}
       </button>
-    </form>
+    </>
   );
 }

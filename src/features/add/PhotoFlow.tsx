@@ -1,47 +1,42 @@
 import { useRef, useState } from "react";
+import { analyzePhoto, downscaleToBase64 } from "../../lib/claude";
 import type { NutritionCandidate } from "../../lib/types";
-import { Loading } from "../../ui/Loading";
-import { Notice } from "../../ui/Notice";
-import { IconCamera, IconImage } from "../../ui/icons";
+import { Loading, Notice } from "../../ui/components";
+import { IconCamera, IconSearch } from "../../ui/icons";
 import { ConfirmStep } from "./ConfirmStep";
 
 export function PhotoFlow({
   apiKey,
-  date,
   onSaved,
 }: {
   apiKey: string;
-  date: string;
   onSaved: () => void;
 }) {
   const cameraInput = useRef<HTMLInputElement>(null);
   const libraryInput = useRef<HTMLInputElement>(null);
+
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [result, setResult] = useState<{
-    candidates: NutritionCandidate[];
-    notes: string;
-  } | null>(null);
+  const [candidates, setCandidates] = useState<NutritionCandidate[] | null>(null);
+  const [notes, setNotes] = useState("");
 
   async function handleFile(file: File | undefined) {
     if (!file) return;
     setError("");
     setBusy(true);
     try {
-      // SDK und Bildverkleinerung erst laden, wenn wirklich ein Foto kommt.
-      const { analyzePhoto, downscaleToBase64 } =
-        await import("../../lib/vision");
       const base64 = await downscaleToBase64(file, 1024, 0.82);
       const analysis = await analyzePhoto(base64, apiKey);
       if (analysis.candidates.length === 0) {
         setError(analysis.notes || "Auf dem Foto war kein Essen erkennbar.");
         return;
       }
-      // Kleines Vorschaubild nur am ersten Eintrag — reicht fürs
-      // Wiedererkennen und hält die Datenbank schlank.
-      const first = analysis.candidates[0];
-      if (first) first.thumb = await downscaleToBase64(file, 100, 0.6);
-      setResult(analysis);
+      // Kleines Vorschaubild nur am ersten Eintrag — reicht fürs Wiedererkennen
+      // im Verlauf und hält die Datenbank schlank.
+      const thumb = await downscaleToBase64(file, 100, 0.6);
+      analysis.candidates[0].thumb = thumb;
+      setCandidates(analysis.candidates);
+      setNotes(analysis.notes);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Analyse fehlgeschlagen.");
     } finally {
@@ -51,26 +46,23 @@ export function PhotoFlow({
 
   if (!apiKey) {
     return (
-      <Notice kind="info">
-        Für die Foto-Analyse fehlt der Anthropic API-Key. Du kannst ihn unter
-        Mehr → Einstellungen hinterlegen.
+      <Notice>
+        Für die Foto-Analyse fehlt der Anthropic API-Key. Du kannst ihn in den
+        Einstellungen hinterlegen.
       </Notice>
     );
   }
 
-  if (result)
+  if (candidates) {
     return (
-      <ConfirmStep
-        candidates={result.candidates}
-        notes={result.notes}
-        date={date}
-        onSaved={onSaved}
-      />
+      <ConfirmStep candidates={candidates} notes={notes} onSaved={onSaved} />
     );
+  }
+
   if (busy) return <Loading label="Essen wird analysiert …" />;
 
   return (
-    <div className="stack">
+    <>
       {error && <Notice>{error}</Notice>}
       <input
         ref={cameraInput}
@@ -88,21 +80,20 @@ export function PhotoFlow({
         onChange={(e) => handleFile(e.target.files?.[0])}
       />
       <button
-        type="button"
         className="btn"
+        style={{ marginBottom: 10 }}
         onClick={() => cameraInput.current?.click()}
       >
         <IconCamera size={19} />
         Foto aufnehmen
       </button>
       <button
-        type="button"
         className="btn btn-secondary"
         onClick={() => libraryInput.current?.click()}
       >
-        <IconImage size={19} />
+        <IconSearch size={19} />
         Aus Fotos wählen
       </button>
-    </div>
+    </>
   );
 }

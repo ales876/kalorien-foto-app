@@ -1,9 +1,4 @@
-import {
-  formatDateKey,
-  longDate,
-  toDateKey,
-  weekdayShort,
-} from "../../lib/date";
+import { formatDateKey, toDateKey } from "../../lib/nutrition";
 import { IconBack, IconChevron } from "../../ui/icons";
 
 export interface DayStat {
@@ -13,8 +8,8 @@ export interface DayStat {
 }
 
 /** Wochenleiste als Kopfzeile: jeder Tag ein Ring, der zeigt, wie weit
- *  das Tagesziel gefüllt war. Antippen wechselt den Tag, Pfeile blättern
- *  Wochen, künftige Tage sind ausgegraut. */
+ *  das Tagesziel gefüllt war. Ersetzt Titel und Datumszeile — das Datum
+ *  steht ohnehin an jedem Tag. */
 export function WeekStrip({
   days,
   selected,
@@ -29,53 +24,58 @@ export function WeekStrip({
   onShiftWeek: (direction: -1 | 1) => void;
 }) {
   const today = toDateKey();
-  const lastDay = days[days.length - 1]?.date ?? selected;
+
+  const selectedDate = new Date(`${selected}T00:00:00`);
+  const label =
+    selected === today
+      ? "Heute"
+      : selectedDate.toLocaleDateString("de-DE", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+        });
 
   return (
     <header className="weekstrip">
-      <div className="week-label" aria-live="polite">
-        {selected === today ? "Heute" : longDate(selected)}
-      </div>
+      <div className="week-label">{label}</div>
+
       <div className="week-row">
-        <button
-          type="button"
-          className="week-nav"
-          onClick={() => onShiftWeek(-1)}
-          aria-label="Vorherige Woche"
-        >
-          <IconBack size={18} />
-        </button>
+      <button
+        className="week-nav"
+        onClick={() => onShiftWeek(-1)}
+        aria-label="Vorherige Woche"
+      >
+        <IconBack size={18} />
+      </button>
 
-        <div className="week-days">
-          {days.map((day) => (
-            <DayButton
-              key={day.date}
-              day={day}
-              goal={goal}
-              isSelected={day.date === selected}
-              isToday={day.date === today}
-              isFuture={day.date > today}
-              onSelect={onSelect}
-            />
-          ))}
-        </div>
+      <div className="week-days">
+        {days.map((day) => (
+          <DayButton
+            key={day.date}
+            day={day}
+            goal={goal}
+            isSelected={day.date === selected}
+            isToday={day.date === today}
+            isFuture={day.date > today}
+            onSelect={onSelect}
+          />
+        ))}
+      </div>
 
-        <button
-          type="button"
-          className="week-nav"
-          onClick={() => onShiftWeek(1)}
-          disabled={lastDay >= today}
-          aria-label="Nächste Woche"
-        >
-          <IconChevron size={18} />
-        </button>
+      <button
+        className="week-nav"
+        onClick={() => onShiftWeek(1)}
+        disabled={days[days.length - 1].date >= today}
+        aria-label="Nächste Woche"
+      >
+        <IconChevron size={18} />
+      </button>
       </div>
     </header>
   );
 }
 
-const RADIUS = 15.75; // 34 px Ring, 2,5 px stark
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+const WEEKDAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
 function DayButton({
   day,
@@ -92,18 +92,23 @@ function DayButton({
   isFuture: boolean;
   onSelect: (date: string) => void;
 }) {
+  const number = Number(day.date.slice(-2));
+  const weekday = WEEKDAYS[(new Date(`${day.date}T00:00:00`).getDay() + 6) % 7];
+
   const ratio = goal > 0 ? Math.min(day.kcal / goal, 1) : 0;
   const over = goal > 0 && day.kcal > goal * 1.05;
 
+  // Ring: 34px Durchmesser, 2.5px stark
+  const radius = 15.75;
+  const circumference = 2 * Math.PI * radius;
+
   return (
     <button
-      type="button"
       className="week-day"
       data-selected={isSelected}
       data-future={isFuture}
-      aria-pressed={isSelected}
-      aria-label={formatDateKey(day.date)}
       onClick={() => onSelect(day.date)}
+      aria-label={formatDateKey(day.date)}
     >
       <span className="week-circle">
         <svg width="34" height="34" aria-hidden="true">
@@ -112,7 +117,7 @@ function DayButton({
               <circle
                 cx="17"
                 cy="17"
-                r={RADIUS}
+                r={radius}
                 fill="none"
                 stroke="var(--surface-sunken)"
                 strokeWidth="2.5"
@@ -120,23 +125,23 @@ function DayButton({
               <circle
                 cx="17"
                 cy="17"
-                r={RADIUS}
+                r={radius}
                 fill="none"
                 stroke={over ? "var(--danger)" : "var(--accent)"}
                 strokeWidth="2.5"
                 strokeLinecap="round"
-                strokeDasharray={CIRCUMFERENCE}
-                strokeDashoffset={CIRCUMFERENCE * (1 - ratio)}
+                strokeDasharray={circumference}
+                strokeDashoffset={circumference * (1 - ratio)}
                 transform="rotate(-90 17 17)"
               />
             </>
           )}
         </svg>
         <span className="week-number" data-today={isToday}>
-          {Number(day.date.slice(-2))}
+          {number}
         </span>
       </span>
-      <span className="week-weekday">{weekdayShort(day.date)}</span>
+      <span className="week-weekday">{weekday}</span>
     </button>
   );
 }

@@ -28,10 +28,8 @@ const chunk = (type, data) => {
 };
 const png = (w, h, rgba) => {
   const ihdr = Buffer.alloc(13);
-  ihdr.writeUInt32BE(w, 0);
-  ihdr.writeUInt32BE(h, 4);
-  ihdr[8] = 8;
-  ihdr[9] = 6;
+  ihdr.writeUInt32BE(w, 0); ihdr.writeUInt32BE(h, 4);
+  ihdr[8] = 8; ihdr[9] = 6;
   const raw = Buffer.alloc((w * 4 + 1) * h);
   for (let y = 0; y < h; y++)
     rgba.copy(raw, y * (w * 4 + 1) + 1, y * w * 4, (y + 1) * w * 4);
@@ -55,9 +53,9 @@ const PROGRESS = 0.72; // Anteil des gefuellten Rings
 function render(size) {
   const rgba = Buffer.alloc(size * size * 4);
   const c = size / 2;
-  const corner = size * 0.225; // iOS-artige Rundung
-  const R = size * 0.295; // Ringradius
-  const w = size * 0.082; // halbe Ringstaerke
+  const corner = size * 0.225;          // iOS-artige Rundung
+  const R = size * 0.295;               // Ringradius
+  const w = size * 0.082;               // halbe Ringstaerke
   const endAngle = PROGRESS * Math.PI * 2;
 
   // Endpunkte fuer die runden Abschluesse
@@ -68,16 +66,14 @@ function render(size) {
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       const i = (y * size + x) * 4;
-      const px = x + 0.5,
-        py = y + 0.5;
+      const px = x + 0.5, py = y + 0.5;
 
       // Abgerundetes Quadrat
       const dx = Math.abs(px - c) - (c - corner);
       const dy = Math.abs(py - c) - (c - corner);
       const outside =
         Math.hypot(Math.max(dx, 0), Math.max(dy, 0)) +
-        Math.min(Math.max(dx, dy), 0) -
-        corner;
+        Math.min(Math.max(dx, dy), 0) - corner;
       const bg = cover(outside);
 
       // Ringband
@@ -90,10 +86,7 @@ function render(size) {
 
       // Gefuellter Bogen inklusive runder Enden
       let arc = a <= endAngle ? band : 0;
-      for (const [cx, cy] of [
-        [cap1x, cap1y],
-        [cap2x, cap2y],
-      ]) {
+      for (const [cx, cy] of [[cap1x, cap1y], [cap2x, cap2y]]) {
         arc = Math.max(arc, cover(Math.hypot(px - cx, py - cy) - w));
       }
       // Restliche Bahn als helle Spur — dunkel angedeutet wirkte

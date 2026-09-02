@@ -3,13 +3,12 @@ import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
 import { findByBarcode } from "../../lib/localFoods";
 import { lookupBarcode } from "../../lib/openfoodfacts";
 import type { NutritionCandidate } from "../../lib/types";
-import { Loading } from "../../ui/Loading";
-import { Notice } from "../../ui/Notice";
+import { Loading, Notice } from "../../ui/components";
 import { ConfirmStep } from "./ConfirmStep";
 
 const READER_ID = "reader";
 
-// Nur Symbologien, die auf Lebensmittelverpackungen vorkommen —
+// Nur die Symbologien, die auf Lebensmittelverpackungen vorkommen —
 // weniger Formate heißt spürbar schnelleres Erkennen.
 const FOOD_FORMATS = [
   Html5QrcodeSupportedFormats.EAN_13,
@@ -18,14 +17,10 @@ const FOOD_FORMATS = [
   Html5QrcodeSupportedFormats.UPC_E,
 ];
 
-export function BarcodeFlow({
-  date,
-  onSaved,
-}: {
-  date: string;
-  onSaved: () => void;
-}) {
+export function BarcodeFlow({ onSaved }: { onSaved: () => void }) {
+  const scannerRef = useRef<Html5Qrcode | null>(null);
   const handledRef = useRef(false);
+
   const [status, setStatus] = useState<"scanning" | "loading" | "done">(
     "scanning",
   );
@@ -37,11 +32,10 @@ export function BarcodeFlow({
       formatsToSupport: FOOD_FORMATS,
       verbose: false,
     });
-    let disposed = false;
+    scannerRef.current = scanner;
 
     async function handleBarcode(barcode: string) {
       await scanner.stop().catch(() => undefined);
-      if (disposed) return;
       setStatus("loading");
       try {
         // Lokaler Index zuerst — trifft bei gängigen Produkten sofort.
@@ -54,7 +48,7 @@ export function BarcodeFlow({
             : "Produkt konnte nicht geladen werden.",
         );
       } finally {
-        if (!disposed) setStatus("done");
+        setStatus("done");
       }
     }
 
@@ -73,7 +67,6 @@ export function BarcodeFlow({
         },
       )
       .catch((err: unknown) => {
-        if (disposed) return;
         setError(
           err instanceof Error
             ? `Kamera nicht verfügbar: ${err.message}`
@@ -82,22 +75,23 @@ export function BarcodeFlow({
       });
 
     return () => {
-      disposed = true;
       // stop() wirft, wenn der Scanner nie lief — hier bewusst verschluckt.
       scanner.stop().catch(() => undefined);
     };
   }, []);
 
-  if (candidate)
-    return (
-      <ConfirmStep candidates={[candidate]} date={date} onSaved={onSaved} />
-    );
+  if (candidate) {
+    return <ConfirmStep candidates={[candidate]} onSaved={onSaved} />;
+  }
 
   return (
     <>
       {error && <Notice>{error}</Notice>}
       {status === "loading" && <Loading label="Produkt wird geladen …" />}
-      <div id={READER_ID} hidden={status !== "scanning"} />
+      <div
+        id={READER_ID}
+        style={{ display: status === "scanning" ? "block" : "none" }}
+      />
       {status === "scanning" && !error && (
         <p className="empty" style={{ textAlign: "center" }}>
           Barcode ins Bild halten
