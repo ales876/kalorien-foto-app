@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { searchLocal } from "../../lib/localFoods";
 import { searchProducts } from "../../lib/openfoodfacts";
 import type { NutritionCandidate } from "../../lib/types";
 import { Loading, Notice } from "../../ui/components";
@@ -10,12 +11,24 @@ export function SearchFlow({ onSaved }: { onSaved: () => void }) {
   const [selected, setSelected] = useState<NutritionCandidate | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [usedFallback, setUsedFallback] = useState(false);
 
   async function runSearch() {
     if (query.trim().length < 2) return;
     setBusy(true);
     setError("");
+    setUsedFallback(false);
     try {
+      // Zuerst der mitgelieferte Index: sofort da, auch offline. Fehlt er
+      // (erster Start ohne Netz, Deploy ohne Index), zählt das wie „nichts
+      // gefunden" — die Suche darf daran nicht scheitern.
+      const local = await searchLocal(query.trim()).catch(() => []);
+      if (local.length > 0) {
+        setResults(local);
+        return;
+      }
+      // Nur wenn lokal nichts passt, die (wacklige) Online-Suche versuchen.
+      setUsedFallback(true);
       setResults(await searchProducts(query.trim()));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Suche fehlgeschlagen.");
@@ -55,36 +68,43 @@ export function SearchFlow({ onSaved }: { onSaved: () => void }) {
       {busy && <Loading label="Suche läuft …" />}
 
       {results && !busy && (
-        <div className="card">
-          {results.length === 0 && (
-            <div className="empty">
-              Nichts gefunden. Andere Schreibweise oder Markenname versuchen.
-            </div>
+        <>
+          {usedFallback && results.length > 0 && (
+            <Notice kind="info">
+              Nicht im lokalen Index — Treffer kommen live von Open Food Facts.
+            </Notice>
           )}
-          {results.map((result, index) => (
-            <button
-              key={`${result.barcode}-${index}`}
-              className="row"
-              style={{
-                width: "100%",
-                border: "none",
-                borderTop: index === 0 ? "none" : "1px solid var(--hairline)",
-                background: "transparent",
-                textAlign: "left",
-              }}
-              onClick={() => setSelected(result)}
-            >
-              <div className="row-main">
-                <div className="row-title">{result.name}</div>
-                <div className="row-sub">
-                  {result.brand ? `${result.brand} · ` : ""}
-                  {Math.round(result.kcalPer100g)} kcal / 100 g
-                </div>
+          <div className="card">
+            {results.length === 0 && (
+              <div className="empty">
+                Nichts gefunden. Andere Schreibweise oder Markenname versuchen.
               </div>
-              <span className="row-sub">›</span>
-            </button>
-          ))}
-        </div>
+            )}
+            {results.map((result, index) => (
+              <button
+                key={`${result.barcode}-${index}`}
+                className="row"
+                style={{
+                  width: "100%",
+                  border: "none",
+                  borderTop: index === 0 ? "none" : "1px solid var(--hairline)",
+                  background: "transparent",
+                  textAlign: "left",
+                }}
+                onClick={() => setSelected(result)}
+              >
+                <div className="row-main">
+                  <div className="row-title">{result.name}</div>
+                  <div className="row-sub">
+                    {result.brand ? `${result.brand} · ` : ""}
+                    {Math.round(result.kcalPer100g)} kcal / 100 g
+                  </div>
+                </div>
+                <span className="row-sub">›</span>
+              </button>
+            ))}
+          </div>
+        </>
       )}
     </>
   );

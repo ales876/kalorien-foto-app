@@ -45,6 +45,17 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
         runtimeCaching: [
           {
+            // Der Produktindex ändert sich nur beim Deploy — einmal laden,
+            // danach aus dem Cache. Hält die Suche offline funktionsfähig.
+            urlPattern: /de-foods\.json$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "produktindex",
+              expiration: { maxEntries: 2, maxAgeSeconds: 60 * 60 * 24 * 90 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
             // Produktdaten dürfen ruhig aus dem Cache kommen, wenn offline.
             urlPattern: /^https:\/\/(world|search)\.openfoodfacts\.org\/.*/i,
             handler: "NetworkFirst",

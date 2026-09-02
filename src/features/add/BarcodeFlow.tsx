@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
+import { findByBarcode } from "../../lib/localFoods";
 import { lookupBarcode } from "../../lib/openfoodfacts";
 import type { NutritionCandidate } from "../../lib/types";
 import { Loading, Notice } from "../../ui/components";
@@ -37,7 +38,9 @@ export function BarcodeFlow({ onSaved }: { onSaved: () => void }) {
       await scanner.stop().catch(() => undefined);
       setStatus("loading");
       try {
-        setCandidate(await lookupBarcode(barcode));
+        // Lokaler Index zuerst — trifft bei gängigen Produkten sofort.
+        const local = await findByBarcode(barcode).catch(() => null);
+        setCandidate(local ?? (await lookupBarcode(barcode)));
       } catch (err) {
         setError(
           err instanceof Error

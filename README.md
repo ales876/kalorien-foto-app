@@ -15,7 +15,7 @@ Live: https://ales876.github.io/kalorien-foto-app/
 | Datenhaltung | Dexie / IndexedDB (rein lokal) |
 | Charts | Recharts |
 | Barcode | html5-qrcode |
-| Produktdaten | Open Food Facts |
+| Produktdaten | Open Food Facts (lokaler DE-Index + Live-Barcode) |
 | Foto-Analyse | Claude Vision (Anthropic API) |
 
 ## Entwicklung
@@ -54,15 +54,36 @@ Nährwerte werden **immer pro 100 g** gespeichert. Die Grammzahl ist der
 einzige veränderliche Wert — dadurch rechnet eine nachträgliche Korrektur
 Kalorien und Makros automatisch neu.
 
+## Produktdaten
+
+Die Live-Suche von Open Food Facts ist für eine Browser-App unbrauchbar:
+die moderne Such-API (`search.openfoodfacts.org`) sendet keine CORS-Header,
+der veraltete Ersatz (`cgi/search.pl`) antwortet unter Last regelmäßig mit
+503 und ist auf 10 Anfragen/Minute begrenzt.
+
+Deshalb liegt die Suche lokal: `scripts/build-de-index.py` zieht die
+populärsten deutschen Produkte mit vollständigen Nährwerten aus dem
+Open-Food-Facts-Datensatz (Parquet auf Hugging Face, per DuckDB gefiltert)
+nach `public/de-foods.json`. Die App lädt diese Datei beim ersten Suchlauf,
+danach liegt sie im Service-Worker-Cache — Suche funktioniert damit sofort
+und offline.
+
+Aktualisiert wird der Index monatlich durch
+`.github/workflows/refresh-index.yml`; manuell geht es per
+`python scripts/build-de-index.py`.
+
+Reihenfolge zur Laufzeit:
+
+1. **Suche** → lokaler Index; nur wenn dort nichts passt, die Live-Suche.
+2. **Barcode** → lokaler Index; sonst der Live-Produktendpunkt
+   (der ist CORS-fähig und stabil).
+
 ## Bekannte Einschränkungen
 
-- **Produktsuche ist wackelig.** Die offizielle Volltextsuche
-  (`search.openfoodfacts.org`) sendet keine CORS-Header und ist aus einer
-  reinen Browser-App nicht erreichbar. Genutzt wird deshalb der offiziell
-  veraltete Endpunkt `cgi/search.pl`, der unter Last mit 503 antwortet;
-  die App versucht es bis zu dreimal. Der Barcode-Lookup ist davon nicht
-  betroffen und läuft stabil.
-- **Datenqualität schwankt.** Open Food Facts ist crowd-sourced; Treffer
-  ohne hinterlegte Nährwerte werden ausgefiltert.
+- **Datenqualität schwankt.** Open Food Facts ist crowd-sourced; Einträge
+  ohne hinterlegte Nährwerte fliegen beim Indexbau und in der Live-Suche
+  raus.
+- **Der Index deckt nicht alles ab.** Er enthält die populärsten deutschen
+  Produkte; alles andere landet beim Live-Fallback.
 - **Der API-Key liegt lokal im Browser** (IndexedDB), nicht im Code. Für
   eine private Ein-Personen-App ist das in Ordnung.
