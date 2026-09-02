@@ -2,9 +2,9 @@
    Haarlinien statt Rahmen, weiche Schatten, ein Akzent. */
 :root {
   /* Akzent wird beim Start aus der gewählten Palette überschrieben. */
-  --accent: #ffd400;
-  --accent-soft: #fff6cc;
-  --accent-deep: #e6be00;
+  --accent: #ffe680;
+  --accent-soft: #fff8d6;
+  --accent-deep: #e3c65a;
   --on-accent: #1c1c1e;
   --complement: #4759c9;
   --complement-soft: #e8eafb;

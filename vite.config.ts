@@ -27,7 +27,7 @@ export default defineConfig({
         description:
           "Kalorien und Makros per Foto, Barcode oder Suche erfassen",
         lang: "de",
-        theme_color: "#FFD400",
+        theme_color: "#FFE680",
         background_color: "#FAFAF8",
         display: "standalone",
         orientation: "portrait",

@@ -22,11 +22,11 @@ export interface Palette {
 export const PALETTES: readonly Palette[] = [
   {
     id: "gelb",
-    label: "Sonnengelb",
-    hint: "Wach und freundlich",
-    accent: "#ffd400",
-    accentSoft: "#fff6cc",
-    accentDeep: "#e6be00",
+    label: "Vanille",
+    hint: "Weich und freundlich",
+    accent: "#ffe680",
+    accentSoft: "#fff8d6",
+    accentDeep: "#e3c65a",
     onAccent: "#1c1c1e",
     complement: "#4759c9",
     complementSoft: "#e8eafb",

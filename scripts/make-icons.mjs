@@ -47,7 +47,7 @@ const clamp01 = (v) => Math.max(0, Math.min(1, v));
 /** Weiche Kante: Abstand zur Sollkante in Deckung umrechnen. */
 const cover = (d) => clamp01(0.5 - d);
 
-const GELB = [255, 212, 0];
+const GELB = [255, 230, 128]; // Vanille
 // Pastell-Flieder fuer den gefuellten Teil des Rings.
 const FLIEDER = [196, 167, 231];
 const PROGRESS = 0.72; // Anteil des gefuellten Rings
