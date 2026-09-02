@@ -426,7 +426,7 @@
   border: none;
   border-radius: 50%;
   background: var(--accent);
-  color: var(--on-accent);
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;

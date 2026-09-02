@@ -48,8 +48,8 @@ const clamp01 = (v) => Math.max(0, Math.min(1, v));
 const cover = (d) => clamp01(0.5 - d);
 
 const GELB = [255, 212, 0];
-// Gegenfarbe zum Gelb — dieselbe, die in der App die Auswahl traegt.
-const KOMPLEMENT = [71, 89, 201];
+// Pastell-Flieder fuer den gefuellten Teil des Rings.
+const FLIEDER = [196, 167, 231];
 const PROGRESS = 0.72; // Anteil des gefuellten Rings
 
 function render(size) {
@@ -104,7 +104,7 @@ function render(size) {
       const hell = clamp01(track) * bg * (1 - ink);
       for (let k = 0; k < 3; k++) {
         const grund = GELB[k] * (1 - hell) + 255 * hell;
-        rgba[i + k] = Math.round(grund * (1 - ink) + KOMPLEMENT[k] * ink);
+        rgba[i + k] = Math.round(grund * (1 - ink) + FLIEDER[k] * ink);
       }
       rgba[i + 3] = Math.round(bg * 255);
     }
