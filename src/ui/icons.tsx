@@ -156,12 +156,12 @@ export function IconMoon(props: IconProps) {
 export function IconSnack(props: IconProps) {
   return (
     <Filled {...props}>
-      <path d="M12 8.2c1.7-2.1 4.4-2.6 6-1 1.9 1.9 1.3 5.8-1.1 8.9-1.3 1.7-2.9 3.1-4.9 3.1s-3.6-1.4-4.9-3.1C4.7 13 4.1 9.1 6 7.2c1.6-1.6 4.3-1.1 6 1z" />
+      <path d="M12 7.4c1.9-1.4 4.3-1.5 5.7-.1 2 2 1.4 5.9-1 9-1.3 1.7-2.8 3.1-4.7 3.1s-3.4-1.4-4.7-3.1c-2.4-3.1-3-7-1-9 1.4-1.4 3.8-1.3 5.7.1z" />
       <path
-        d="M12 8.2V6a2.5 2.5 0 0 1 2.5-2.5"
+        d="M12 7.4V4.6a2.4 2.4 0 0 1 2.4-2.4"
         fill="none"
         stroke="#fff"
-        strokeWidth="1.5"
+        strokeWidth="1.6"
         strokeLinecap="round"
       />
     </Filled>
@@ -251,6 +251,16 @@ export function IconTrash(props: IconProps) {
       <path d="M4.5 7h15" />
       <path d="M9.5 7V5.5A1.5 1.5 0 0 1 11 4h2a1.5 1.5 0 0 1 1.5 1.5V7" />
       <path d="M6.5 7l.9 12.1A1.5 1.5 0 0 0 8.9 20.5h6.2a1.5 1.5 0 0 0 1.5-1.4L17.5 7" />
+    </Outline>
+  );
+}
+
+export function IconUpload(props: IconProps) {
+  return (
+    <Outline {...props}>
+      <path d="M12 15V4" />
+      <path d="M8 7.5l4-4 4 4" />
+      <path d="M5 19h14" />
     </Outline>
   );
 }

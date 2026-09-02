@@ -1,8 +1,15 @@
+import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, getSettings } from "../../lib/db";
-import { entryTotals, formatNumber, sumTotals, toDateKey } from "../../lib/nutrition";
+import {
+  entryTotals,
+  formatNumber,
+  sumTotals,
+  toDateKey,
+} from "../../lib/nutrition";
 import { MEALS, type FoodEntry } from "../../lib/types";
-import { Card, KcalRing, MacroBar, ScreenHeader } from "../../ui/components";
+import { Card, KcalRing, MacroBar } from "../../ui/components";
+import { IconBack, IconChevron } from "../../ui/icons";
 import {
   IconBarcodeLine,
   IconCameraLine,
@@ -12,10 +19,15 @@ import {
 import { MEAL_ICONS } from "../../ui/mealIcons";
 
 export function TodayScreen() {
-  const today = toDateKey();
+  // 0 = heute, 1 = gestern, … Damit lassen sich auch importierte Tage
+  // im Detail ansehen, nicht nur als Kurve im Bericht.
+  const [daysBack, setDaysBack] = useState(0);
+  const shownDate = dateFromOffset(daysBack);
+  const dateKey = toDateKey(shownDate);
+
   const entries = useLiveQuery(
-    () => db.entries.where("date").equals(today).toArray(),
-    [today],
+    () => db.entries.where("date").equals(dateKey).toArray(),
+    [dateKey],
     [] as FoodEntry[],
   );
   const settings = useLiveQuery(() => getSettings(), []);
@@ -26,14 +38,35 @@ export function TodayScreen() {
 
   return (
     <div className="screen">
-      <ScreenHeader
-        title="Heute"
-        subtitle={new Date().toLocaleDateString("de-DE", {
-          weekday: "long",
-          day: "numeric",
-          month: "long",
-        })}
-      />
+      <header className="screen-header day-header">
+        <button
+          className="icon-btn day-nav"
+          onClick={() => setDaysBack(daysBack + 1)}
+          aria-label="Vorheriger Tag"
+        >
+          <IconBack size={20} />
+        </button>
+
+        <div className="day-label">
+          <h1 className="screen-title">{dayTitle(daysBack)}</h1>
+          <div className="screen-subtitle">
+            {shownDate.toLocaleDateString("de-DE", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+            })}
+          </div>
+        </div>
+
+        <button
+          className="icon-btn day-nav"
+          onClick={() => setDaysBack(daysBack - 1)}
+          disabled={daysBack === 0}
+          aria-label="Nächster Tag"
+        >
+          <IconChevron size={20} />
+        </button>
+      </header>
 
       <Card>
         <div className="kcal-hero">
@@ -74,7 +107,9 @@ export function TodayScreen() {
             </header>
 
             {mealEntries.length === 0 ? (
-              <p className="empty">Noch nichts erfasst</p>
+              <p className="empty">
+                {daysBack === 0 ? "Noch nichts erfasst" : "Nichts erfasst"}
+              </p>
             ) : (
               mealEntries.map((entry) => (
                 <EntryRow key={entry.id} entry={entry} />
@@ -85,6 +120,19 @@ export function TodayScreen() {
       })}
     </div>
   );
+}
+
+function dateFromOffset(daysBack: number): Date {
+  const date = new Date();
+  date.setDate(date.getDate() - daysBack);
+  return date;
+}
+
+function dayTitle(daysBack: number): string {
+  if (daysBack === 0) return "Heute";
+  if (daysBack === 1) return "Gestern";
+  if (daysBack === 2) return "Vorgestern";
+  return `vor ${daysBack} Tagen`;
 }
 
 const SOURCE_ICONS = {

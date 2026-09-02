@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db, getSettings, saveSettings } from "../../lib/db";
-import { Card, Loading, ScreenHeader } from "../../ui/components";
-import { IconDownload } from "../../ui/icons";
+import { getSettings, saveSettings } from "../../lib/db";
+import { exportBackup, importBackup } from "../../lib/backup";
+import { Card, Loading, Notice, ScreenHeader } from "../../ui/components";
+import { IconDownload, IconUpload } from "../../ui/icons";
 import type { Settings } from "../../lib/types";
 import { APP_VERSION } from "../../version";
 
@@ -24,6 +25,11 @@ function SettingsForm({ settings }: { settings: Settings }) {
     fatGoal: settings.fatGoal,
   });
   const [saved, setSaved] = useState(false);
+  const [importMsg, setImportMsg] = useState<{
+    kind: "info" | "error";
+    text: string;
+  } | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
 
   async function save() {
     await saveSettings({ apiKey: apiKey.trim(), ...goals });
@@ -32,20 +38,37 @@ function SettingsForm({ settings }: { settings: Settings }) {
   }
 
   async function exportData() {
-    const [entries, measurements] = await Promise.all([
-      db.entries.toArray(),
-      db.measurements.toArray(),
-    ]);
-    const blob = new Blob(
-      [JSON.stringify({ version: APP_VERSION, entries, measurements }, null, 2)],
-      { type: "application/json" },
-    );
+    const backup = await exportBackup();
+    const blob = new Blob([JSON.stringify(backup, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
     link.download = `kcal-backup-${new Date().toISOString().slice(0, 10)}.json`;
     link.click();
     URL.revokeObjectURL(url);
+  }
+
+  async function importData(file: File | undefined) {
+    if (!file) return;
+    setImportMsg(null);
+    try {
+      const result = await importBackup(await file.text());
+      const teile = [`${result.entries} Einträge`];
+      if (result.measurements > 0)
+        teile.push(`${result.measurements} Messungen`);
+      if (result.skipped > 0)
+        teile.push(`${result.skipped} bereits vorhanden, übersprungen`);
+      setImportMsg({ kind: "info", text: `Importiert: ${teile.join(", ")}.` });
+    } catch (err) {
+      setImportMsg({
+        kind: "error",
+        text: err instanceof Error ? err.message : "Import fehlgeschlagen.",
+      });
+    } finally {
+      if (fileInput.current) fileInput.current.value = "";
+    }
   }
 
   return (
@@ -99,10 +122,32 @@ function SettingsForm({ settings }: { settings: Settings }) {
       </Card>
 
       <Card title="Daten">
-        <button className="btn btn-secondary" onClick={exportData}>
+        {importMsg && <Notice kind={importMsg.kind}>{importMsg.text}</Notice>}
+        <button
+          className="btn btn-secondary"
+          style={{ marginBottom: 10 }}
+          onClick={exportData}
+        >
           <IconDownload size={19} />
-          Backup exportieren (JSON)
+          Backup exportieren
         </button>
+        <input
+          ref={fileInput}
+          type="file"
+          accept="application/json,.json"
+          hidden
+          onChange={(e) => importData(e.target.files?.[0])}
+        />
+        <button
+          className="btn btn-secondary"
+          onClick={() => fileInput.current?.click()}
+        >
+          <IconUpload size={19} />
+          Backup importieren
+        </button>
+        <div className="row-sub" style={{ marginTop: 8 }}>
+          Bereits vorhandene Einträge werden beim Import übersprungen.
+        </div>
       </Card>
 
       <div

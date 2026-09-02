@@ -712,3 +712,27 @@ select {
   text-align: right;
   flex: 0 0 auto;
 }
+
+/* ---------- Tageswechsel ---------- */
+
+.day-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.day-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.day-nav {
+  flex: 0 0 auto;
+  color: var(--ink-tertiary);
+  padding: 10px;
+}
+
+.day-nav:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
