@@ -2,6 +2,7 @@ import { Suspense, lazy, useState } from "react";
 import { NavLink, Navigate, Route, Routes } from "react-router-dom";
 import { useLiveQuery } from "dexie-react-hooks";
 import { getSettings } from "./lib/db";
+import { applyPalette } from "./lib/palettes";
 import { AddSheet } from "./features/add/AddSheet";
 import { BodyScreen } from "./features/body/BodyScreen";
 import { SettingsScreen } from "./features/settings/SettingsScreen";
@@ -45,6 +46,9 @@ const TABS = [
 export default function App() {
   const [addOpen, setAddOpen] = useState(false);
   const settings = useLiveQuery(() => getSettings(), []);
+
+  // Beim Laden und bei jedem Wechsel die Akzentfarben setzen.
+  applyPalette(settings?.palette);
 
   return (
     <div className="app">

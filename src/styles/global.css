@@ -1,9 +1,11 @@
 /* Design-Tokens: Gelb als Akzent, ruhiger heller Untergrund,
    Haarlinien statt Rahmen, weiche Schatten — Things-Anmutung. */
 :root {
-  --yellow: #ffd400;
-  --yellow-soft: #fff6cc;
-  --yellow-deep: #e6be00;
+  /* Werden beim Start aus der gewählten Palette überschrieben. */
+  --accent: #ffd400;
+  --accent-soft: #fff6cc;
+  --accent-deep: #e6be00;
+  --on-accent: #1c1c1e;
 
   --bg: #fafaf8;
   --surface: #ffffff;
@@ -159,6 +161,10 @@ select {
 .row-sub {
   font-size: 13px;
   color: var(--ink-secondary);
+}
+
+/* Nur in Listenzeilen wird gekürzt — Hinweistexte sollen umbrechen. */
+.row-button .row-sub {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -187,8 +193,8 @@ select {
   padding: 14px 18px;
   border: none;
   border-radius: var(--radius);
-  background: var(--yellow);
-  color: var(--ink);
+  background: var(--accent);
+  color: var(--on-accent);
   font-weight: 600;
   transition: filter 0.15s ease;
 }
@@ -204,6 +210,7 @@ select {
 
 .btn-secondary {
   background: var(--surface-sunken);
+  color: var(--ink);
 }
 
 .btn-ghost {
@@ -250,8 +257,8 @@ select {
 }
 
 .input:focus {
-  border-color: var(--yellow-deep);
-  box-shadow: 0 0 0 3px var(--yellow-soft);
+  border-color: var(--accent-deep);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .segmented {
@@ -383,8 +390,8 @@ select {
   height: 52px;
   margin-top: -18px;
   border-radius: 50%;
-  background: var(--yellow);
-  color: var(--ink);
+  background: var(--accent);
+  color: var(--on-accent);
   font-size: 26px;
   display: flex;
   align-items: center;
@@ -458,7 +465,7 @@ select {
 }
 
 .notice-info {
-  background: var(--yellow-soft);
+  background: var(--accent-soft);
   color: #6b5600;
 }
 
@@ -467,7 +474,7 @@ select {
   width: 18px;
   height: 18px;
   border: 2px solid var(--hairline);
-  border-top-color: var(--yellow-deep);
+  border-top-color: var(--accent-deep);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -502,7 +509,7 @@ select {
   color: #1e7a52;
 }
 .badge-mittel {
-  background: var(--yellow-soft);
+  background: var(--accent-soft);
   color: #6b5600;
 }
 .badge-niedrig {
@@ -735,4 +742,53 @@ select {
 .day-nav:disabled {
   opacity: 0.25;
   cursor: default;
+}
+
+/* ---------- Farbwähler ---------- */
+
+.palette-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.palette-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--surface);
+  text-align: left;
+  transition: border-color 0.15s ease;
+}
+
+.palette-option[data-active="true"] {
+  border-color: var(--ink);
+}
+
+.palette-swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.palette-text {
+  min-width: 0;
+}
+
+.palette-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.palette-hint {
+  display: block;
+  font-size: 11px;
+  color: var(--ink-secondary);
+  line-height: 1.3;
 }

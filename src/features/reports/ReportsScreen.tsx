@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
-  Area,
-  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -23,6 +21,7 @@ import {
   sumTotals,
 } from "../../lib/nutrition";
 import type { FoodEntry } from "../../lib/types";
+import { getPalette } from "../../lib/palettes";
 import { Card, ScreenHeader, Segmented } from "../../ui/components";
 
 const RANGES = [
@@ -50,6 +49,7 @@ export function ReportsScreen() {
     [],
   );
   const settings = useLiveQuery(() => getSettings(), []);
+  const accent = getPalette(settings?.palette).accent;
 
   // Ein Datenpunkt pro Tag, auch für Tage ohne Einträge — sonst
   // verzerrt der Graph die zeitlichen Abstände.
@@ -59,9 +59,6 @@ export function ReportsScreen() {
       date,
       label: shortDate(date),
       kcal: Math.round(totals.kcal),
-      protein: Math.round(totals.protein),
-      carbs: Math.round(totals.carbs),
-      fat: Math.round(totals.fat),
     };
   });
 
@@ -120,52 +117,10 @@ export function ReportsScreen() {
                     strokeDasharray="4 4"
                   />
                 ) : null}
-                <Bar dataKey="kcal" fill="#FFD400" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="kcal" fill={accent} radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </>
-        )}
-      </Card>
-
-      <Card title="Makros im Verlauf (g)">
-        {daysWithData.length === 0 ? (
-          <div className="empty">Noch keine Einträge in diesem Zeitraum.</div>
-        ) : (
-          <ResponsiveContainer width="100%" height={190}>
-            <AreaChart data={daily} margin={{ top: 4, right: 4, bottom: 0, left: -18 }}>
-              <CartesianGrid vertical={false} stroke={GRID_COLOR} />
-              <XAxis dataKey="label" tick={AXIS_STYLE} interval="preserveStartEnd" />
-              <YAxis tick={AXIS_STYLE} />
-              <Tooltip />
-              <Area
-                type="monotone"
-                dataKey="protein"
-                name="Eiweiß"
-                stackId="1"
-                stroke="#4a90d9"
-                fill="#4a90d9"
-                fillOpacity={0.75}
-              />
-              <Area
-                type="monotone"
-                dataKey="carbs"
-                name="Kohlenhydrate"
-                stackId="1"
-                stroke="#f2994a"
-                fill="#f2994a"
-                fillOpacity={0.75}
-              />
-              <Area
-                type="monotone"
-                dataKey="fat"
-                name="Fett"
-                stackId="1"
-                stroke="#9b7ede"
-                fill="#9b7ede"
-                fillOpacity={0.75}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
         )}
       </Card>
 

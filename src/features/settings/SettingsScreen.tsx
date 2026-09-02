@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { getSettings, saveSettings } from "../../lib/db";
 import { exportBackup, importBackup } from "../../lib/backup";
+import { PALETTES, applyPalette } from "../../lib/palettes";
 import { Card, Loading, Notice, ScreenHeader } from "../../ui/components";
 import { IconDownload, IconUpload } from "../../ui/icons";
 import type { Settings } from "../../lib/types";
@@ -30,6 +31,13 @@ function SettingsForm({ settings }: { settings: Settings }) {
     text: string;
   } | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+
+  /** Sofort anwenden, damit die Wirkung direkt sichtbar ist — ohne
+   *  Umweg über "Speichern". */
+  async function choosePalette(id: string) {
+    applyPalette(id);
+    await saveSettings({ palette: id });
+  }
 
   async function save() {
     await saveSettings({ apiKey: apiKey.trim(), ...goals });
@@ -88,6 +96,28 @@ function SettingsForm({ settings }: { settings: Settings }) {
             Nur für die Foto-Analyse nötig. Wird ausschließlich lokal auf diesem
             Gerät gespeichert.
           </div>
+        </div>
+      </Card>
+
+      <Card title="Farbe">
+        <div className="palette-grid">
+          {PALETTES.map((palette) => (
+            <button
+              key={palette.id}
+              className="palette-option"
+              data-active={settings.palette === palette.id}
+              onClick={() => choosePalette(palette.id)}
+            >
+              <span
+                className="palette-swatch"
+                style={{ background: palette.accent }}
+              />
+              <span className="palette-text">
+                <span className="palette-label">{palette.label}</span>
+                <span className="palette-hint">{palette.hint}</span>
+              </span>
+            </button>
+          ))}
         </div>
       </Card>
 

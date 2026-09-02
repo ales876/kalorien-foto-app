@@ -43,6 +43,7 @@ export interface BodyMeasurement {
 export interface Settings {
   id: string;
   apiKey: string;
+  palette: string;
   kcalGoal: number;
   proteinGoal: number;
   carbsGoal: number;
@@ -52,6 +53,7 @@ export interface Settings {
 export const DEFAULT_SETTINGS: Settings = {
   id: "settings",
   apiKey: "",
+  palette: "gelb",
   kcalGoal: 2000,
   proteinGoal: 130,
   carbsGoal: 200,
