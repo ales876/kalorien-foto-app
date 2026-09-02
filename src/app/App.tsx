@@ -29,7 +29,13 @@ export function App() {
   const [dateKey, setDateKey] = useState(toDateKey);
 
   useEffect(() => {
-    applyPalette(settings?.palette);
+    const palette = settings?.palette;
+    applyPalette(palette);
+    // Wechselt das System zwischen Hell und Dunkel, die Tönungen neu setzen.
+    const query = window.matchMedia("(prefers-color-scheme: dark)");
+    const onChange = () => applyPalette(palette);
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
   }, [settings?.palette]);
 
   const closeAdd = useCallback(() => setAddOpen(false), []);

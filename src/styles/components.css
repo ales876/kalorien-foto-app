@@ -303,18 +303,18 @@
 }
 
 .notice-error {
-  background: var(--danger-soft);
-  color: #a32227;
+  background: var(--notice-error-bg);
+  color: var(--notice-error-ink);
 }
 
 .notice-info {
-  background: var(--accent-soft);
-  color: #6b5600;
+  background: var(--notice-info-bg);
+  color: var(--notice-info-ink);
 }
 
 .notice-success {
-  background: #e3f5ec;
-  color: #1e7a52;
+  background: var(--notice-success-bg);
+  color: var(--notice-success-ink);
 }
 
 .spinner {
@@ -348,16 +348,16 @@
 }
 
 .badge-hoch {
-  background: #e3f5ec;
-  color: #1e7a52;
+  background: var(--notice-success-bg);
+  color: var(--notice-success-ink);
 }
 .badge-mittel {
-  background: var(--accent-soft);
-  color: #6b5600;
+  background: var(--notice-info-bg);
+  color: var(--notice-info-ink);
 }
 .badge-niedrig {
-  background: var(--danger-soft);
-  color: #a32227;
+  background: var(--notice-error-bg);
+  color: var(--notice-error-ink);
 }
 
 /* ---------- Tab-Leiste & Plus ---------- */
@@ -372,7 +372,7 @@
   display: flex;
   align-items: center;
   justify-content: space-around;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--tabbar-bg);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-top: 1px solid var(--hairline);
@@ -525,7 +525,7 @@ body[data-editing="true"] .fab {
 .sheet-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.28);
+  background: rgba(0, 0, 0, 0.4);
   z-index: 30;
   display: flex;
   align-items: flex-end;

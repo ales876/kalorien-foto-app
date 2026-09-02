@@ -112,6 +112,23 @@ Vorlage war eine Bildschirmaufnahme von Things 3 (2026-09-02). Daraus
   Blätterrichtung, Ringe und Balken animieren ihren Füllstand.
   `prefers-reduced-motion` schaltet alles ab.
 
+## 11. Dark Mode folgt dem System
+
+Keine eigene Umschaltung: `prefers-color-scheme` entscheidet, wie bei
+Things. Die Nachtfarben sind tiefes Blaugrau (`#14161b`), Karten eine
+Stufe heller, Haarlinien bleiben. Die Palette bleibt gleich, nur die
+Tönungen werden zu transparenten Anteilen der Farbe (`color-mix`) und
+die Gegenfarbe wird als Text aufgehellt (`--complement-ink`) —
+`applyPalette()` setzt beides, `App` hört auf den Schemawechsel.
+Diagramme nutzen dieselben Tokens über `var()` in SVG-Attributen.
+
+## 12. Suche: eigene Einträge zuerst
+
+„Produkt suchen" zeigt zuerst Treffer aus den eigenen Einträgen der
+letzten 365 Tage (auch Foto und Hand, keine Tagessummen), zusammengefasst
+je Lebensmittel mit der zuletzt genutzten Menge — dann den Produktindex,
+zuletzt die Live-Suche. Ersetzt ein eigenes „Quick Find".
+
 ## Fallstricke
 
 | Falle                                                  | Was passiert                        | Richtig                              |

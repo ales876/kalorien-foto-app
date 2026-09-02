@@ -9,6 +9,7 @@ import { copyDay } from "../../lib/suggestions";
 import { MEALS, type FoodEntry } from "../../lib/types";
 import { Notice } from "../../ui/Notice";
 import { DaySummary } from "./DaySummary";
+import { EmptyDay } from "./EmptyDay";
 import { MealSection } from "./MealSection";
 import { WeekStrip, type DayStat } from "./WeekStrip";
 
@@ -45,7 +46,8 @@ export function TodayScreen({
   function collapseIfOutside(event: MouseEvent<HTMLDivElement>) {
     if (editingId === null) return;
     const target = event.target as HTMLElement;
-    if (target.closest('[data-expanded="true"], .entry-main')) return;
+    if (target.closest('[data-expanded="true"], .entry-main, .move-popover'))
+      return;
     setEditingId(null);
   }
 
@@ -131,16 +133,20 @@ export function TodayScreen({
           activityKcal={activity?.kcal}
         />
 
-        {MEALS.map((meal) => (
-          <MealSection
-            key={meal.id}
-            meal={meal}
-            date={dateKey}
-            entries={entries.filter((entry) => entry.meal === meal.id)}
-            editingId={editingId}
-            onEdit={setEditingId}
-          />
-        ))}
+        {entries.length === 0 ? (
+          <EmptyDay date={dateKey} />
+        ) : (
+          MEALS.map((meal) => (
+            <MealSection
+              key={meal.id}
+              meal={meal}
+              date={dateKey}
+              entries={entries.filter((entry) => entry.meal === meal.id)}
+              editingId={editingId}
+              onEdit={setEditingId}
+            />
+          ))
+        )}
       </div>
     </div>
   );

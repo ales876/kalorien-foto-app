@@ -110,7 +110,7 @@
 }
 
 .week-day[data-selected="true"] .week-number {
-  color: var(--complement);
+  color: var(--complement-ink);
   font-weight: 700;
 }
 
@@ -122,7 +122,7 @@
 }
 
 .week-day[data-selected="true"] .week-weekday {
-  color: var(--complement);
+  color: var(--complement-ink);
   font-weight: 600;
 }
 
@@ -536,7 +536,7 @@
   display: inline-block;
   font-size: 13px;
   font-weight: 600;
-  color: var(--complement);
+  color: var(--complement-ink);
 }
 
 .take-over-day {
@@ -713,7 +713,7 @@
 }
 
 .legend-raw {
-  background: #c9c9c4;
+  background: var(--ink-tertiary);
 }
 
 .legend-trend {
@@ -820,4 +820,86 @@
   background: var(--surface);
   padding: 12px;
   border-radius: var(--radius-sm);
+}
+
+/* ---------- Leerer Tag: großer, blasser Glyph wie die leere Inbox ---------- */
+
+.empty-day {
+  text-align: center;
+  padding: 28px 16px 20px;
+}
+
+.empty-day-glyph {
+  display: flex;
+  justify-content: center;
+  color: var(--ink-tertiary);
+  opacity: 0.35;
+  margin-bottom: 10px;
+}
+
+.empty-day-text {
+  color: var(--ink-tertiary);
+  font-size: 14px;
+  margin-bottom: 18px;
+}
+
+.empty-day .row {
+  text-align: left;
+}
+
+.empty-day .take-over {
+  padding: 0;
+}
+
+/* ---------- Verschieben-Popover über der Werkzeugleiste ---------- */
+
+.move-popover {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--tabbar-height) + 72px + var(--safe-bottom));
+  transform: translateX(-50%);
+  width: min(320px, calc(100vw - 32px));
+  padding: 12px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-lifted);
+  z-index: 26;
+  animation: popover-in var(--dur-base) var(--ease-spring) both;
+}
+
+.move-popover .card-title {
+  margin-bottom: 8px;
+}
+
+.move-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.move-options:last-child {
+  margin-bottom: 0;
+}
+
+.move-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  padding: 10px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  transition: filter var(--dur-fast) var(--ease-out);
+}
+
+.move-option:active {
+  filter: brightness(0.94);
+}
+
+.move-option:disabled {
+  opacity: 0.35;
 }

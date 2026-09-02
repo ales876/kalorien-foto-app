@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import { formatDateKey, shiftDays, toDateKey } from "../../lib/date";
 import { deleteEntry, updateEntry } from "../../lib/db";
 import { parseNonNegative } from "../../lib/format";
 import { kcalFor } from "../../lib/nutrition";
 import { MEALS, type FoodEntry, type Meal } from "../../lib/types";
 import { Segmented } from "../../ui/Segmented";
-import { IconCheck, IconTrash } from "../../ui/icons";
+import { IconCheck, IconChevron, IconTrash } from "../../ui/icons";
+import { MEAL_ICONS } from "../../ui/mealIcons";
 
 const PER100_FIELDS = [
   { key: "kcalPer100g", label: "kcal" },
@@ -35,7 +37,7 @@ export function EntryEditor({
     carbsPer100g: String(entry.carbsPer100g),
     fatPer100g: String(entry.fatPer100g),
   });
-  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [menu, setMenu] = useState<"none" | "delete" | "move">("none");
 
   const gramsValue = parseNonNegative(grams);
   const kcalValue = parseNonNegative(per100.kcalPer100g);
@@ -83,6 +85,24 @@ export function EntryEditor({
     if (entryId !== undefined) await deleteEntry(entryId);
     onDone();
   }
+
+  /** Verschieben speichert sofort — mitsamt allen offenen Änderungen —
+   *  und klappt zu. Die Zeile wandert dann sichtbar in die andere
+   *  Mahlzeit oder verschwindet auf den anderen Tag. */
+  async function moveTo(target: { meal?: Meal; date?: string }) {
+    pending.current = null;
+    if (entryId !== undefined)
+      await updateEntry(entryId, { ...(patch ?? {}), ...target });
+    onDone();
+  }
+
+  const today = toDateKey();
+  const dateTargets: { label: string; date: string }[] = [
+    { label: "Einen Tag zurück", date: shiftDays(entry.date, -1) },
+    { label: "Einen Tag vor", date: shiftDays(entry.date, 1) },
+  ];
+  if (entry.date !== today)
+    dateTargets.unshift({ label: "Auf heute", date: today });
 
   const field = (id: string) => `edit-${entryId ?? "x"}-${id}`;
 
@@ -168,13 +188,53 @@ export function EntryEditor({
           : "Name, Menge und kcal werden gebraucht"}
       </div>
 
+      {menu === "move" && (
+        <div className="move-popover" role="dialog" aria-label="Verschieben">
+          <div className="card-title">In Mahlzeit</div>
+          <div className="move-options">
+            {MEALS.map((m) => {
+              const Icon = MEAL_ICONS[m.id];
+              return (
+                <button
+                  type="button"
+                  key={m.id}
+                  className="move-option"
+                  disabled={m.id === meal}
+                  onClick={() => moveTo({ meal: m.id })}
+                >
+                  <span className="meal-icon" style={{ color: m.color }}>
+                    <Icon size={16} />
+                  </span>
+                  {m.label}
+                </button>
+              );
+            })}
+          </div>
+          <div className="card-title">Auf Tag</div>
+          <div className="move-options">
+            {dateTargets.map((target) => (
+              <button
+                type="button"
+                key={target.date}
+                className="move-option"
+                onClick={() => moveTo({ date: target.date })}
+                title={formatDateKey(target.date)}
+              >
+                <IconChevron size={14} />
+                {target.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="edit-toolbar" role="toolbar" aria-label="Eintrag">
-        {confirmingDelete ? (
+        {menu === "delete" ? (
           <>
             <button
               type="button"
               className="toolbar-btn"
-              onClick={() => setConfirmingDelete(false)}
+              onClick={() => setMenu("none")}
             >
               Abbrechen
             </button>
@@ -192,11 +252,18 @@ export function EntryEditor({
             <button
               type="button"
               className="toolbar-btn"
-              onClick={() => setConfirmingDelete(true)}
+              onClick={() => setMenu("delete")}
               aria-label="Eintrag löschen"
             >
               <IconTrash size={17} />
-              Löschen
+            </button>
+            <button
+              type="button"
+              className="toolbar-btn"
+              aria-expanded={menu === "move"}
+              onClick={() => setMenu(menu === "move" ? "none" : "move")}
+            >
+              Verschieben
             </button>
             <button
               type="button"

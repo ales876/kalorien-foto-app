@@ -37,6 +37,18 @@
   --danger-soft: #fdecec;
   --success: #35b37e;
 
+  /* Gegenfarbe als Textfarbe — im Dunkeln aufgehellt, damit sie auf
+     dunklen Karten lesbar bleibt. Wird von applyPalette() gesetzt. */
+  --complement-ink: #4759c9;
+
+  --tabbar-bg: rgba(255, 255, 255, 0.92);
+  --notice-error-bg: #fdecec;
+  --notice-error-ink: #a32227;
+  --notice-info-bg: var(--accent-soft);
+  --notice-info-ink: #6b5600;
+  --notice-success-bg: #e3f5ec;
+  --notice-success-ink: #1e7a52;
+
   --radius-sm: 8px;
   --radius: 12px;
   --radius-lg: 18px;
@@ -57,4 +69,33 @@
   --dur-slow: 480ms;
 
   color-scheme: light;
+}
+
+/* Dark Mode folgt der Systemeinstellung — Things-Nachtfarben: tiefes
+   Blaugrau statt Schwarz, Karten eine Stufe heller, Haarlinien bleiben. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14161b;
+    --surface: #1f2229;
+    --surface-sunken: #2a2e37;
+
+    --ink: #f2f2f5;
+    --ink-secondary: #a3a7b0;
+    --ink-tertiary: #6e727c;
+
+    --hairline: #30343d;
+    --danger-soft: rgba(229, 72, 77, 0.18);
+
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-lifted: 0 8px 24px rgba(0, 0, 0, 0.55);
+
+    --tabbar-bg: rgba(22, 24, 30, 0.9);
+    --notice-error-bg: rgba(229, 72, 77, 0.18);
+    --notice-error-ink: #ff8f93;
+    --notice-info-ink: var(--ink);
+    --notice-success-bg: rgba(53, 179, 126, 0.18);
+    --notice-success-ink: #7fd6ac;
+
+    color-scheme: dark;
+  }
 }
