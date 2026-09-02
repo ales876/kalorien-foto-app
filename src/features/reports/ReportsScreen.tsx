@@ -129,7 +129,7 @@ export function ReportsScreen() {
         unit="kg"
         data={weightSeries}
         color="#1c1c1e"
-        emptyHint="Noch kein Gewicht erfasst — trag es unter „Körper“ ein."
+        emptyHint="Noch kein Gewicht erfasst — trag es unter „Fortschritt“ ein."
       />
 
       <MeasurementChart

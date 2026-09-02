@@ -28,7 +28,12 @@ const ReportsScreen = lazy(() =>
 // so erkennt man ihn am Icon statt am Zustand (wie in Things).
 const TABS = [
   { to: "/heute", Icon: IconToday, label: "Heute", color: "var(--tab-today)" },
-  { to: "/koerper", Icon: IconBody, label: "Körper", color: "var(--tab-body)" },
+  {
+    to: "/fortschritt",
+    Icon: IconBody,
+    label: "Fortschritt",
+    color: "var(--tab-body)",
+  },
   {
     to: "/berichte",
     Icon: IconReports,
@@ -55,7 +60,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/heute" replace />} />
         <Route path="/heute" element={<TodayScreen />} />
-        <Route path="/koerper" element={<BodyScreen />} />
+        <Route path="/fortschritt" element={<BodyScreen />} />
         <Route
           path="/berichte"
           element={

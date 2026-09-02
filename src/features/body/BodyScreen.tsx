@@ -33,7 +33,10 @@ export function BodyScreen() {
 
   return (
     <div className="screen">
-      <ScreenHeader title="Körper" subtitle="Gewicht und Bauchumfang erfassen" />
+      <ScreenHeader
+        title="Fortschritt"
+        subtitle="Gewicht und Bauchumfang erfassen"
+      />
 
       <Card title="Heute eintragen">
         {todayEntry && (
