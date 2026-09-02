@@ -11,7 +11,6 @@ import {
   IconBarcode,
   IconBody,
   IconCamera,
-  IconChevron,
   IconSearch,
   type IconComponent,
 } from "../../ui/icons";
@@ -50,31 +49,31 @@ const CHOICES: {
     mode: "photo",
     Icon: IconCamera,
     color: "var(--tab-today)",
-    label: "Foto vom Essen",
+    label: "Foto",
   },
   {
     mode: "barcode",
     Icon: IconBarcode,
     color: "var(--tab-body)",
-    label: "Barcode scannen",
+    label: "Barcode",
   },
   {
     mode: "search",
     Icon: IconSearch,
     color: "var(--tab-reports)",
-    label: "Produkt suchen",
+    label: "Suchen",
   },
   {
     mode: "weight",
     Icon: IconBody,
     color: "var(--tab-body)",
-    label: "Gewicht & Maße",
+    label: "Gewicht",
   },
   {
     mode: "activity",
     Icon: IconActivity,
     color: "var(--meal-snack)",
-    label: "Aktivität erfassen",
+    label: "Aktivität",
   },
 ];
 
@@ -137,23 +136,22 @@ function AddFlow({
       <div className="step" key={mode} data-direction={direction}>
         {mode === "choose" && (
           <>
+            <div className="icon-row" role="group" aria-label="Erfassen">
+              {CHOICES.map(({ mode: target, Icon, color, label }) => (
+                <button
+                  type="button"
+                  className="icon-choice"
+                  key={target}
+                  onClick={() => go(target)}
+                >
+                  <span className="icon-circle" style={{ color }}>
+                    <Icon size={26} />
+                  </span>
+                  <span className="icon-label">{label}</span>
+                </button>
+              ))}
+            </div>
             <QuickPicks meal={guessMeal()} onPick={pick} />
-            {CHOICES.map(({ mode: target, Icon, color, label }) => (
-              <button
-                type="button"
-                className="choice"
-                key={target}
-                onClick={() => go(target)}
-              >
-                <span className="choice-icon" style={{ color }}>
-                  <Icon size={26} />
-                </span>
-                <span className="choice-text">
-                  <span className="choice-label">{label}</span>
-                </span>
-                <IconChevron size={17} className="choice-chevron" />
-              </button>
-            ))}
           </>
         )}
 

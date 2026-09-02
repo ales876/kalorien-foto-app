@@ -591,6 +591,51 @@
 
 /* ---------- Erfassen ---------- */
 
+/* Reihe runder Icon-Knöpfe, wie ein Teilen-Blatt: kompakt, damit die
+   Vorschläge darunter ohne Scrollen erreichbar bleiben. */
+.icon-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 2px 6px;
+}
+
+.icon-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 60px;
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+.icon-circle {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--dur-base) var(--ease-spring);
+}
+
+.icon-choice:active .icon-circle {
+  transform: scale(0.92);
+}
+
+.icon-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-secondary);
+}
+
+.quickpicks {
+  margin-top: 14px;
+}
+
 .choice {
   display: flex;
   align-items: center;
