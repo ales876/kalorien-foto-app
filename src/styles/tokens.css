@@ -25,6 +25,13 @@
   --tab-reports: #35b37e;
   --tab-more: #9aa0a6;
 
+  /* Erfassungswege: jede Aktion ihre eigene Farbe, keine doppelt. */
+  --action-photo: #a98ad4;
+  --action-barcode: #4a90d9;
+  --action-search: #35b37e;
+  --action-weight: #f2994a;
+  --action-activity: #e2795b;
+
   --meal-morning: #f2994a;
   --meal-noon: #f0b429;
   --meal-evening: #6c7ae0;

@@ -103,6 +103,7 @@ function DayButton({
       data-future={isFuture}
       aria-pressed={isSelected}
       aria-label={formatDateKey(day.date)}
+      disabled={isFuture}
       onClick={() => onSelect(day.date)}
     >
       <span className="week-circle">

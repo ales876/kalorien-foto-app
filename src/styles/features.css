@@ -55,6 +55,7 @@
 
 .week-day[data-future="true"] {
   opacity: 0.4;
+  cursor: default;
 }
 
 .week-circle {

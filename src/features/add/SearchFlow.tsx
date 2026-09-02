@@ -10,6 +10,7 @@ import { Loading } from "../../ui/Loading";
 import { Notice } from "../../ui/Notice";
 import { IconChevron } from "../../ui/icons";
 import { ConfirmStep } from "./ConfirmStep";
+import { ManualFlow } from "./ManualFlow";
 
 interface SearchResults {
   history: HistoryHit[];
@@ -32,6 +33,7 @@ export function SearchFlow({
   const [selected, setSelected] = useState<NutritionCandidate | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [manual, setManual] = useState(false);
 
   async function runSearch() {
     const term = query.trim();
@@ -65,6 +67,10 @@ export function SearchFlow({
   if (selected)
     return (
       <ConfirmStep candidates={[selected]} date={date} onSaved={onSaved} />
+    );
+  if (manual)
+    return (
+      <ManualFlow initialName={query.trim()} date={date} onSaved={onSaved} />
     );
 
   const nothing =
@@ -150,6 +156,13 @@ export function SearchFlow({
               </div>
             </section>
           )}
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={() => setManual(true)}
+          >
+            Nicht dabei? Selbst anlegen
+          </button>
         </>
       )}
     </>

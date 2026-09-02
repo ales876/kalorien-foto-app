@@ -48,31 +48,31 @@ const CHOICES: {
   {
     mode: "photo",
     Icon: IconCamera,
-    color: "var(--tab-today)",
+    color: "var(--action-photo)",
     label: "Foto",
   },
   {
     mode: "barcode",
     Icon: IconBarcode,
-    color: "var(--tab-body)",
+    color: "var(--action-barcode)",
     label: "Barcode",
   },
   {
     mode: "search",
     Icon: IconSearch,
-    color: "var(--tab-reports)",
+    color: "var(--action-search)",
     label: "Suchen",
   },
   {
     mode: "weight",
     Icon: IconBody,
-    color: "var(--tab-body)",
+    color: "var(--action-weight)",
     label: "Gewicht",
   },
   {
     mode: "activity",
     Icon: IconActivity,
-    color: "var(--meal-snack)",
+    color: "var(--action-activity)",
     label: "Aktivität",
   },
 ];
