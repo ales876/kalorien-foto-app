@@ -16,6 +16,7 @@ import {
 } from "recharts";
 import { db, getSettings } from "../../lib/db";
 import {
+  formatDecimal,
   formatNumber,
   lastNDays,
   shortDate,
@@ -76,9 +77,12 @@ export function ReportsScreen() {
 
   // Skala immer bis übers Tagesziel ziehen, sonst liegt die gestrichelte
   // Ziellinie außerhalb des sichtbaren Bereichs.
-  const kcalAxisMax = Math.ceil(
-    Math.max(settings?.kcalGoal ?? 0, ...daily.map((d) => d.kcal), 500) * 1.1,
-  );
+  const kcalAxisMax =
+    Math.ceil(
+      Math.max(settings?.kcalGoal ?? 0, ...daily.map((d) => d.kcal), 500) *
+        1.08 /
+        250,
+    ) * 250;
   const avgKcal =
     daysWithData.length > 0
       ? Math.round(
@@ -167,6 +171,7 @@ export function ReportsScreen() {
 
       <MeasurementChart
         title="Gewicht (kg)"
+        unit="kg"
         data={weightSeries}
         color="#1c1c1e"
         emptyHint="Noch kein Gewicht erfasst — trag es unter „Körper“ ein."
@@ -174,6 +179,7 @@ export function ReportsScreen() {
 
       <MeasurementChart
         title="Bauchumfang (cm)"
+        unit="cm"
         data={waistSeries}
         color="#35b37e"
         emptyHint="Noch kein Bauchumfang erfasst."
@@ -184,11 +190,13 @@ export function ReportsScreen() {
 
 function MeasurementChart({
   title,
+  unit,
   data,
   color,
   emptyHint,
 }: {
   title: string;
+  unit: string;
   data: { label: string; value?: number }[];
   color: string;
   emptyHint: string;
@@ -206,7 +214,7 @@ function MeasurementChart({
             <div className="row-sub" style={{ marginBottom: 10 }}>
               {trend === 0
                 ? "unverändert im Zeitraum"
-                : `${trend > 0 ? "+" : ""}${trend.toFixed(1)} im Zeitraum`}
+                : `${trend > 0 ? "+" : "−"}${formatDecimal(Math.abs(trend))} ${unit} im Zeitraum`}
             </div>
           )}
           <ResponsiveContainer width="100%" height={170}>
