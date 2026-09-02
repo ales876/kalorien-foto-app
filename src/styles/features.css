@@ -362,8 +362,8 @@
 
 .entry-row {
   flex-wrap: wrap;
-  border-radius: var(--radius);
   transition:
+    border-radius var(--dur-fast) var(--ease-out),
     background var(--dur-base) var(--ease-out),
     box-shadow var(--dur-base) var(--ease-out),
     margin var(--dur-base) var(--ease-out),
@@ -372,6 +372,7 @@
 }
 
 .entry-row[data-expanded="true"] {
+  border-radius: var(--radius);
   background: var(--surface-sunken);
   box-shadow: inset 0 0 0 1px var(--hairline);
   margin: 6px -8px;
