@@ -4,7 +4,6 @@ import {
   computeBMR,
   computeEnergyBalance,
   isBalanceGap,
-  smoothWeights,
 } from "./analysis";
 import { lastNDays } from "./date";
 import type { BodyMeasurement, FoodEntry } from "./types";
@@ -77,17 +76,6 @@ describe("computeEnergyBalance", () => {
         today,
       ),
     ).toMatchObject({ reason: "zu-wenig-tage" });
-  });
-});
-
-describe("smoothWeights", () => {
-  it("glättet über sieben Kalendertage", () => {
-    const points = smoothWeights([
-      { date: "2026-09-01", timestamp: 0, weightKg: 75 },
-      { date: "2026-09-02", timestamp: 0, weightKg: 76 },
-      { date: "2026-09-10", timestamp: 0, weightKg: 74 },
-    ]);
-    expect(points.map((p) => p.trend)).toEqual([75, 75.5, 74]);
   });
 });
 

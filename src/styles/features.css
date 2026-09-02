@@ -762,15 +762,6 @@
   display: inline-block;
 }
 
-.legend-raw {
-  background: var(--ink-tertiary);
-}
-
-.legend-trend {
-  background: var(--ink);
-  margin-left: 10px;
-}
-
 .measure-waist {
   width: 68px;
   text-align: right;

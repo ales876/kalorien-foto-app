@@ -50,7 +50,7 @@ src/
     db.ts         Dexie-Schema (Name "KcalScanner" bleibt — dort liegen die Daten)
     date.ts       Datumsschlüssel (lokal, nie toISOString)
     nutrition.ts  Summen, Kandidat → Eintrag, Mahlzeit nach Uhrzeit
-    analysis.ts   Energiebilanz, Gewichtsglättung, Grundumsatz
+    analysis.ts   Energiebilanz, Grundumsatz, Defizit-Einordnung
     suggestions.ts  Vorschläge aus der Historie, Tag/Mahlzeit übernehmen
     backup.ts     Export/Import mit Schema-Prüfung und Dublettenerkennung
     vision.ts     Foto-Analyse über das Anthropic SDK

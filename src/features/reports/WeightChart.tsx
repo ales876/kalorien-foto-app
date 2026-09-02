@@ -7,7 +7,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { smoothWeights } from "../../lib/analysis";
 import { shortDate } from "../../lib/date";
 import { formatDecimal, formatSigned } from "../../lib/format";
 import type { BodyMeasurement } from "../../lib/types";
@@ -16,34 +15,30 @@ import {
   AXIS_STYLE,
   CHART_MARGIN,
   GRID_COLOR,
-  INK_COLOR,
-  MUTED_COLOR,
+  TOOLTIP_PROPS,
   paddedDomain,
 } from "./chartStyle";
 
-/** Beschreibt die Richtung anhand des geglätteten Werts, nicht anhand
- *  zweier Tageswerte — sonst entscheidet ein Wassertag über die Aussage. */
-function weightTrendText(points: { trend: number }[]): string {
-  const first = points[0];
-  const last = points[points.length - 1];
-  if (!first || !last || points.length < 2)
-    return "Noch zu wenig Messungen für einen Trend";
-  const delta = last.trend - first.trend;
-  if (Math.abs(delta) < 0.1) return "Im Zeitraum unverändert";
-  return `${formatSigned(delta)} kg im Zeitraum (geglättet)`;
-}
-
+/** Gewicht als Linie durch die Messpunkte — ein Punkt je Wiegung, keine
+ *  Glättung. Der Text darüber nennt die Differenz zwischen erster und
+ *  letzter Messung im Zeitraum. */
 export function WeightChart({
   measurements,
 }: {
   measurements: BodyMeasurement[];
 }) {
-  const points = smoothWeights(measurements).map((p) => ({
-    ...p,
-    label: shortDate(p.date),
-  }));
+  const points = measurements
+    .filter(
+      (m): m is BodyMeasurement & { weightKg: number } =>
+        typeof m.weightKg === "number",
+    )
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .map((m) => ({ date: m.date, label: shortDate(m.date), kg: m.weightKg }));
+  const first = points[0];
+  const last = points[points.length - 1];
+  const delta = first && last && points.length >= 2 ? last.kg - first.kg : null;
   const domain = paddedDomain(
-    points.flatMap((p) => [p.raw, p.trend]),
+    points.map((p) => p.kg),
     0.5,
     0.5,
   );
@@ -56,7 +51,13 @@ export function WeightChart({
         </p>
       ) : (
         <>
-          <div className="row-sub chart-lead">{weightTrendText(points)}</div>
+          <div className="row-sub chart-lead">
+            {delta === null
+              ? "Noch zu wenig Messungen für einen Vergleich"
+              : Math.abs(delta) < 0.05
+                ? "Im Zeitraum unverändert"
+                : `${formatSigned(delta)} kg im Zeitraum`}
+          </div>
           <ResponsiveContainer width="100%" height={180}>
             <LineChart data={points} margin={CHART_MARGIN}>
               <CartesianGrid vertical={false} stroke={GRID_COLOR} />
@@ -71,35 +72,32 @@ export function WeightChart({
                 tickFormatter={(v: number) => formatDecimal(v)}
               />
               <Tooltip
-                formatter={(value, name) => [
+                {...TOOLTIP_PROPS}
+                formatter={(value) => [
                   `${formatDecimal(Number(value))} kg`,
-                  name === "trend" ? "Trend" : "Gemessen",
+                  "Gewicht",
                 ]}
               />
-              {/* Rohwerte nur als Punkte — sie zeigen die Streuung, ohne
-                  die Trendlinie zu übertönen. */}
               <Line
                 type="monotone"
-                dataKey="raw"
-                name="raw"
-                stroke="none"
-                dot={{ r: 2.5, fill: MUTED_COLOR }}
-                isAnimationActive={false}
-              />
-              <Line
-                type="monotone"
-                dataKey="trend"
-                name="trend"
-                stroke={INK_COLOR}
+                dataKey="kg"
+                stroke="var(--tertiary-deep)"
                 strokeWidth={2.2}
-                dot={false}
+                dot={{
+                  r: 3.5,
+                  fill: "var(--tertiary-deep)",
+                  stroke: "var(--surface)",
+                  strokeWidth: 1.5,
+                }}
+                activeDot={{
+                  r: 5,
+                  fill: "var(--tertiary-deep)",
+                  stroke: "var(--surface)",
+                  strokeWidth: 2,
+                }}
               />
             </LineChart>
           </ResponsiveContainer>
-          <div className="row-sub chart-legend">
-            <span className="legend-dot legend-raw" /> Tageswert
-            <span className="legend-dot legend-trend" /> 7-Tage-Trend
-          </div>
         </>
       )}
     </Card>

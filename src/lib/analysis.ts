@@ -106,44 +106,6 @@ export function computeEnergyBalance(
   };
 }
 
-export interface WeightPoint {
-  date: string;
-  raw: number;
-  /** Gleitender Durchschnitt über die zurückliegenden sieben Kalendertage. */
-  trend: number;
-}
-
-/** Tageswerte schwanken um bis zu einem Kilo, meist Wasser — der gleitende
- *  Schnitt zeigt die eigentliche Richtung. */
-export function smoothWeights(
-  measurements: readonly BodyMeasurement[],
-  windowDays = 7,
-): WeightPoint[] {
-  const points = measurements
-    .filter(
-      (m): m is BodyMeasurement & { weightKg: number } =>
-        typeof m.weightKg === "number",
-    )
-    .sort((a, b) => a.date.localeCompare(b.date));
-
-  return points.map((point, index) => {
-    let sum = 0;
-    let count = 0;
-    for (let i = index; i >= 0; i--) {
-      const earlier = points[i];
-      if (!earlier || daysBetween(earlier.date, point.date) >= windowDays)
-        break;
-      sum += earlier.weightKg;
-      count++;
-    }
-    return {
-      date: point.date,
-      raw: point.weightKg,
-      trend: Math.round((sum / count) * 100) / 100,
-    };
-  });
-}
-
 /** Grundumsatz nach Mifflin-St Jeor — Verbrauch in völliger Ruhe. */
 export function computeBMR(params: {
   weightKg: number;

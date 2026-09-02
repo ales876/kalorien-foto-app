@@ -4,6 +4,22 @@ export const MUTED_COLOR = "var(--ink-tertiary)";
 export const INK_COLOR = "var(--ink)";
 export const CHART_MARGIN = { top: 4, right: 6, bottom: 0, left: -18 };
 
+/** Recharts bringt für den Tooltip weiße Festfarben mit — im Dunkeln
+ *  unlesbar. Deshalb alles aus den Tokens. */
+export const TOOLTIP_PROPS = {
+  contentStyle: {
+    background: "var(--surface)",
+    border: "1px solid var(--hairline)",
+    borderRadius: 10,
+    boxShadow: "var(--shadow-lifted)",
+    color: "var(--ink)",
+    fontSize: 13,
+  },
+  labelStyle: { color: "var(--ink-secondary)", marginBottom: 2 },
+  itemStyle: { color: "var(--ink)" },
+  cursor: { fill: "var(--surface-sunken)", stroke: "var(--hairline)" },
+} as const;
+
 /** Achsengrenzen selbst rechnen: Recharts kommt mit String-Domains
  *  („dataMin - 1") bei zwei Datenreihen durcheinander und zeigt 99999. */
 export function paddedDomain(

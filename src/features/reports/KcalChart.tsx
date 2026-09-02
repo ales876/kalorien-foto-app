@@ -18,6 +18,7 @@ import {
   CHART_MARGIN,
   GRID_COLOR,
   MUTED_COLOR,
+  TOOLTIP_PROPS,
 } from "./chartStyle";
 
 export function KcalChart({
@@ -67,6 +68,7 @@ export function KcalChart({
               />
               <YAxis tick={AXIS_STYLE} domain={[0, axisMax]} />
               <Tooltip
+                {...TOOLTIP_PROPS}
                 formatter={(value) => [
                   `${formatNumber(Number(value))} kcal`,
                   "Kalorien",
