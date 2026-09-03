@@ -6,7 +6,7 @@ import { shiftDays, toDateKey, weekOf } from "../../lib/date";
 import { db } from "../../lib/db";
 import { groupByDate, sumTotals } from "../../lib/nutrition";
 import { copyDay } from "../../lib/suggestions";
-import { MEALS, type FoodEntry } from "../../lib/types";
+import { MEALS, type Activity, type FoodEntry } from "../../lib/types";
 import { Notice } from "../../ui/Notice";
 import { DaySummary } from "./DaySummary";
 import { EmptyDay } from "./EmptyDay";
@@ -76,10 +76,17 @@ export function TodayScreen({
     [] as FoodEntry[],
   );
   const settings = useSettings();
-  const activity = useLiveQuery(
-    () => db.activities.where("date").equals(dateKey).first(),
-    [dateKey],
+  const weekActivities = useLiveQuery(
+    () =>
+      db.activities
+        .where("date")
+        .between(weekStart, weekEnd, true, true)
+        .toArray(),
+    [weekStart, weekEnd],
+    [] as Activity[],
   );
+  const activityByDate = new Map(weekActivities.map((a) => [a.date, a.kcal]));
+  const activityKcal = activityByDate.get(dateKey);
 
   const byDate = groupByDate(weekEntries);
   const entries = byDate.get(dateKey) ?? [];
@@ -87,7 +94,12 @@ export function TodayScreen({
 
   const dayStats: DayStat[] = week.map((date) => {
     const ofDay = byDate.get(date) ?? [];
-    return { date, kcal: sumTotals(ofDay).kcal, hasData: ofDay.length > 0 };
+    return {
+      date,
+      kcal: sumTotals(ofDay).kcal,
+      budget: goal + (activityByDate.get(date) ?? 0),
+      hasData: ofDay.length > 0,
+    };
   });
 
   function selectDate(next: string) {
@@ -104,7 +116,6 @@ export function TodayScreen({
       <WeekStrip
         days={dayStats}
         selected={dateKey}
-        goal={goal}
         onSelect={selectDate}
         onShiftWeek={(delta) => selectDate(shiftDays(dateKey, delta * 7))}
       />
@@ -130,7 +141,7 @@ export function TodayScreen({
             carbs: settings?.carbsGoal ?? 0,
             fat: settings?.fatGoal ?? 0,
           }}
-          activityKcal={activity?.kcal}
+          activityKcal={activityKcal}
         />
 
         {entries.length === 0 ? (

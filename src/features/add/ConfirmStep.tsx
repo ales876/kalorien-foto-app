@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { addEntries } from "../../lib/db";
+import { parseNonNegative } from "../../lib/format";
 import { candidateToEntry, guessMeal, kcalFor } from "../../lib/nutrition";
 import {
   MEALS,
@@ -11,7 +12,8 @@ import { Notice } from "../../ui/Notice";
 import { Segmented } from "../../ui/Segmented";
 
 /** Letzter Schritt jeder Erfassung: Mahlzeit wählen (nach Uhrzeit
- *  vorbelegt), Gramm justieren, speichern. Gilt für alle Wege. */
+ *  vorbelegt), Gramm justieren, speichern. Gilt für alle Wege — auch für
+ *  mehrere Kandidaten auf einmal (Foto, Mehrfachauswahl in der Suche). */
 export function ConfirmStep({
   candidates,
   date,
@@ -24,27 +26,30 @@ export function ConfirmStep({
   onSaved: () => void;
 }) {
   const [meal, setMeal] = useState<Meal>(guessMeal());
-  const [grams, setGrams] = useState<number[]>(
-    candidates.map((c) => c.suggestedGrams),
+  // Als Text, damit das Feld leer sein darf, ohne dass eine 0 hineinspringt.
+  const [grams, setGrams] = useState<string[]>(
+    candidates.map((c) => String(c.suggestedGrams)),
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  const gramsAt = (index: number) => grams[index] ?? 0;
+  const gramsAt = (index: number) => parseNonNegative(grams[index] ?? "") ?? 0;
   const totalKcal = candidates.reduce(
     (sum, candidate, index) =>
       sum + kcalFor(candidate.kcalPer100g, gramsAt(index)),
     0,
   );
+  const nothing = candidates.every((_, index) => gramsAt(index) === 0);
 
   async function save() {
     setSaving(true);
     setError("");
     try {
       await addEntries(
-        candidates.map((candidate, index) =>
-          candidateToEntry(candidate, meal, gramsAt(index), date),
-        ),
+        candidates
+          .map((candidate, index) => [candidate, gramsAt(index)] as const)
+          .filter(([, g]) => g > 0)
+          .map(([candidate, g]) => candidateToEntry(candidate, meal, g, date)),
       );
       onSaved();
     } catch (err) {
@@ -94,10 +99,10 @@ export function ConfirmStep({
               inputMode="decimal"
               min={0}
               aria-label={`Menge ${candidate.name} in Gramm`}
-              value={gramsAt(index)}
+              value={grams[index] ?? ""}
               onChange={(e) => {
                 const next = [...grams];
-                next[index] = Math.max(0, Number(e.target.value) || 0);
+                next[index] = e.target.value;
                 setGrams(next);
               }}
             />
@@ -116,11 +121,13 @@ export function ConfirmStep({
         type="button"
         className="btn"
         onClick={save}
-        disabled={saving || grams.every((g) => g === 0)}
+        disabled={saving || nothing}
       >
         {saving
           ? "Speichern …"
-          : `${totalKcal} kcal zu ${mealLabel(meal)} hinzufügen`}
+          : candidates.length > 1
+            ? `${candidates.length} Einträge, ${totalKcal} kcal zu ${mealLabel(meal)} hinzufügen`
+            : `${totalKcal} kcal zu ${mealLabel(meal)} hinzufügen`}
       </button>
     </>
   );

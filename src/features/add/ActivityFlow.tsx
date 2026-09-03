@@ -73,8 +73,8 @@ export function ActivityFlow({
       </button>
 
       <p className="explainer-note" style={{ marginTop: 16 }}>
-        Der Wert wird nicht gegen deine Kalorien verrechnet: Dein
-        Erhaltungsbedarf ist aus dem tatsächlichen Gewichtsverlauf gemessen und
+        Der Wert erhöht dein Tagesbudget auf der Heute-Seite. Die Energiebilanz
+        in den Berichten bleibt davon unberührt: Der gemessene Erhaltungsbedarf
         enthält deine Bewegung bereits.
       </p>
     </form>

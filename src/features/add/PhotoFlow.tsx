@@ -1,9 +1,12 @@
 import { useRef, useState } from "react";
+import { withReloadOnFailure } from "../../lib/lazyImport";
 import type { NutritionCandidate } from "../../lib/types";
 import { Loading } from "../../ui/Loading";
 import { Notice } from "../../ui/Notice";
 import { IconCamera, IconImage } from "../../ui/icons";
 import { ConfirmStep } from "./ConfirmStep";
+
+const loadVision = withReloadOnFailure(() => import("../../lib/vision"));
 
 export function PhotoFlow({
   apiKey,
@@ -29,8 +32,7 @@ export function PhotoFlow({
     setBusy(true);
     try {
       // SDK und Bildverkleinerung erst laden, wenn wirklich ein Foto kommt.
-      const { analyzePhoto, downscaleToBase64 } =
-        await import("../../lib/vision");
+      const { analyzePhoto, downscaleToBase64 } = await loadVision();
       const base64 = await downscaleToBase64(file, 1024, 0.82);
       const analysis = await analyzePhoto(base64, apiKey);
       if (analysis.candidates.length === 0) {

@@ -9,6 +9,8 @@ import { IconBack, IconChevron } from "../../ui/icons";
 export interface DayStat {
   date: string;
   kcal: number;
+  /** Tagesziel plus erfasste Aktivität. */
+  budget: number;
   hasData: boolean;
 }
 
@@ -18,13 +20,11 @@ export interface DayStat {
 export function WeekStrip({
   days,
   selected,
-  goal,
   onSelect,
   onShiftWeek,
 }: {
   days: DayStat[];
   selected: string;
-  goal: number;
   onSelect: (date: string) => void;
   onShiftWeek: (direction: -1 | 1) => void;
 }) {
@@ -51,7 +51,6 @@ export function WeekStrip({
             <DayButton
               key={day.date}
               day={day}
-              goal={goal}
               isSelected={day.date === selected}
               isToday={day.date === today}
               isFuture={day.date > today}
@@ -79,21 +78,19 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 function DayButton({
   day,
-  goal,
   isSelected,
   isToday,
   isFuture,
   onSelect,
 }: {
   day: DayStat;
-  goal: number;
   isSelected: boolean;
   isToday: boolean;
   isFuture: boolean;
   onSelect: (date: string) => void;
 }) {
-  const ratio = goal > 0 ? Math.min(day.kcal / goal, 1) : 0;
-  const over = goal > 0 && day.kcal > goal * 1.05;
+  const ratio = day.budget > 0 ? Math.min(day.kcal / day.budget, 1) : 0;
+  const over = day.budget > 0 && day.kcal > day.budget * 1.05;
 
   return (
     <button

@@ -5,8 +5,8 @@ import { KcalRing } from "../../ui/KcalRing";
 import { MacroGoals, type MacroGoalValues } from "../../ui/MacroGoals";
 
 /** Tageskarte: die Zahl, nach der man handelt — was noch übrig ist —
- *  steht im Ring. Gegessen, Ziel und Aktivität bleiben als ruhige Liste
- *  daneben. */
+ *  steht im Ring. Erfasste Aktivität erhöht das Tagesbudget:
+ *  übrig = Ziel − Gegessen + Aktiv. */
 export function DaySummary({
   totals,
   goal,
@@ -18,14 +18,15 @@ export function DaySummary({
   macroGoals: MacroGoalValues;
   activityKcal?: number | undefined;
 }) {
-  const remaining = Math.round(goal - totals.kcal);
+  const budget = goal + (activityKcal ?? 0);
+  const remaining = Math.round(budget - totals.kcal);
   const over = remaining < 0;
 
   return (
     <Card>
       <div className="day-hero">
         <div className="ring-wrap" data-over={over}>
-          <KcalRing value={totals.kcal} goal={goal} size={124} stroke={11} />
+          <KcalRing value={totals.kcal} goal={budget} size={124} stroke={11} />
           <div className="ring-inner" aria-live="polite">
             <div className="ring-big">{formatNumber(Math.abs(remaining))}</div>
             <div className="ring-sub">
@@ -45,7 +46,7 @@ export function DaySummary({
           {activityKcal !== undefined && (
             <div>
               <dt>Aktiv</dt>
-              <dd className="muted">{formatNumber(activityKcal)}</dd>
+              <dd className="muted">+{formatNumber(activityKcal)}</dd>
             </div>
           )}
         </dl>

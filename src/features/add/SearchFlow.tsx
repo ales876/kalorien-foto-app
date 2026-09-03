@@ -8,7 +8,7 @@ import { searchProducts } from "../../lib/openfoodfacts";
 import type { NutritionCandidate } from "../../lib/types";
 import { Loading } from "../../ui/Loading";
 import { Notice } from "../../ui/Notice";
-import { IconChevron } from "../../ui/icons";
+import { IconCheck, IconChevron } from "../../ui/icons";
 import { ConfirmStep } from "./ConfirmStep";
 import { ManualFlow } from "./ManualFlow";
 
@@ -20,7 +20,10 @@ interface SearchResults {
 
 /** Suche in drei Stufen: zuerst die eigenen bisherigen Einträge (auch
  *  Foto und Hand), dann der mitgelieferte Produktindex, zuletzt die
- *  wacklige Live-Suche. */
+ *  wacklige Live-Suche.
+ *
+ *  Ein Tipp auf einen Treffer geht direkt weiter. Über den Kreis links
+ *  lassen sich mehrere Treffer markieren und gemeinsam übernehmen. */
 export function SearchFlow({
   date,
   onSaved,
@@ -30,7 +33,10 @@ export function SearchFlow({
 }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResults | null>(null);
-  const [selected, setSelected] = useState<NutritionCandidate | null>(null);
+  const [picked, setPicked] = useState<NutritionCandidate[]>([]);
+  const [confirming, setConfirming] = useState<NutritionCandidate[] | null>(
+    null,
+  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [manual, setManual] = useState(false);
@@ -40,6 +46,7 @@ export function SearchFlow({
     if (term.length < 2) return;
     setBusy(true);
     setError("");
+    setPicked([]);
     try {
       const [history, local] = await Promise.all([
         searchHistory(term).catch(() => [] as HistoryHit[]),
@@ -64,9 +71,24 @@ export function SearchFlow({
     }
   }
 
-  if (selected)
+  function toggle(candidate: NutritionCandidate) {
+    setPicked((current) =>
+      current.includes(candidate)
+        ? current.filter((c) => c !== candidate)
+        : [...current, candidate],
+    );
+  }
+
+  /** Ohne aktive Auswahl geht ein Tipp sofort weiter; mit Auswahl wird
+   *  der Treffer dazu- oder abgewählt. */
+  function open(candidate: NutritionCandidate) {
+    if (picked.length > 0) toggle(candidate);
+    else setConfirming([candidate]);
+  }
+
+  if (confirming)
     return (
-      <ConfirmStep candidates={[selected]} date={date} onSaved={onSaved} />
+      <ConfirmStep candidates={confirming} date={date} onSaved={onSaved} />
     );
   if (manual)
     return (
@@ -120,7 +142,9 @@ export function SearchFlow({
                     key={`h-${hit.name}-${index}`}
                     candidate={hit}
                     sub={`${hit.brand ? `${hit.brand} · ` : ""}${formatNumber(hit.suggestedGrams)} g · ${formatNumber(kcalFor(hit.kcalPer100g, hit.suggestedGrams))} kcal · zuletzt ${formatDateKey(hit.lastUsed).slice(0, 6)}`}
-                    onPick={setSelected}
+                    picked={picked.includes(hit)}
+                    onToggle={() => toggle(hit)}
+                    onOpen={() => open(hit)}
                   />
                 ))}
               </div>
@@ -150,12 +174,15 @@ export function SearchFlow({
                     key={`p-${result.barcode ?? result.name}-${index}`}
                     candidate={result}
                     sub={`${result.brand ? `${result.brand} · ` : ""}${Math.round(result.kcalPer100g)} kcal / 100 g`}
-                    onPick={setSelected}
+                    picked={picked.includes(result)}
+                    onToggle={() => toggle(result)}
+                    onOpen={() => open(result)}
                   />
                 ))}
               </div>
             </section>
           )}
+
           <button
             type="button"
             className="btn btn-ghost"
@@ -163,6 +190,20 @@ export function SearchFlow({
           >
             Nicht dabei? Selbst anlegen
           </button>
+
+          {picked.length > 0 && (
+            <div className="pick-bar">
+              <button
+                type="button"
+                className="btn"
+                onClick={() => setConfirming(picked)}
+              >
+                {picked.length === 1
+                  ? "1 Eintrag übernehmen"
+                  : `${picked.length} Einträge übernehmen`}
+              </button>
+            </div>
+          )}
         </>
       )}
     </>
@@ -172,23 +213,38 @@ export function SearchFlow({
 function ResultRow({
   candidate,
   sub,
-  onPick,
+  picked,
+  onToggle,
+  onOpen,
 }: {
   candidate: NutritionCandidate;
   sub: string;
-  onPick: (candidate: NutritionCandidate) => void;
+  picked: boolean;
+  onToggle: () => void;
+  onOpen: () => void;
 }) {
   return (
-    <button
-      type="button"
-      className="row row-button"
-      onClick={() => onPick(candidate)}
-    >
-      <div className="row-main">
-        <div className="row-title">{candidate.name}</div>
-        <div className="row-sub">{sub}</div>
-      </div>
-      <IconChevron size={16} className="row-chevron" />
-    </button>
+    <div className="row result-row" data-picked={picked}>
+      <button
+        type="button"
+        className="pick-circle"
+        aria-pressed={picked}
+        aria-label={`${candidate.name} markieren`}
+        onClick={onToggle}
+      >
+        {picked && <IconCheck size={14} />}
+      </button>
+      <button type="button" className="result-main" onClick={onOpen}>
+        <span className="row-main">
+          <span className="row-title" style={{ display: "block" }}>
+            {candidate.name}
+          </span>
+          <span className="row-sub" style={{ display: "block" }}>
+            {sub}
+          </span>
+        </span>
+        <IconChevron size={16} className="row-chevron" />
+      </button>
+    </div>
   );
 }

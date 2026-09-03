@@ -37,12 +37,14 @@ Schutzgrenzen: mindestens zwei Wiegungen, 14 Tage, 10 erfasste Tage. Darunter
 wird benannt, was fehlt. Der laufende Tag ist ausgenommen, weil meist erst
 halb erfasst. Die Konstanten stehen exportiert in `analysis.ts`.
 
-## 3. Aktivität wird nicht verrechnet
+## 3. Aktivität: Tagesbudget ja, Energiebilanz nein
 
-Der gemessene Erhaltungsbedarf enthält die Bewegung bereits — er kommt aus
-dem realen Gewichtsverlauf. Aktivitätskalorien abzuziehen würde sie doppelt
-zählen. Sie stehen als Kontext daneben. Diese Trennung bitte nicht
-„reparieren".
+Auf der Heute-Seite erhöht die erfasste Aktivität das Tagesbudget
+(übrig = Ziel − Gegessen + Aktiv), auch in den Wochenringen — so hat es
+der Nutzer am 2026-09-03 gewünscht. In der Energiebilanz der Berichte
+wird sie **nicht** verrechnet: Der gemessene Erhaltungsbedarf kommt aus
+dem realen Gewichtsverlauf und enthält die Bewegung bereits; sie
+abzuziehen würde sie doppelt zählen.
 
 ## 4. HashRouter
 

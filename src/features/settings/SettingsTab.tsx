@@ -6,7 +6,7 @@ import {
   type ImportResult,
 } from "../../lib/backup";
 import { saveSettings } from "../../lib/db";
-import { parsePositive } from "../../lib/format";
+import { parseNonNegative, parsePositive } from "../../lib/format";
 import { PALETTES, applyPalette } from "../../lib/palettes";
 import type { FormulaSex, PaletteId, Settings } from "../../lib/types";
 import { Card } from "../../ui/Card";
@@ -122,16 +122,22 @@ const GOAL_FIELDS = [
 ] as const;
 
 function GoalsCard({ settings }: { settings: Settings }) {
+  // Als Text, damit ein Feld leer sein darf, ohne dass eine 0 hineinspringt.
   const [goals, setGoals] = useState({
-    kcalGoal: settings.kcalGoal,
-    proteinGoal: settings.proteinGoal,
-    carbsGoal: settings.carbsGoal,
-    fatGoal: settings.fatGoal,
+    kcalGoal: String(settings.kcalGoal),
+    proteinGoal: String(settings.proteinGoal),
+    carbsGoal: String(settings.carbsGoal),
+    fatGoal: String(settings.fatGoal),
   });
   const [saved, markSaved] = useSavedFlag();
 
   async function save() {
-    await saveSettings(goals);
+    await saveSettings({
+      kcalGoal: parseNonNegative(goals.kcalGoal) ?? 0,
+      proteinGoal: parseNonNegative(goals.proteinGoal) ?? 0,
+      carbsGoal: parseNonNegative(goals.carbsGoal) ?? 0,
+      fatGoal: parseNonNegative(goals.fatGoal) ?? 0,
+    });
     markSaved();
   }
 
@@ -170,8 +176,8 @@ function GoalField({
   onChange,
 }: {
   label: string;
-  value: number;
-  onChange: (value: number) => void;
+  value: string;
+  onChange: (value: string) => void;
 }) {
   const id = `goal-${label.replace(/\W/g, "").toLowerCase()}`;
   return (
@@ -186,7 +192,7 @@ function GoalField({
         inputMode="numeric"
         min={0}
         value={value}
-        onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0))}
+        onChange={(e) => onChange(e.target.value)}
       />
     </div>
   );

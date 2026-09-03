@@ -1,5 +1,6 @@
 import { Suspense, lazy, useState } from "react";
 import { formatDateKey, toDateKey } from "../../lib/date";
+import { withReloadOnFailure } from "../../lib/lazyImport";
 import { guessMeal } from "../../lib/nutrition";
 import type { Suggestion } from "../../lib/suggestions";
 import type { NutritionCandidate } from "../../lib/types";
@@ -22,8 +23,10 @@ import { SearchFlow } from "./SearchFlow";
 import { WeightFlow } from "./WeightFlow";
 
 // Die Scanner-Bibliothek wiegt einiges und wird nur beim Barcode gebraucht.
-const BarcodeFlow = lazy(() =>
-  import("./BarcodeFlow").then((m) => ({ default: m.BarcodeFlow })),
+const BarcodeFlow = lazy(
+  withReloadOnFailure(() =>
+    import("./BarcodeFlow").then((m) => ({ default: m.BarcodeFlow })),
+  ),
 );
 
 type Mode =

@@ -112,8 +112,9 @@ export function EnergyExplainer({ settings }: { settings: Settings }) {
         <p className="explainer-text">
           Diese App schätzt deinen Erhaltungsbedarf nicht aus einer Formel,
           sondern misst ihn: aus dem, was du tatsächlich gegessen hast, und wie
-          sich dein Gewicht dabei entwickelt hat. Die erfasste Aktivität wird
-          dabei nicht abgezogen — sie steckt im Gewichtsverlauf schon drin.
+          sich dein Gewicht dabei entwickelt hat. Die erfasste Aktivität fließt
+          hier nicht ein — sie steckt im Gewichtsverlauf schon drin. Auf der
+          Heute-Seite erhöht sie dagegen dein Tagesbudget.
         </p>
         <p className="explainer-note">
           Alles hier ist Arithmetik auf deinen Zahlen, keine

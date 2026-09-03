@@ -2,6 +2,7 @@ import { Suspense, lazy, useCallback, useEffect, useState } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useSettings } from "../hooks/useSettings";
 import { toDateKey } from "../lib/date";
+import { withReloadOnFailure } from "../lib/lazyImport";
 import { applyPalette } from "../lib/palettes";
 import { AddSheet } from "../features/add/AddSheet";
 import { ImportRoute } from "../features/import/ImportRoute";
@@ -14,10 +15,12 @@ import { TabBar } from "./TabBar";
 
 // Recharts ist der größte Brocken im Bundle — erst laden, wenn die
 // Berichte wirklich geöffnet werden.
-const ReportsScreen = lazy(() =>
-  import("../features/reports/ReportsScreen").then((m) => ({
-    default: m.ReportsScreen,
-  })),
+const ReportsScreen = lazy(
+  withReloadOnFailure(() =>
+    import("../features/reports/ReportsScreen").then((m) => ({
+      default: m.ReportsScreen,
+    })),
+  ),
 );
 
 export function App() {
@@ -70,26 +73,26 @@ export function App() {
           <Route path="/import" element={<ImportRoute />} />
           <Route path="*" element={<Navigate to="/heute" replace />} />
         </Routes>
+
+        <button
+          type="button"
+          className="fab"
+          data-hidden={addOpen}
+          onClick={() => setAddOpen(true)}
+          aria-label="Eintrag hinzufügen"
+        >
+          <IconPlus size={26} />
+        </button>
+
+        <TabBar />
+
+        <AddSheet
+          open={addOpen}
+          date={targetDate}
+          apiKey={settings?.apiKey ?? ""}
+          onClose={closeAdd}
+        />
       </ErrorBoundary>
-
-      <button
-        type="button"
-        className="fab"
-        data-hidden={addOpen}
-        onClick={() => setAddOpen(true)}
-        aria-label="Eintrag hinzufügen"
-      >
-        <IconPlus size={26} />
-      </button>
-
-      <TabBar />
-
-      <AddSheet
-        open={addOpen}
-        date={targetDate}
-        apiKey={settings?.apiKey ?? ""}
-        onClose={closeAdd}
-      />
     </div>
   );
 }
