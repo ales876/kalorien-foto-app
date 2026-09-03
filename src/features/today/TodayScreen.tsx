@@ -9,6 +9,7 @@ import { copyDay } from "../../lib/suggestions";
 import { MEALS, type Activity, type FoodEntry } from "../../lib/types";
 import { Notice } from "../../ui/Notice";
 import { DaySummary } from "./DaySummary";
+import { ActivitySection } from "./ActivitySection";
 import { EmptyDay } from "./EmptyDay";
 import { MealSection } from "./MealSection";
 import { WeekStrip, type DayStat } from "./WeekStrip";
@@ -86,7 +87,8 @@ export function TodayScreen({
     [] as Activity[],
   );
   const activityByDate = new Map(weekActivities.map((a) => [a.date, a.kcal]));
-  const activityKcal = activityByDate.get(dateKey);
+  const activity = weekActivities.find((a) => a.date === dateKey);
+  const activityKcal = activity?.kcal;
 
   const byDate = groupByDate(weekEntries);
   const entries = byDate.get(dateKey) ?? [];
@@ -158,6 +160,8 @@ export function TodayScreen({
             />
           ))
         )}
+
+        {activity && <ActivitySection activity={activity} />}
       </div>
     </div>
   );

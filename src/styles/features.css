@@ -998,3 +998,7 @@
   background: linear-gradient(to top, var(--bg) 70%, transparent);
   animation: popover-in var(--dur-base) var(--ease-spring) both;
 }
+
+.activity-editor .field {
+  margin-bottom: 10px;
+}
