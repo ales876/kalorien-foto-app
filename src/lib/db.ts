@@ -1,6 +1,7 @@
 import { Dexie, type EntityTable } from "dexie";
 import {
   DEFAULT_SETTINGS,
+  LEGACY_DEFAULT_GOALS,
   type Activity,
   type BodyMeasurement,
   type FoodEntry,
@@ -41,7 +42,29 @@ export async function getSettings(
   database: AppDatabase = db,
 ): Promise<Settings> {
   const stored = await database.settings.get("settings");
-  return stored ? { ...DEFAULT_SETTINGS, ...stored } : DEFAULT_SETTINGS;
+  if (!stored) return DEFAULT_SETTINGS;
+  const merged: Settings = { ...DEFAULT_SETTINGS, ...stored };
+  // Unveränderte Ziele der ersten Version → neue Standardwerte.
+  const untouched = (
+    Object.keys(LEGACY_DEFAULT_GOALS) as (keyof typeof LEGACY_DEFAULT_GOALS)[]
+  ).every((key) => stored[key] === LEGACY_DEFAULT_GOALS[key]);
+  if (untouched) {
+    merged.kcalGoal = DEFAULT_SETTINGS.kcalGoal;
+    merged.proteinGoal = DEFAULT_SETTINGS.proteinGoal;
+    merged.carbsGoal = DEFAULT_SETTINGS.carbsGoal;
+    merged.fatGoal = DEFAULT_SETTINGS.fatGoal;
+  }
+  // Leere Körperdaten → Standard; alter Jahrgang → Alter.
+  if (merged.heightCm === undefined)
+    merged.heightCm = DEFAULT_SETTINGS.heightCm;
+  if (merged.age === undefined) {
+    merged.age =
+      stored.birthYear !== undefined
+        ? new Date().getFullYear() - stored.birthYear
+        : DEFAULT_SETTINGS.age;
+  }
+  if (merged.sex === undefined) merged.sex = DEFAULT_SETTINGS.sex;
+  return merged;
 }
 
 export async function saveSettings(

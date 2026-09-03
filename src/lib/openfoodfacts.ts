@@ -1,3 +1,4 @@
+import { guessUnit } from "./nutrition";
 import type { NutritionCandidate } from "./types";
 
 /** Open Food Facts bittet um eine Client-Kennung. Der User-Agent-Header
@@ -86,6 +87,7 @@ export function toCandidate(
     fatPer100g: n.fat_100g ?? 0,
     suggestedGrams: 100,
     source,
+    unit: guessUnit(displayName(product), firstBrand(product) ?? ""),
   };
   const brand = firstBrand(product);
   if (brand) candidate.brand = brand;

@@ -4,6 +4,7 @@ import {
   entryTotals,
   groupByDate,
   guessMeal,
+  guessUnit,
   kcalFor,
   sumTotals,
 } from "./nutrition";
@@ -79,5 +80,16 @@ describe("guessMeal", () => {
     expect(guessMeal(new Date(2026, 8, 2, 12))).toBe("mittag");
     expect(guessMeal(new Date(2026, 8, 2, 19))).toBe("abend");
     expect(guessMeal(new Date(2026, 8, 2, 22))).toBe("snack");
+  });
+});
+
+describe("guessUnit", () => {
+  it("erkennt Getränke am Namen", () => {
+    expect(guessUnit("Hafermilch Kakao", "Oatly")).toBe("ml");
+    expect(guessUnit("Skyr Natur", "Arla")).toBe("g");
+    expect(guessUnit("Cola Zero 0,5 l")).toBe("ml");
+    expect(guessUnit("Haferdrink ungesüßt")).toBe("ml");
+    expect(guessUnit("Vollkornbrot")).toBe("g");
+    expect(guessUnit("Kaffee mit Milch")).toBe("ml");
   });
 });

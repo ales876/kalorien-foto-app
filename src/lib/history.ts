@@ -69,6 +69,7 @@ export function searchHistoryEntries(
         source: latest.source,
         lastUsed: latest.date,
         count,
+        unit: latest.unit ?? "g",
       };
       if (latest.brand) hit.brand = latest.brand;
       if (latest.barcode) hit.barcode = latest.barcode;

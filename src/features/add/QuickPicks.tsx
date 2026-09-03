@@ -1,6 +1,6 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { formatNumber } from "../../lib/format";
-import { kcalFor } from "../../lib/nutrition";
+import { kcalFor, unitOf } from "../../lib/nutrition";
 import { getSuggestions, type Suggestion } from "../../lib/suggestions";
 import type { Meal } from "../../lib/types";
 import { IconChevron } from "../../ui/icons";
@@ -33,7 +33,7 @@ export function QuickPicks({
               <div className="row-title">{item.name}</div>
               <div className="row-sub">
                 {item.brand ? `${item.brand} · ` : ""}
-                {formatNumber(item.suggestedGrams)} g ·{" "}
+                {formatNumber(item.suggestedGrams)} {unitOf(item)} ·{" "}
                 {formatNumber(kcalFor(item.kcalPer100g, item.suggestedGrams))}{" "}
                 kcal
               </div>

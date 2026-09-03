@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { addEntries } from "../../lib/db";
 import { parseNonNegative } from "../../lib/format";
-import { candidateToEntry, guessMeal, kcalFor } from "../../lib/nutrition";
+import {
+  candidateToEntry,
+  guessMeal,
+  guessUnit,
+  kcalFor,
+} from "../../lib/nutrition";
 import {
   MEALS,
   mealLabel,
@@ -10,6 +15,8 @@ import {
 } from "../../lib/types";
 import { Notice } from "../../ui/Notice";
 import { Segmented } from "../../ui/Segmented";
+
+const unitFor = (c: NutritionCandidate) => c.unit ?? guessUnit(c.name, c.brand);
 
 /** Letzter Schritt jeder Erfassung: Mahlzeit wählen (nach Uhrzeit
  *  vorbelegt), Gramm justieren, speichern. Gilt für alle Wege — auch für
@@ -90,7 +97,8 @@ export function ConfirmStep({
               </div>
               <div className="row-sub">
                 {candidate.brand ? `${candidate.brand} · ` : ""}
-                {Math.round(candidate.kcalPer100g)} kcal / 100 g
+                {Math.round(candidate.kcalPer100g)} kcal / 100{" "}
+                {unitFor(candidate)}
               </div>
             </div>
             <input
@@ -98,7 +106,7 @@ export function ConfirmStep({
               type="number"
               inputMode="decimal"
               min={0}
-              aria-label={`Menge ${candidate.name} in Gramm`}
+              aria-label={`Menge ${candidate.name} in ${unitFor(candidate) === "ml" ? "Milliliter" : "Gramm"}`}
               value={grams[index] ?? ""}
               onChange={(e) => {
                 const next = [...grams];
@@ -106,7 +114,7 @@ export function ConfirmStep({
                 setGrams(next);
               }}
             />
-            <span className="row-sub">g</span>
+            <span className="row-sub">{unitFor(candidate)}</span>
             <span className="row-value">
               {kcalFor(candidate.kcalPer100g, gramsAt(index))} kcal
             </span>

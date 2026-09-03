@@ -200,16 +200,15 @@ function GoalField({
 
 function BodyCard({ settings }: { settings: Settings }) {
   const [heightCm, setHeightCm] = useState(settings.heightCm?.toString() ?? "");
-  const [birthYear, setBirthYear] = useState(
-    settings.birthYear?.toString() ?? "",
-  );
+  const [age, setAge] = useState(settings.age?.toString() ?? "");
   const [sex, setSex] = useState<FormulaSex>(settings.sex ?? "m");
   const [saved, markSaved] = useSavedFlag();
 
   async function save() {
     const patch: Partial<Settings> = { sex };
     patch.heightCm = parsePositive(heightCm);
-    patch.birthYear = parsePositive(birthYear);
+    patch.age = parsePositive(age);
+    patch.birthYear = undefined;
     await saveSettings(patch);
     markSaved();
   }
@@ -230,23 +229,23 @@ function BodyCard({ settings }: { settings: Settings }) {
             className="input"
             type="number"
             inputMode="numeric"
-            placeholder="180"
+            placeholder="179"
             value={heightCm}
             onChange={(e) => setHeightCm(e.target.value)}
           />
         </div>
         <div className="field">
-          <label className="field-label" htmlFor="birth-year">
-            Jahrgang
+          <label className="field-label" htmlFor="age">
+            Alter
           </label>
           <input
-            id="birth-year"
+            id="age"
             className="input"
             type="number"
             inputMode="numeric"
-            placeholder="1991"
-            value={birthYear}
-            onChange={(e) => setBirthYear(e.target.value)}
+            placeholder="40"
+            value={age}
+            onChange={(e) => setAge(e.target.value)}
           />
         </div>
       </div>

@@ -59,7 +59,12 @@ export interface FoodEntry {
   barcode?: string;
   /** Nur bei Foto-Einträgen: kleines Vorschaubild (base64, ohne Präfix). */
   thumb?: string;
+  /** Getränke werden in ml geführt; fehlt das Feld, gilt g. Die Nährwerte
+   *  beziehen sich dann auf 100 ml — die Rechnung bleibt dieselbe. */
+  unit?: Unit;
 }
+
+export type Unit = "g" | "ml";
 
 /** Höchstens eine Messung pro Tag. */
 export interface BodyMeasurement {
@@ -94,6 +99,9 @@ export interface Settings {
   apiKey: string;
   palette: PaletteId;
   heightCm?: number;
+  /** Alter in Jahren (ersetzt den früheren Jahrgang). */
+  age?: number;
+  /** Nur noch für alte Datenbestände; wird beim Laden in `age` überführt. */
   birthYear?: number;
   sex?: FormulaSex;
   kcalGoal: number;
@@ -106,11 +114,23 @@ export const DEFAULT_SETTINGS: Settings = {
   id: "settings",
   apiKey: "",
   palette: "gelb",
+  heightCm: 179,
+  age: 40,
+  sex: "m",
+  kcalGoal: 1650,
+  proteinGoal: 120,
+  carbsGoal: 220,
+  fatGoal: 25,
+};
+
+/** Ziele der ersten Version — wer sie nie angefasst hat, bekommt beim
+ *  Laden die neuen Standardwerte. */
+export const LEGACY_DEFAULT_GOALS = {
   kcalGoal: 2000,
   proteinGoal: 130,
   carbsGoal: 200,
   fatGoal: 70,
-};
+} as const;
 
 export type Confidence = "hoch" | "mittel" | "niedrig";
 
@@ -128,6 +148,7 @@ export interface NutritionCandidate {
   barcode?: string;
   source: EntrySource;
   thumb?: string;
+  unit?: Unit;
   /** Nur Foto-Analyse: wie sicher das Modell die Zutat erkannt hat. */
   confidence?: Confidence;
 }

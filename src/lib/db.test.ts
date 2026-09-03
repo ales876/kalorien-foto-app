@@ -12,11 +12,27 @@ describe("Einstellungen", () => {
   it("liefert Standardwerte und ergänzt gespeicherte", async () => {
     const db = createDatabase(`test-${Math.random()}`);
     expect(await getSettings(db)).toEqual(DEFAULT_SETTINGS);
+    // Unveränderte alte Ziele werden zu den neuen Standardwerten
+    await db.settings.put({
+      ...DEFAULT_SETTINGS,
+      kcalGoal: 2000,
+      proteinGoal: 130,
+      carbsGoal: 200,
+      fatGoal: 70,
+      birthYear: 1986,
+      heightCm: undefined,
+      age: undefined,
+    });
+    const migrated = await getSettings(db);
+    expect(migrated.kcalGoal).toBe(1650);
+    expect(migrated.fatGoal).toBe(25);
+    expect(migrated.heightCm).toBe(179);
+    expect(migrated.age).toBe(new Date().getFullYear() - 1986);
     await saveSettings({ apiKey: "sk-test", kcalGoal: 2100 }, db);
     const stored = await getSettings(db);
     expect(stored.apiKey).toBe("sk-test");
     expect(stored.kcalGoal).toBe(2100);
-    expect(stored.proteinGoal).toBe(DEFAULT_SETTINGS.proteinGoal);
+    expect(stored.kcalGoal).toBe(2100);
   });
 });
 

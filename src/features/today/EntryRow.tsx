@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { formatNumber } from "../../lib/format";
-import { entryTotals } from "../../lib/nutrition";
+import { entryTotals, unitOf } from "../../lib/nutrition";
 import type { FoodEntry } from "../../lib/types";
 import { SOURCE_ICONS } from "../../ui/mealIcons";
 import { IconSearchLine } from "../../ui/icons";
@@ -53,7 +53,7 @@ export function EntryRow({
           <span className="row-sub entry-meta">
             <span className="entry-origin">
               {entry.brand ? `${entry.brand} · ` : ""}
-              {formatNumber(entry.grams)} g
+              {formatNumber(entry.grams)} {unitOf(entry)}
             </span>
             <span className="macro-inline">
               <b>{formatNumber(totals.protein)}</b> P

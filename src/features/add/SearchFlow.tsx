@@ -3,7 +3,7 @@ import { formatDateKey } from "../../lib/date";
 import { formatNumber } from "../../lib/format";
 import { searchHistory, type HistoryHit } from "../../lib/history";
 import { searchLocal } from "../../lib/localFoods";
-import { kcalFor } from "../../lib/nutrition";
+import { kcalFor, unitOf } from "../../lib/nutrition";
 import { searchProducts } from "../../lib/openfoodfacts";
 import type { NutritionCandidate } from "../../lib/types";
 import { Loading } from "../../ui/Loading";
@@ -141,7 +141,7 @@ export function SearchFlow({
                   <ResultRow
                     key={`h-${hit.name}-${index}`}
                     candidate={hit}
-                    sub={`${hit.brand ? `${hit.brand} · ` : ""}${formatNumber(hit.suggestedGrams)} g · ${formatNumber(kcalFor(hit.kcalPer100g, hit.suggestedGrams))} kcal · zuletzt ${formatDateKey(hit.lastUsed).slice(0, 6)}`}
+                    sub={`${hit.brand ? `${hit.brand} · ` : ""}${formatNumber(hit.suggestedGrams)} ${unitOf(hit)} · ${formatNumber(kcalFor(hit.kcalPer100g, hit.suggestedGrams))} kcal · zuletzt ${formatDateKey(hit.lastUsed).slice(0, 6)}`}
                     picked={picked.includes(hit)}
                     onToggle={() => toggle(hit)}
                     onOpen={() => open(hit)}
@@ -173,7 +173,7 @@ export function SearchFlow({
                   <ResultRow
                     key={`p-${result.barcode ?? result.name}-${index}`}
                     candidate={result}
-                    sub={`${result.brand ? `${result.brand} · ` : ""}${Math.round(result.kcalPer100g)} kcal / 100 g`}
+                    sub={`${result.brand ? `${result.brand} · ` : ""}${Math.round(result.kcalPer100g)} kcal / 100 ${unitOf(result)}`}
                     picked={picked.includes(result)}
                     onToggle={() => toggle(result)}
                     onOpen={() => open(result)}

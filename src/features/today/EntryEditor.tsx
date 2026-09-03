@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { formatDateKey, shiftDays, toDateKey } from "../../lib/date";
 import { deleteEntry, updateEntry } from "../../lib/db";
 import { parseNonNegative } from "../../lib/format";
-import { kcalFor } from "../../lib/nutrition";
+import { kcalFor, unitOf } from "../../lib/nutrition";
 import { MEALS, type FoodEntry, type Meal } from "../../lib/types";
 import { Segmented } from "../../ui/Segmented";
 import { IconCheck, IconChevron, IconTrash } from "../../ui/icons";
@@ -18,7 +18,7 @@ const PER100_FIELDS = [
 /** Bearbeiten an Ort und Stelle, wie eine aufgeklappte Aufgabe in Things:
  *  die Zeile wird zur Karte, unten erscheint die Werkzeugleiste. Beim
  *  Zuklappen wird automatisch gespeichert — es gibt keinen Abbrechen-Fall,
- *  nur „Fertig". Die Invariante bleibt: Nährwerte pro 100 g, Gramm ist
+ *  nur „Fertig". Die Invariante bleibt: Nährwerte pro 100 {unitOf(entry)}, Gramm ist
  *  die Menge. */
 export function EntryEditor({
   entry,
@@ -122,7 +122,7 @@ export function EntryEditor({
         </div>
         <div className="field" style={{ flex: "0 0 96px" }}>
           <label className="field-label" htmlFor={field("grams")}>
-            Menge (g)
+            Menge ({unitOf(entry)})
           </label>
           <input
             id={field("grams")}

@@ -1,5 +1,5 @@
 import { toDateKey } from "./date";
-import type { FoodEntry, Meal, NutritionCandidate } from "./types";
+import type { FoodEntry, Meal, NutritionCandidate, Unit } from "./types";
 
 export interface Totals {
   kcal: number;
@@ -57,6 +57,79 @@ export function groupByDate(
   return groups;
 }
 
+const DRINK_WORDS = [
+  "milch",
+  "milk",
+  "drink",
+  "saft",
+  "juice",
+  "wasser",
+  "water",
+  "cola",
+  "limo",
+  "limonade",
+  "schorle",
+  "kaffee",
+  "coffee",
+  "latte",
+  "cappuccino",
+  "espresso",
+  "tee",
+  "tea",
+  "bier",
+  "beer",
+  "wein",
+  "wine",
+  "sekt",
+  "prosecco",
+  "shake",
+  "smoothie",
+  "kefir",
+  "buttermilch",
+  "getränk",
+  "getraenk",
+  "beverage",
+  "soda",
+  "spezi",
+  "eistee",
+  "kakao",
+  "cocoa",
+  "energy",
+  "radler",
+  "brühe",
+  "bruehe",
+  "suppe",
+  "sirup",
+  "likör",
+  "likoer",
+  "gin",
+  "wodka",
+  "vodka",
+  "whisky",
+  "rum",
+];
+const DRINK_PATTERNS = [/\bml\b/, /\d\s*[,.]?\d*\s*l\b/, /\bliter\b/];
+
+/** Getränke werden in ml geführt. Erkannt wird über den Namen — der
+ *  Produktindex kennt keine Kategorien. Grenzfälle (Suppe, Joghurt-
+ *  Drink) laufen bewusst als Getränk, weil man sie abmisst, nicht wiegt. */
+export function guessUnit(name: string, brand = ""): Unit {
+  const text = `${name} ${brand}`.toLowerCase();
+  if (DRINK_PATTERNS.some((p) => p.test(text))) return "ml";
+  const words = text.split(/[^a-zäöüß]+/);
+  return words.some(
+    (w) =>
+      DRINK_WORDS.includes(w) ||
+      DRINK_WORDS.some((d) => d.length > 4 && w.endsWith(d)),
+  )
+    ? "ml"
+    : "g";
+}
+
+export function unitOf(item: { unit?: Unit | undefined }): Unit {
+  return item.unit ?? "g";
+}
+
 export function candidateToEntry(
   candidate: NutritionCandidate,
   meal: Meal,
@@ -78,6 +151,7 @@ export function candidateToEntry(
   if (candidate.brand) entry.brand = candidate.brand;
   if (candidate.barcode) entry.barcode = candidate.barcode;
   if (candidate.thumb) entry.thumb = candidate.thumb;
+  entry.unit = candidate.unit ?? guessUnit(candidate.name, candidate.brand);
   return entry;
 }
 

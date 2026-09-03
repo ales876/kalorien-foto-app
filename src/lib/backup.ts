@@ -25,6 +25,7 @@ const entrySchema = z.object({
   source: z.enum(ENTRY_SOURCES as [string, ...string[]]).catch("import"),
   barcode: z.string().optional(),
   thumb: z.string().optional(),
+  unit: z.enum(["g", "ml"]).optional(),
 });
 
 const measurementSchema = z

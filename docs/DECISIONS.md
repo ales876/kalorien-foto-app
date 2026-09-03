@@ -140,6 +140,22 @@ letzten 365 Tage (auch Foto und Hand, keine Tagessummen), zusammengefasst
 je Lebensmittel mit der zuletzt genutzten Menge — dann den Produktindex,
 zuletzt die Live-Suche. Ersetzt ein eigenes „Quick Find".
 
+## 13. Getränke in ml
+
+Der Produktindex kennt keine Kategorien, deshalb erkennt `guessUnit()`
+Getränke am Namen (Milch, Drink, Saft, Kaffee, „0,5 l", …). Solche
+Einträge tragen `unit: "ml"`; Nährwerte gelten dann pro 100 ml, die
+Rechnung bleibt identisch. Bearbeiten zeigt die Einheit, ändert sie
+aber nicht — ein Fehlgriff wird über den Namen korrigiert.
+
+## 14. Standardwerte
+
+Ziele 1.650 kcal, 120 g Protein, 220 g KH, 25 g Fett; Körperdaten
+179 cm, 40 Jahre, Formel-Variante männlich (Wunsch vom 2026-09-03).
+`getSettings()` hebt unveränderte Ziele der ersten Version (2.000/130/
+200/70) auf diese Werte an und überführt einen alten Jahrgang in das
+Alter.
+
 ## Fallstricke
 
 | Falle                                                  | Was passiert                        | Richtig                              |

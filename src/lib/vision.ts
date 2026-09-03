@@ -6,6 +6,7 @@ import Anthropic, {
 } from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
+import { guessUnit } from "./nutrition";
 import type { NutritionCandidate } from "./types";
 
 /** Opus 5 ist der aktuelle Standard der Anthropic-API; ein Foto kostet
@@ -140,6 +141,7 @@ export async function analyzePhoto(
         fatPer100g: clampNonNegative(item.fat_per_100g),
         suggestedGrams: Math.max(1, Math.round(clampNonNegative(item.grams))),
         source: "photo",
+        unit: guessUnit(item.name),
         confidence: item.confidence,
       })),
     };

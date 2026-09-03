@@ -1,3 +1,4 @@
+import { guessUnit } from "./nutrition";
 import type { NutritionCandidate } from "./types";
 
 /** Kompakter Eintrag im mitgelieferten Produktindex (public/de-foods.json).
@@ -74,6 +75,7 @@ export function toCandidate(
     suggestedGrams: 100,
     barcode: entry.c,
     source,
+    unit: guessUnit(entry.n, entry.b),
   };
   if (entry.b) candidate.brand = entry.b;
   return candidate;

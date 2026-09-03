@@ -20,10 +20,7 @@ export function EnergyExplainer({ settings }: { settings: Settings }) {
   const latestWeight = [...measurements]
     .filter((m) => typeof m.weightKg === "number")
     .sort((a, b) => b.date.localeCompare(a.date))[0]?.weightKg;
-  const age =
-    settings.birthYear !== undefined
-      ? new Date().getFullYear() - settings.birthYear
-      : undefined;
+  const age = settings.age;
 
   const bmr =
     latestWeight !== undefined &&
@@ -54,7 +51,7 @@ export function EnergyExplainer({ settings }: { settings: Settings }) {
           note={
             bmr !== undefined
               ? "Was der Körper in völliger Ruhe verbraucht"
-              : "Größe, Jahrgang, Formel-Variante und eine Wiegung fehlen noch"
+              : "Größe, Alter, Formel-Variante und eine Wiegung fehlen noch"
           }
         />
         <Line

@@ -62,6 +62,7 @@ export function rankSuggestions(
       source: latest.source,
       count: group.entries.length,
       lastUsed: latest.date,
+      unit: latest.unit ?? "g",
     };
     if (latest.brand) suggestion.brand = latest.brand;
     if (latest.barcode) suggestion.barcode = latest.barcode;
