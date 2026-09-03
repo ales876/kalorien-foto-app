@@ -59,6 +59,24 @@ describe("importBackup", () => {
     expect(await db.activities.count()).toBe(1);
   });
 
+  it("ersetzt eine übernommene Tagessumme desselben Tages statt sie zu addieren", async () => {
+    const daySum = {
+      ...validEntry,
+      name: "Tagessumme (Import)",
+      source: "import",
+      kcalPer100g: 780,
+    };
+    await importBackup(JSON.stringify({ entries: [daySum] }), db);
+    const result = await importBackup(
+      JSON.stringify({ entries: [{ ...daySum, kcalPer100g: 1702 }] }),
+      db,
+    );
+    expect(result.entries).toBe(1);
+    const entries = await db.entries.toArray();
+    expect(entries).toHaveLength(1);
+    expect(entries[0]?.kcalPer100g).toBe(1702);
+  });
+
   it("nimmt Altformate ohne activities-Feld", async () => {
     const result = await importBackup(
       JSON.stringify({

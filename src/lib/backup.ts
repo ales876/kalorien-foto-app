@@ -137,16 +137,30 @@ export async function importBackup(
     throw new Error("Die Datei enthält keine verwertbaren Daten.");
   }
 
-  const known = new Set(
-    (await database.entries.toArray()).map(entryFingerprint),
-  );
+  const existing = await database.entries.toArray();
+  const known = new Set(existing.map(entryFingerprint));
   let skipped = 0;
   const toAdd: FoodEntry[] = [];
+  // Übernommene Tagessummen gibt es je Tag nur einmal: kommt eine neue
+  // Summe für einen Tag, ersetzt sie die alte statt sich dazuzuaddieren.
+  const toReplace: number[] = [];
   for (const entry of entries.valid) {
     const key = entryFingerprint(entry);
     if (known.has(key)) {
       skipped++;
       continue;
+    }
+    if (entry.source === "import") {
+      for (const old of existing) {
+        if (
+          old.source === "import" &&
+          old.date === entry.date &&
+          old.name === entry.name &&
+          old.id !== undefined
+        ) {
+          toReplace.push(old.id);
+        }
+      }
     }
     known.add(key);
     // Fremde IDs nicht übernehmen — Dexie vergibt eigene.
@@ -161,6 +175,7 @@ export async function importBackup(
     "rw",
     [database.entries, database.measurements, database.activities],
     async () => {
+      if (toReplace.length > 0) await database.entries.bulkDelete(toReplace);
       if (toAdd.length > 0) await database.entries.bulkAdd(toAdd);
       for (const m of measurements.valid)
         await upsertMeasurement(m.date, m, database);
