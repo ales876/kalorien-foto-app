@@ -38,7 +38,7 @@ const TITLES: Record<Mode, string> = {
   photo: "Foto analysieren",
   barcode: "Barcode scannen",
   search: "Produkt suchen",
-  weight: "Gewicht & Maße",
+  weight: "Gewicht",
   activity: "Aktivität erfassen",
 };
 

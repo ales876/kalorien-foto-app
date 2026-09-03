@@ -464,7 +464,6 @@
 
 /* Alles andere tritt zurück, solange eine Zeile offen ist. */
 .screen[data-editing="true"] .weekstrip,
-.screen[data-editing="true"] .take-over-day,
 .screen[data-editing="true"]
   .day-content
   > .card:not([data-has-editing="true"]),
@@ -474,7 +473,6 @@
 }
 
 .weekstrip,
-.take-over-day,
 .day-content > .card,
 .meal-header {
   transition: opacity var(--dur-base) var(--ease-out);
@@ -549,45 +547,6 @@
   padding: 8px 12px;
   font-size: 13px;
   width: auto;
-}
-
-/* ---------- Übernehmen ---------- */
-
-.take-over {
-  display: block;
-  width: 100%;
-  text-align: left;
-  border: none;
-  background: transparent;
-  padding: 6px 0 2px;
-}
-
-.take-over-label {
-  display: block;
-  font-size: 13px;
-  color: var(--ink-tertiary);
-}
-
-.take-over-names {
-  display: block;
-  font-size: 14px;
-  color: var(--ink-secondary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  margin: 1px 0 3px;
-}
-
-/* Gegenfarbe statt Akzent: Gelb auf Weiß wäre unlesbar (1,8:1). */
-.take-over-action {
-  display: inline-block;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--complement-ink);
-}
-
-.take-over-day {
-  margin-bottom: 16px;
 }
 
 /* ---------- Erfassen ---------- */
@@ -762,12 +721,6 @@
   display: inline-block;
 }
 
-.measure-waist {
-  width: 68px;
-  text-align: right;
-  flex: 0 0 auto;
-}
-
 /* ---------- Mehr ---------- */
 
 .palette-grid {
@@ -881,15 +834,6 @@
 .empty-day-text {
   color: var(--ink-tertiary);
   font-size: 14px;
-  margin-bottom: 18px;
-}
-
-.empty-day .row {
-  text-align: left;
-}
-
-.empty-day .take-over {
-  padding: 0;
 }
 
 /* ---------- Verschieben-Popover über der Werkzeugleiste ---------- */

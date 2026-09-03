@@ -4,8 +4,8 @@ import { db, upsertMeasurement } from "../../lib/db";
 import { formatDecimal, parsePositive } from "../../lib/format";
 import { Notice } from "../../ui/Notice";
 
-/** Gewicht und Bauchumfang werden wie Essen über das Plus erfasst —
- *  ein Ort zum Eintragen, egal worum es geht. Ein Wert pro Tag. */
+/** Gewicht wird wie Essen über das Plus erfasst — ein Ort zum Eintragen,
+ *  egal worum es geht. Ein Wert pro Tag. */
 export function WeightFlow({
   date,
   onSaved,
@@ -18,21 +18,14 @@ export function WeightFlow({
     [date],
   );
   const [weight, setWeight] = useState("");
-  const [waist, setWaist] = useState("");
   const [saving, setSaving] = useState(false);
-
   const weightValue = parsePositive(weight);
-  const waistValue = parsePositive(waist);
-  const nothingEntered = weightValue === undefined && waistValue === undefined;
 
   async function save() {
-    if (nothingEntered) return;
+    if (weightValue === undefined) return;
     setSaving(true);
     try {
-      const values: { weightKg?: number; waistCm?: number } = {};
-      if (weightValue !== undefined) values.weightKg = weightValue;
-      if (waistValue !== undefined) values.waistCm = waistValue;
-      await upsertMeasurement(date, values);
+      await upsertMeasurement(date, { weightKg: weightValue });
       onSaved();
     } finally {
       setSaving(false);
@@ -46,54 +39,35 @@ export function WeightFlow({
         void save();
       }}
     >
-      {existing && (
+      {existing?.weightKg !== undefined && (
         <Notice kind="info">
-          Für diesen Tag schon erfasst:{" "}
-          {[
-            existing.weightKg ? `${formatDecimal(existing.weightKg)} kg` : "",
-            existing.waistCm ? `${formatDecimal(existing.waistCm)} cm` : "",
-          ]
-            .filter(Boolean)
-            .join(" · ")}{" "}
-          — neue Werte überschreiben den Eintrag.
+          Für diesen Tag schon erfasst: {formatDecimal(existing.weightKg)} kg —
+          ein neuer Wert überschreibt ihn.
         </Notice>
       )}
 
-      <div className="split">
-        <div className="field">
-          <label className="field-label" htmlFor="weight">
-            Gewicht (kg)
-          </label>
-          <input
-            id="weight"
-            className="input"
-            type="number"
-            inputMode="decimal"
-            step="0.1"
-            placeholder="74,5"
-            autoFocus
-            value={weight}
-            onChange={(e) => setWeight(e.target.value)}
-          />
-        </div>
-        <div className="field">
-          <label className="field-label" htmlFor="waist">
-            Bauchumfang (cm)
-          </label>
-          <input
-            id="waist"
-            className="input"
-            type="number"
-            inputMode="decimal"
-            step="0.5"
-            placeholder="94"
-            value={waist}
-            onChange={(e) => setWaist(e.target.value)}
-          />
-        </div>
+      <div className="field">
+        <label className="field-label" htmlFor="weight">
+          Gewicht (kg)
+        </label>
+        <input
+          id="weight"
+          className="input"
+          type="number"
+          inputMode="decimal"
+          step="0.1"
+          placeholder="74,5"
+          autoFocus
+          value={weight}
+          onChange={(e) => setWeight(e.target.value)}
+        />
       </div>
 
-      <button type="submit" className="btn" disabled={nothingEntered || saving}>
+      <button
+        type="submit"
+        className="btn"
+        disabled={weightValue === undefined || saving}
+      >
         {saving ? "Speichern …" : "Speichern"}
       </button>
     </form>

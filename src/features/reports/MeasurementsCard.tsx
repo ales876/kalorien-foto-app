@@ -29,9 +29,6 @@ export function MeasurementsCard({
             <span className="row-value">
               {m.weightKg ? `${formatDecimal(m.weightKg)} kg` : "–"}
             </span>
-            <span className="row-sub measure-waist">
-              {m.waistCm ? `${formatDecimal(m.waistCm)} cm` : "–"}
-            </span>
             <DeleteButton
               label={`Messung vom ${formatDateKey(m.date)} löschen`}
               onDelete={() =>

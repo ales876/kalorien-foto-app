@@ -2,10 +2,9 @@ import { useEffect, useState, type MouseEvent } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSettings } from "../../hooks/useSettings";
-import { shiftDays, toDateKey, weekOf } from "../../lib/date";
+import { shiftDays, weekOf } from "../../lib/date";
 import { db } from "../../lib/db";
 import { groupByDate, sumTotals } from "../../lib/nutrition";
-import { copyDay } from "../../lib/suggestions";
 import { MEALS, type Activity, type FoodEntry } from "../../lib/types";
 import { Notice } from "../../ui/Notice";
 import { DaySummary } from "./DaySummary";
@@ -21,7 +20,6 @@ export function TodayScreen({
   dateKey: string;
   onDateChange: (date: string) => void;
 }) {
-  const today = toDateKey();
   const week = weekOf(dateKey);
   const weekStart = week[0] ?? dateKey;
   const weekEnd = week[6] ?? dateKey;
@@ -125,16 +123,6 @@ export function TodayScreen({
       {hint && <Notice kind="success">{hint}</Notice>}
 
       <div className="day-content" key={dateKey} data-direction={direction}>
-        {dateKey !== today && entries.length > 0 && (
-          <button
-            type="button"
-            className="btn btn-secondary take-over-day"
-            onClick={() => copyDay(dateKey, today)}
-          >
-            Diesen Tag auf heute übernehmen
-          </button>
-        )}
-
         <DaySummary
           totals={sumTotals(entries)}
           goal={goal}
@@ -147,13 +135,12 @@ export function TodayScreen({
         />
 
         {entries.length === 0 ? (
-          <EmptyDay date={dateKey} />
+          <EmptyDay />
         ) : (
           MEALS.map((meal) => (
             <MealSection
               key={meal.id}
               meal={meal}
-              date={dateKey}
               entries={entries.filter((entry) => entry.meal === meal.id)}
               editingId={editingId}
               onEdit={setEditingId}
