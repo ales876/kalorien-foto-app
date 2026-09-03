@@ -381,11 +381,28 @@
   margin-left: 0;
 }
 
-/* Frisch gespeicherte Zeile: kurzer Nachhall, der verblasst. */
+/* Frisch gespeicherte Zeile poppt auf wie eine neue Aufgabe in Things:
+   klein und leicht versetzt starten, kurz über die Endgröße hinaus,
+   dann einrasten — dazu ein Farbnachhall, der verblasst. */
 .entry-row[data-new="true"] {
+  transform-origin: 12% 50%;
   animation:
-    card-in var(--dur-base) var(--ease-out) both,
+    row-pop 0.55s var(--ease-spring) both,
     row-flash 1.6s var(--ease-out) both;
+}
+
+@keyframes row-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(10px);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(1.025) translateY(-1px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
 }
 
 @keyframes row-flash {
