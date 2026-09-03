@@ -105,8 +105,10 @@ Vorlage war eine Bildschirmaufnahme von Things 3 (2026-09-02). Daraus
   zurück umgekehrt. Tab-Leiste und Plus haben eigene
   `view-transition-name`s und bleiben stehen. Ohne API-Unterstützung
   wechselt der Browser hart.
-- **Plus wächst in den Dialog.** Der Knopf schrumpft weg, während das
-  Sheet aufsteigt, und springt beim Schließen zurück.
+- **Plus wächst in den Dialog.** Der Dialog wächst aus der Mitte des
+  Plus heraus (transform-origin auf dem Knopf, Federkurve), der Knopf
+  wird dabei größer und verblasst; beim Schließen schrumpft der Dialog
+  ins Plus zurück. Vorlage: zweite Things-Aufnahme vom 2026-09-03.
 - **Neue Zeile blitzt auf.** Einträge, die jünger als drei Sekunden sind,
   erscheinen mit einem Nachhall in `--accent-soft`, der verblasst.
 - Eigene Kurven (`--ease-out`, `--ease-spring`) statt `ease`, Sheet

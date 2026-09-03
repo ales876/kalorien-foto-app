@@ -10,7 +10,7 @@ import { IconClose } from "./icons";
 
 type Phase = "closed" | "open" | "closing";
 
-/** Muss zur Dauer von `sheet-out`/`fade-out` in components.css passen —
+/** Muss zur Dauer von `sheet-shrink`/`fade-out` in components.css passen —
  *  Sicherheitsnetz, falls das animationend-Ereignis ausbleibt (etwa in
  *  Hintergrund-Tabs, wo Browser Animationen anhalten). */
 const CLOSE_FALLBACK_MS = 420;

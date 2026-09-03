@@ -447,7 +447,15 @@
 /* Das Plus wächst in den Dialog hinein: es schrumpft weg, während das
    Sheet aufsteigt, und springt beim Schließen zurück. Während eine Zeile
    bearbeitet wird, übernimmt die Werkzeugleiste seinen Platz. */
-.fab[data-hidden="true"],
+.fab[data-hidden="true"] {
+  transform: scale(1.8);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--dur-base) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
+}
+
 body[data-editing="true"] .fab {
   transform: scale(0.2);
   opacity: 0;
@@ -552,11 +560,22 @@ body[data-editing="true"] .fab {
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   padding: 8px 16px calc(24px + var(--safe-bottom));
   outline: none;
-  animation: sheet-in var(--dur-slow) var(--ease-out) both;
+  /* Wie das Plus in Things: der Dialog wächst aus dem Knopf heraus.
+     Der Ursprung liegt auf der Mitte des Plus (rechts unten). */
+  transform-origin: calc(100% - 45px)
+    calc(100% - (var(--tabbar-height) + 43px + var(--safe-bottom)));
+  animation: sheet-grow var(--dur-slow) var(--ease-spring) both;
 }
 
 .sheet-backdrop[data-closing="true"] .sheet {
-  animation: sheet-out var(--dur-base) var(--ease-in-out) both;
+  animation: sheet-shrink var(--dur-base) var(--ease-in-out) both;
+}
+
+/* Inhalt kommt einen Tick nach dem Rahmen, wie die Karte im Video. */
+.sheet > .sheet-header,
+.sheet > .sheet-grabber {
+  animation: fade-in var(--dur-base) var(--ease-out) both;
+  animation-delay: 120ms;
 }
 
 .sheet-grabber {
@@ -611,15 +630,30 @@ body[data-editing="true"] .fab {
   }
 }
 
-@keyframes sheet-in {
+@keyframes sheet-grow {
   from {
-    transform: translateY(100%);
+    transform: scale(0.06);
+    opacity: 0;
+    border-radius: 50%;
+  }
+  35% {
+    opacity: 1;
+  }
+  to {
+    transform: scale(1);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   }
 }
 
-@keyframes sheet-out {
+@keyframes sheet-shrink {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
   to {
-    transform: translateY(100%);
+    transform: scale(0.06);
+    opacity: 0;
+    border-radius: 50%;
   }
 }
 
