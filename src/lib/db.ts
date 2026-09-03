@@ -54,14 +54,11 @@ export async function getSettings(
     merged.carbsGoal = DEFAULT_SETTINGS.carbsGoal;
     merged.fatGoal = DEFAULT_SETTINGS.fatGoal;
   }
-  // Leere Körperdaten → Standard; alter Jahrgang → Alter.
-  if (merged.heightCm === undefined)
+  // Datensätze ohne Alter stammen aus der ersten Version: Körperdaten
+  // einmalig auf die gewünschten Werte setzen (179 cm, 40 Jahre).
+  if (stored.age === undefined) {
     merged.heightCm = DEFAULT_SETTINGS.heightCm;
-  if (merged.age === undefined) {
-    merged.age =
-      stored.birthYear !== undefined
-        ? new Date().getFullYear() - stored.birthYear
-        : DEFAULT_SETTINGS.age;
+    merged.age = DEFAULT_SETTINGS.age;
   }
   if (merged.sex === undefined) merged.sex = DEFAULT_SETTINGS.sex;
   return merged;

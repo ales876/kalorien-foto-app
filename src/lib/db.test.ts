@@ -20,14 +20,14 @@ describe("Einstellungen", () => {
       carbsGoal: 200,
       fatGoal: 70,
       birthYear: 1986,
-      heightCm: undefined,
+      heightCm: 180,
       age: undefined,
     });
     const migrated = await getSettings(db);
     expect(migrated.kcalGoal).toBe(1650);
     expect(migrated.fatGoal).toBe(25);
     expect(migrated.heightCm).toBe(179);
-    expect(migrated.age).toBe(new Date().getFullYear() - 1986);
+    expect(migrated.age).toBe(40);
     await saveSettings({ apiKey: "sk-test", kcalGoal: 2100 }, db);
     const stored = await getSettings(db);
     expect(stored.apiKey).toBe("sk-test");
