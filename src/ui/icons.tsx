@@ -336,6 +336,24 @@ export function IconCheck(props: IconProps) {
   );
 }
 
+export function IconCopy(props: IconProps) {
+  return (
+    <Outline {...props}>
+      <rect x="9" y="9" width="11" height="11" rx="2.5" />
+      <path d="M15.5 6.2A2.2 2.2 0 0 0 13.3 4H6.2A2.2 2.2 0 0 0 4 6.2v7.1a2.2 2.2 0 0 0 2.2 2.2" />
+    </Outline>
+  );
+}
+
+export function IconMove(props: IconProps) {
+  return (
+    <Outline {...props}>
+      <path d="M4 12h14" />
+      <path d="M13.5 7.5 18 12l-4.5 4.5" />
+    </Outline>
+  );
+}
+
 export function IconUpload(props: IconProps) {
   return (
     <Outline {...props}>

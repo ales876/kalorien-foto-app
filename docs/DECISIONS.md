@@ -158,6 +158,27 @@ Ziele 1.650 kcal, 120 g Protein, 220 g KH, 25 g Fett; Körperdaten
 200/70) auf diese Werte an und überführt einen alten Jahrgang in das
 Alter.
 
+## 15. Datenbankfehler nach der Pause im Hintergrund
+
+iOS schließt IndexedDB-Verbindungen, wenn die PWA länger im Hintergrund
+lag. Der Schreibvorgang gelingt dann oft noch, die nachfolgende
+Live-Abfrage wirft — und `useLiveQuery` reicht solche Fehler beim
+Rendern weiter, was direkt die Fehlerseite auslöste. Deshalb:
+
+- `db.on("close")` und `visibilitychange` öffnen die Verbindung wieder.
+- Schreibzugriffe laufen über `withRetry()`: einmal neu öffnen, dann
+  erneut versuchen.
+- Alle Live-Abfragen laufen über `useLiveData()`, das den Fehler fängt,
+  die Verbindung erneuert und notfalls beim letzten Wert bleibt.
+- `unhandledrejection` fängt Datenbank- und Nachladefehler global ab.
+- Die Fehlerseite bietet „Nochmal versuchen" ohne Neuladen und zeigt die
+  Details aufklappbar; der letzte Fehler liegt zusätzlich im
+  localStorage unter `sunny-orbit:letzter-fehler`.
+
+Dazu bleibt der Service Worker bei `cleanupOutdatedCaches: false` — sonst
+verlieren geöffnete Sitzungen nach einem Deploy ihre nachladbaren
+Bausteine.
+
 ## Fallstricke
 
 | Falle                                                  | Was passiert                        | Richtig                              |

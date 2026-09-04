@@ -1,4 +1,3 @@
-import { useLiveQuery } from "dexie-react-hooks";
 import {
   assessDeficit,
   computeBMR,
@@ -7,15 +6,20 @@ import {
 } from "../../lib/analysis";
 import { db } from "../../lib/db";
 import { formatDecimal, formatNumber } from "../../lib/format";
-import type { Settings } from "../../lib/types";
+import type { BodyMeasurement, FoodEntry, Settings } from "../../lib/types";
 import { Card } from "../../ui/Card";
+import { useLiveData } from "../../hooks/useLiveData";
 
 /** Erklärt, woraus sich das Tagesziel rechnerisch ergibt: Grundumsatz,
  *  tatsächlicher Verbrauch, Defizit. Keine Empfehlung — nur die Zahlen
  *  und was sie bedeuten. */
 export function EnergyExplainer({ settings }: { settings: Settings }) {
-  const entries = useLiveQuery(() => db.entries.toArray(), [], []);
-  const measurements = useLiveQuery(() => db.measurements.toArray(), [], []);
+  const entries = useLiveData<FoodEntry[]>(() => db.entries.toArray(), [], []);
+  const measurements = useLiveData<BodyMeasurement[]>(
+    () => db.measurements.toArray(),
+    [],
+    [],
+  );
 
   const latestWeight = [...measurements]
     .filter((m) => typeof m.weightKg === "number")

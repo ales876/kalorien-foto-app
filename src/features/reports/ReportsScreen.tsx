@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useLiveQuery } from "dexie-react-hooks";
 import { useSettings } from "../../hooks/useSettings";
 import { lastNDays } from "../../lib/date";
 import { db } from "../../lib/db";
@@ -10,6 +9,7 @@ import { EnergyBalanceCard } from "./EnergyBalanceCard";
 import { KcalChart } from "./KcalChart";
 import { MeasurementsCard } from "./MeasurementsCard";
 import { WeightChart } from "./WeightChart";
+import { useLiveData } from "../../hooks/useLiveData";
 
 const RANGES = [
   { value: 7, label: "7 Tage" },
@@ -22,15 +22,15 @@ export function ReportsScreen() {
   const range = lastNDays(days);
   const from = range[0] ?? "";
 
-  const entries = useLiveQuery(
+  const entries = useLiveData<FoodEntry[]>(
     () => db.entries.where("date").aboveOrEqual(from).toArray(),
     [from],
-    [] as FoodEntry[],
+    [],
   );
-  const measurements = useLiveQuery(
+  const measurements = useLiveData<BodyMeasurement[]>(
     () => db.measurements.where("date").aboveOrEqual(from).sortBy("date"),
     [from],
-    [] as BodyMeasurement[],
+    [],
   );
   const settings = useSettings();
 

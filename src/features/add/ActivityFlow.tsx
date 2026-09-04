@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useLiveQuery } from "dexie-react-hooks";
 import { db, upsertActivity } from "../../lib/db";
 import { formatNumber, parseNonNegative } from "../../lib/format";
+import type { Activity } from "../../lib/types";
 import { Notice } from "../../ui/Notice";
+import { useLiveData } from "../../hooks/useLiveData";
 
 /** Aktivitätskalorien werden von Hand aus der Health-App übertragen —
  *  iOS gibt Webseiten keinen Zugriff auf HealthKit. Alternativ per
@@ -14,9 +15,10 @@ export function ActivityFlow({
   date: string;
   onSaved: () => void;
 }) {
-  const existing = useLiveQuery(
+  const existing = useLiveData<Activity | undefined>(
     () => db.activities.where("date").equals(date).first(),
     [date],
+    undefined,
   );
   const [kcal, setKcal] = useState("");
   const [saving, setSaving] = useState(false);

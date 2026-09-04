@@ -496,18 +496,23 @@
 }
 
 /* Werkzeugleiste unten, wie in Things: taucht auf, wo sonst das Plus
-   sitzt, mit dem Popover-Einblenden aus dem Video (leicht skaliert). */
+   sitzt. Klar abgesetzt vom gedimmten Hintergrund, damit sie auch auf
+   der aufgeklappten Karte gut lesbar bleibt. */
 .edit-toolbar {
   position: fixed;
   left: 50%;
-  bottom: calc(var(--tabbar-height) + 18px + var(--safe-bottom));
+  bottom: calc(var(--tabbar-height) + 16px + var(--safe-bottom));
   transform: translateX(-50%);
   display: flex;
-  gap: 4px;
-  padding: 5px;
+  align-items: center;
+  gap: 2px;
+  max-width: calc(100vw - 24px);
+  padding: 6px;
   border-radius: 999px;
   background: var(--surface);
-  box-shadow: var(--shadow-lifted);
+  box-shadow:
+    inset 0 0 0 1px var(--hairline),
+    var(--shadow-lifted);
   z-index: 25;
   animation: popover-in var(--dur-base) var(--ease-spring) both;
 }
@@ -525,13 +530,20 @@
   gap: 6px;
   border: none;
   background: transparent;
-  padding: 9px 14px;
+  padding: 10px 13px;
   border-radius: 999px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
-  color: var(--ink-secondary);
+  letter-spacing: -0.01em;
+  color: var(--ink);
   white-space: nowrap;
-  transition: background var(--dur-fast) var(--ease-out);
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.toolbar-btn svg {
+  color: var(--ink-secondary);
 }
 
 .toolbar-btn:active {
@@ -542,14 +554,37 @@
   opacity: 0.4;
 }
 
+.toolbar-btn[aria-expanded="true"] {
+  background: var(--surface-sunken);
+}
+
+.toolbar-icon {
+  padding: 10px 11px;
+}
+
+.toolbar-sep {
+  width: 1px;
+  align-self: stretch;
+  margin: 6px 2px;
+  background: var(--hairline);
+}
+
+.toolbar-primary,
+.toolbar-primary svg {
+  color: var(--on-accent);
+}
+
 .toolbar-primary {
   background: var(--accent);
-  color: var(--on-accent);
+}
+
+.toolbar-danger,
+.toolbar-danger svg {
+  color: var(--danger);
 }
 
 .toolbar-danger {
   background: var(--danger-soft);
-  color: var(--danger);
 }
 
 /* Löschen in zwei Schritten: erst fragen, dann tun. */
@@ -858,7 +893,7 @@
 .move-popover {
   position: fixed;
   left: 50%;
-  bottom: calc(var(--tabbar-height) + 72px + var(--safe-bottom));
+  bottom: calc(var(--tabbar-height) + 80px + var(--safe-bottom));
   transform: translateX(-50%);
   width: min(320px, calc(100vw - 32px));
   padding: 12px;

@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useLiveQuery } from "dexie-react-hooks";
 import { db, upsertMeasurement } from "../../lib/db";
 import { formatDecimal, parsePositive } from "../../lib/format";
+import type { BodyMeasurement } from "../../lib/types";
 import { Notice } from "../../ui/Notice";
+import { useLiveData } from "../../hooks/useLiveData";
 
 /** Gewicht wird wie Essen über das Plus erfasst — ein Ort zum Eintragen,
  *  egal worum es geht. Ein Wert pro Tag. */
@@ -13,9 +14,10 @@ export function WeightFlow({
   date: string;
   onSaved: () => void;
 }) {
-  const existing = useLiveQuery(
+  const existing = useLiveData<BodyMeasurement | undefined>(
     () => db.measurements.where("date").equals(date).first(),
     [date],
+    undefined,
   );
   const [weight, setWeight] = useState("");
   const [saving, setSaving] = useState(false);

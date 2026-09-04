@@ -1,9 +1,9 @@
-import { useLiveQuery } from "dexie-react-hooks";
 import { formatNumber } from "../../lib/format";
 import { kcalFor, unitOf } from "../../lib/nutrition";
 import { getSuggestions, type Suggestion } from "../../lib/suggestions";
 import type { Meal } from "../../lib/types";
 import { IconChevron } from "../../ui/icons";
+import { useLiveData } from "../../hooks/useLiveData";
 
 /** Vorschläge aus der eigenen Historie, passend zur Tageszeit. Stehen
  *  oben im Dialog, weil „das Übliche" der häufigste Fall ist. */
@@ -14,7 +14,11 @@ export function QuickPicks({
   meal: Meal;
   onPick: (suggestion: Suggestion) => void;
 }) {
-  const items = useLiveQuery(() => getSuggestions(meal), [meal]);
+  const items = useLiveData<Suggestion[]>(
+    () => getSuggestions(meal),
+    [meal],
+    [],
+  );
 
   if (!items || items.length === 0) return null;
 

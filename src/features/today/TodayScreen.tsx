@@ -1,5 +1,4 @@
 import { useEffect, useState, type MouseEvent } from "react";
-import { useLiveQuery } from "dexie-react-hooks";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSettings } from "../../hooks/useSettings";
 import { shiftDays, weekOf } from "../../lib/date";
@@ -12,6 +11,7 @@ import { ActivitySection } from "./ActivitySection";
 import { EmptyDay } from "./EmptyDay";
 import { MealSection } from "./MealSection";
 import { WeekStrip, type DayStat } from "./WeekStrip";
+import { useLiveData } from "../../hooks/useLiveData";
 
 export function TodayScreen({
   dateKey,
@@ -65,24 +65,24 @@ export function TodayScreen({
 
   // Eine Abfrage für die ganze Woche: daraus kommen die Ringe in der
   // Kopfzeile und die Einträge des gewählten Tages.
-  const weekEntries = useLiveQuery(
+  const weekEntries = useLiveData<FoodEntry[]>(
     () =>
       db.entries
         .where("date")
         .between(weekStart, weekEnd, true, true)
         .toArray(),
     [weekStart, weekEnd],
-    [] as FoodEntry[],
+    [],
   );
   const settings = useSettings();
-  const weekActivities = useLiveQuery(
+  const weekActivities = useLiveData<Activity[]>(
     () =>
       db.activities
         .where("date")
         .between(weekStart, weekEnd, true, true)
         .toArray(),
     [weekStart, weekEnd],
-    [] as Activity[],
+    [],
   );
   const activityByDate = new Map(weekActivities.map((a) => [a.date, a.kcal]));
   const activity = weekActivities.find((a) => a.date === dateKey);

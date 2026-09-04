@@ -38,6 +38,42 @@ export function createDatabase(name: string = DB_NAME): AppDatabase {
 
 export const db = createDatabase();
 
+/** iOS schließt IndexedDB-Verbindungen, wenn die App länger im
+ *  Hintergrund lag. Der nächste Zugriff wirft dann, obwohl die Daten in
+ *  Ordnung sind. Deshalb: bei jedem Schließen wieder öffnen und beim
+ *  Zurückkehren in den Vordergrund prüfen. */
+export async function ensureOpen(database: AppDatabase = db): Promise<void> {
+  if (database.isOpen()) return;
+  try {
+    await database.open();
+  } catch (error) {
+    console.error("Datenbank ließ sich nicht öffnen", error);
+  }
+}
+
+db.on("close", () => {
+  void ensureOpen();
+});
+
+if (typeof document !== "undefined") {
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") void ensureOpen();
+  });
+}
+
+/** Führt eine Schreiboperation aus und öffnet die Verbindung einmal neu,
+ *  falls sie zwischenzeitlich geschlossen wurde. Wirft der zweite
+ *  Versuch auch, kommt der Fehler durch. */
+export async function withRetry<T>(operation: () => Promise<T>): Promise<T> {
+  try {
+    return await operation();
+  } catch (error) {
+    if (db.isOpen()) throw error;
+    await ensureOpen();
+    return operation();
+  }
+}
+
 export async function getSettings(
   database: AppDatabase = db,
 ): Promise<Settings> {
@@ -69,14 +105,16 @@ export async function saveSettings(
   database: AppDatabase = db,
 ): Promise<void> {
   const current = await getSettings(database);
-  await database.settings.put({ ...current, ...patch, id: "settings" });
+  await withRetry(() =>
+    database.settings.put({ ...current, ...patch, id: "settings" }),
+  );
 }
 
 export async function addEntries(
   entries: readonly FoodEntry[],
   database: AppDatabase = db,
 ): Promise<void> {
-  await database.entries.bulkAdd(entries as FoodEntry[]);
+  await withRetry(() => database.entries.bulkAdd(entries as FoodEntry[]));
 }
 
 export async function updateEntry(
@@ -84,14 +122,27 @@ export async function updateEntry(
   patch: Partial<Omit<FoodEntry, "id">>,
   database: AppDatabase = db,
 ): Promise<void> {
-  await database.entries.update(id, patch);
+  await withRetry(() => database.entries.update(id, patch));
 }
 
 export async function deleteEntry(
   id: number,
   database: AppDatabase = db,
 ): Promise<void> {
-  await database.entries.delete(id);
+  await withRetry(() => database.entries.delete(id));
+}
+
+/** Legt eine Kopie eines Eintrags an — an einem anderen Tag oder in
+ *  einer anderen Mahlzeit. Das Original bleibt unverändert. */
+export async function copyEntry(
+  entry: FoodEntry,
+  target: { date?: string; meal?: FoodEntry["meal"] },
+  database: AppDatabase = db,
+): Promise<void> {
+  const { id: _drop, ...rest } = entry;
+  await withRetry(() =>
+    database.entries.add({ ...rest, ...target, timestamp: Date.now() }),
+  );
 }
 
 /** Speichert Gewicht/Bauchumfang und überschreibt den Eintrag desselben
@@ -105,21 +156,23 @@ export async function upsertMeasurement(
   if (values.weightKg !== undefined) patch.weightKg = values.weightKg;
   if (values.waistCm !== undefined) patch.waistCm = values.waistCm;
 
-  await database.transaction("rw", database.measurements, async () => {
-    const existing = await database.measurements
-      .where("date")
-      .equals(date)
-      .first();
-    if (existing?.id !== undefined) {
-      await database.measurements.update(existing.id, patch);
-    } else {
-      await database.measurements.add({
-        date,
-        ...patch,
-        timestamp: Date.now(),
-      });
-    }
-  });
+  await withRetry(() =>
+    database.transaction("rw", database.measurements, async () => {
+      const existing = await database.measurements
+        .where("date")
+        .equals(date)
+        .first();
+      if (existing?.id !== undefined) {
+        await database.measurements.update(existing.id, patch);
+      } else {
+        await database.measurements.add({
+          date,
+          ...patch,
+          timestamp: Date.now(),
+        });
+      }
+    }),
+  );
 }
 
 /** Ein Aktivitätswert pro Tag — die Health-App liefert ohnehin Tagessummen. */
@@ -128,18 +181,20 @@ export async function upsertActivity(
   kcal: number,
   database: AppDatabase = db,
 ): Promise<void> {
-  await database.transaction("rw", database.activities, async () => {
-    const existing = await database.activities
-      .where("date")
-      .equals(date)
-      .first();
-    if (existing?.id !== undefined) {
-      await database.activities.update(existing.id, {
-        kcal,
-        timestamp: Date.now(),
-      });
-    } else {
-      await database.activities.add({ date, kcal, timestamp: Date.now() });
-    }
-  });
+  await withRetry(() =>
+    database.transaction("rw", database.activities, async () => {
+      const existing = await database.activities
+        .where("date")
+        .equals(date)
+        .first();
+      if (existing?.id !== undefined) {
+        await database.activities.update(existing.id, {
+          kcal,
+          timestamp: Date.now(),
+        });
+      } else {
+        await database.activities.add({ date, kcal, timestamp: Date.now() });
+      }
+    }),
+  );
 }

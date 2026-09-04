@@ -46,6 +46,9 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
+        // Alte Dateien im Cache lassen: sonst verlieren geöffnete
+        // Sitzungen nach einem Deploy ihre nachladbaren Bausteine.
+        cleanupOutdatedCaches: false,
         runtimeCaching: [
           {
             // Der Produktindex ändert sich nur beim Deploy — einmal laden,
