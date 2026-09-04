@@ -466,6 +466,8 @@
 
 .entry-editor-inner {
   padding-top: 12px;
+  /* Platz, damit die schwebende Werkzeugleiste keine Felder verdeckt. */
+  padding-bottom: 64px;
   animation: fade-in var(--dur-slow) var(--ease-out) both;
 }
 
@@ -496,18 +498,18 @@
 }
 
 /* Werkzeugleiste unten, wie in Things: taucht auf, wo sonst das Plus
-   sitzt. Klar abgesetzt vom gedimmten Hintergrund, damit sie auch auf
-   der aufgeklappten Karte gut lesbar bleibt. */
+   sitzt. Spannt sich über die volle Breite statt zu zentrieren — so
+   passt sie auf jedes Gerät, ohne dass ein Knopf abgeschnitten wird. */
 .edit-toolbar {
   position: fixed;
-  left: 50%;
-  bottom: calc(var(--tabbar-height) + 16px + var(--safe-bottom));
-  transform: translateX(-50%);
+  left: 10px;
+  right: 10px;
+  bottom: calc(var(--tabbar-height) + 14px + var(--safe-bottom));
   display: flex;
-  align-items: center;
+  align-items: stretch;
+  justify-content: space-between;
   gap: 2px;
-  max-width: calc(100vw - 24px);
-  padding: 6px;
+  padding: 5px;
   border-radius: 999px;
   background: var(--surface);
   box-shadow:
@@ -520,19 +522,21 @@
 @keyframes popover-in {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(10px) scale(0.9);
+    transform: translateY(10px) scale(0.94);
   }
 }
 
 .toolbar-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
   border: none;
   background: transparent;
-  padding: 10px 13px;
+  padding: 10px 8px;
   border-radius: 999px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   letter-spacing: -0.01em;
   color: var(--ink);
@@ -542,7 +546,13 @@
     color var(--dur-fast) var(--ease-out);
 }
 
+/* Die beschrifteten Knöpfe teilen sich den Platz gleichmäßig. */
+.toolbar-btn:not(.toolbar-icon) {
+  flex: 1 1 0;
+}
+
 .toolbar-btn svg {
+  flex: 0 0 auto;
   color: var(--ink-secondary);
 }
 
@@ -559,13 +569,14 @@
 }
 
 .toolbar-icon {
-  padding: 10px 11px;
+  flex: 0 0 auto;
+  padding: 10px 12px;
 }
 
 .toolbar-sep {
   width: 1px;
-  align-self: stretch;
-  margin: 6px 2px;
+  align-self: center;
+  height: 22px;
   background: var(--hairline);
 }
 
@@ -892,10 +903,11 @@
 
 .move-popover {
   position: fixed;
-  left: 50%;
-  bottom: calc(var(--tabbar-height) + 80px + var(--safe-bottom));
-  transform: translateX(-50%);
-  width: min(320px, calc(100vw - 32px));
+  left: 10px;
+  right: 10px;
+  bottom: calc(var(--tabbar-height) + 76px + var(--safe-bottom));
+  max-width: 420px;
+  margin: 0 auto;
   padding: 12px;
   border-radius: var(--radius-lg);
   background: var(--surface);

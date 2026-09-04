@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { formatDateKey, shiftDays, toDateKey } from "../../lib/date";
 import { copyEntry, deleteEntry, updateEntry } from "../../lib/db";
 import { parseNonNegative } from "../../lib/format";
@@ -198,114 +199,123 @@ export function EntryEditor({
           : "Name, Menge und kcal werden gebraucht"}
       </div>
 
-      {(menu === "move" || menu === "copy") && (
-        <div
-          className="move-popover"
-          role="dialog"
-          aria-label={menu === "copy" ? "Kopieren" : "Verschieben"}
-        >
-          <div className="card-title">
-            {menu === "copy" ? "Kopie auf Tag" : "Auf Tag"}
-          </div>
-          <div className="move-options">
-            {dateTargets.map((target) => (
-              <button
-                type="button"
-                key={target.date}
-                className="move-option"
-                onClick={() => applyTo({ date: target.date })}
-                title={formatDateKey(target.date)}
-              >
-                {target.label}
-              </button>
-            ))}
-          </div>
-          <div className="card-title">
-            {menu === "copy" ? "Kopie in Mahlzeit" : "In Mahlzeit"}
-          </div>
-          <div className="move-options">
-            {MEALS.map((m) => {
-              const Icon = MEAL_ICONS[m.id];
-              return (
+      {/* Werkzeugleiste und Menü hängen am Fenster, nicht an der Zeile:
+          die Tages- und Zeilenanimationen setzen `transform`, und darin
+          würde ein `position: fixed` an der Karte kleben statt am
+          Bildschirm — der rechte Knopf liefe aus dem Bild. */}
+      {createPortal(
+        <>
+          {(menu === "move" || menu === "copy") && (
+            <div
+              className="move-popover"
+              role="dialog"
+              aria-label={menu === "copy" ? "Kopieren" : "Verschieben"}
+            >
+              <div className="card-title">
+                {menu === "copy" ? "Kopie auf Tag" : "Auf Tag"}
+              </div>
+              <div className="move-options">
+                {dateTargets.map((target) => (
+                  <button
+                    type="button"
+                    key={target.date}
+                    className="move-option"
+                    onClick={() => applyTo({ date: target.date })}
+                    title={formatDateKey(target.date)}
+                  >
+                    {target.label}
+                  </button>
+                ))}
+              </div>
+              <div className="card-title">
+                {menu === "copy" ? "Kopie in Mahlzeit" : "In Mahlzeit"}
+              </div>
+              <div className="move-options">
+                {MEALS.map((m) => {
+                  const Icon = MEAL_ICONS[m.id];
+                  return (
+                    <button
+                      type="button"
+                      key={m.id}
+                      className="move-option"
+                      disabled={menu === "move" && m.id === meal}
+                      onClick={() => applyTo({ meal: m.id })}
+                    >
+                      <span className="meal-icon" style={{ color: m.color }}>
+                        <Icon size={16} />
+                      </span>
+                      {m.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div className="edit-toolbar" role="toolbar" aria-label="Eintrag">
+            {menu === "delete" ? (
+              <>
                 <button
                   type="button"
-                  key={m.id}
-                  className="move-option"
-                  disabled={menu === "move" && m.id === meal}
-                  onClick={() => applyTo({ meal: m.id })}
+                  className="toolbar-btn"
+                  onClick={() => setMenu("none")}
                 >
-                  <span className="meal-icon" style={{ color: m.color }}>
-                    <Icon size={16} />
-                  </span>
-                  {m.label}
+                  Abbrechen
                 </button>
-              );
-            })}
+                <button
+                  type="button"
+                  className="toolbar-btn toolbar-danger"
+                  onClick={remove}
+                >
+                  <IconTrash size={18} />
+                  Wirklich löschen
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  className="toolbar-btn toolbar-icon"
+                  onClick={() => setMenu("delete")}
+                  aria-label="Eintrag löschen"
+                >
+                  <IconTrash size={18} />
+                </button>
+                <span className="toolbar-sep" aria-hidden="true" />
+                <button
+                  type="button"
+                  className="toolbar-btn"
+                  aria-expanded={menu === "move"}
+                  onClick={() => setMenu(menu === "move" ? "none" : "move")}
+                >
+                  <IconMove size={18} />
+                  Verschieben
+                </button>
+                <button
+                  type="button"
+                  className="toolbar-btn"
+                  aria-expanded={menu === "copy"}
+                  onClick={() => setMenu(menu === "copy" ? "none" : "copy")}
+                >
+                  <IconCopy size={18} />
+                  Kopieren
+                </button>
+                <span className="toolbar-sep" aria-hidden="true" />
+                <button
+                  type="button"
+                  className="toolbar-btn toolbar-primary"
+                  onClick={onDone}
+                  disabled={!valid}
+                >
+                  <IconCheck size={18} />
+                  Fertig
+                </button>
+              </>
+            )}
           </div>
-        </div>
+        </>,
+        document.body,
       )}
-
-      <div className="edit-toolbar" role="toolbar" aria-label="Eintrag">
-        {menu === "delete" ? (
-          <>
-            <button
-              type="button"
-              className="toolbar-btn"
-              onClick={() => setMenu("none")}
-            >
-              Abbrechen
-            </button>
-            <button
-              type="button"
-              className="toolbar-btn toolbar-danger"
-              onClick={remove}
-            >
-              <IconTrash size={18} />
-              Wirklich löschen
-            </button>
-          </>
-        ) : (
-          <>
-            <button
-              type="button"
-              className="toolbar-btn toolbar-icon"
-              onClick={() => setMenu("delete")}
-              aria-label="Eintrag löschen"
-            >
-              <IconTrash size={18} />
-            </button>
-            <span className="toolbar-sep" aria-hidden="true" />
-            <button
-              type="button"
-              className="toolbar-btn"
-              aria-expanded={menu === "move"}
-              onClick={() => setMenu(menu === "move" ? "none" : "move")}
-            >
-              <IconMove size={18} />
-              Verschieben
-            </button>
-            <button
-              type="button"
-              className="toolbar-btn"
-              aria-expanded={menu === "copy"}
-              onClick={() => setMenu(menu === "copy" ? "none" : "copy")}
-            >
-              <IconCopy size={18} />
-              Kopieren
-            </button>
-            <span className="toolbar-sep" aria-hidden="true" />
-            <button
-              type="button"
-              className="toolbar-btn toolbar-primary"
-              onClick={onDone}
-              disabled={!valid}
-            >
-              <IconCheck size={18} />
-              Fertig
-            </button>
-          </>
-        )}
-      </div>
     </div>
   );
 }

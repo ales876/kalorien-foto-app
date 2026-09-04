@@ -45,7 +45,13 @@ export function TodayScreen({
   function collapseIfOutside(event: MouseEvent<HTMLDivElement>) {
     if (editingId === null) return;
     const target = event.target as HTMLElement;
-    if (target.closest('[data-expanded="true"], .entry-main, .move-popover'))
+    // Werkzeugleiste und Menü hängen im Portal am Body, bubbeln in React
+    // aber bis hierher — sonst würde ein Tipp darauf die Zeile zuklappen.
+    if (
+      target.closest(
+        '[data-expanded="true"], .entry-main, .move-popover, .edit-toolbar',
+      )
+    )
       return;
     setEditingId(null);
   }
