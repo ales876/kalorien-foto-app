@@ -293,19 +293,38 @@
 .timeline {
   list-style: none;
   margin: 0;
-  padding: 0 0 0 38px;
+  padding: 0;
 }
 
+/* Marker und Karte liegen als Flex-Zeile nebeneinander: so sitzt der
+   Punkt exakt auf halber Kartenhöhe, unabhängig davon, wie der Browser
+   die Außenabstände zusammenfasst. */
 .tl-item {
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
   animation: card-in var(--dur-base) var(--ease-out) both;
+}
+
+.tl-item:last-child {
+  margin-bottom: 0;
+}
+
+/* Der Abstand steckt im Element, nicht in der Karte — sonst zöge er die
+   Zeilenmitte nach unten. */
+.timeline .card {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-bottom: 0;
 }
 
 /* Die Linie verbindet die Punkte und endet am ersten und letzten. */
 .tl-item::before {
   content: "";
   position: absolute;
-  left: -31px;
+  left: 19px;
   top: 0;
   bottom: -16px;
   width: 2px;
@@ -327,17 +346,11 @@
   display: none;
 }
 
-/* Punkt und Uhrzeit sitzen mittig zur Karte und wandern mit, wenn die
-   Karte durch weitere Einträge wächst. */
 .tl-marker {
-  position: absolute;
-  /* Mitte des Markers liegt genau auf der Linie. */
-  left: -50px;
-  top: 50%;
-  transform: translateY(-50%);
+  position: relative;
+  flex: 0 0 40px;
   display: flex;
   justify-content: center;
-  width: 40px;
   z-index: 1;
 }
 
