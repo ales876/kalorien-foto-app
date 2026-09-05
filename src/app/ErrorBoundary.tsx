@@ -1,7 +1,9 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import { messageOf } from "../lib/errors";
+import { Notice } from "../ui/Notice";
 
 interface State {
-  error: Error | null;
+  error: unknown;
   details: string;
 }
 
@@ -11,19 +13,22 @@ const LOG_KEY = "sunny-orbit:letzter-fehler";
  *  App weiß lässt. Die Daten in IndexedDB sind davon nie betroffen.
  *  „Nochmal versuchen" baut nur die Ansicht neu auf — das genügt, wenn
  *  eine Abfrage einmalig fehlgeschlagen ist. */
-export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
+export class ErrorBoundary extends Component<
+  { children: ReactNode; compact?: boolean },
+  State
+> {
   override state: State = { error: null, details: "" };
 
-  static getDerivedStateFromError(error: Error): Partial<State> {
-    return { error };
+  static getDerivedStateFromError(error: unknown): Partial<State> {
+    return { error: error ?? new Error("Unbekannter Fehler") };
   }
 
-  override componentDidCatch(error: Error, info: ErrorInfo): void {
-    const details =
-      `${error.name}: ${error.message}\n${info.componentStack ?? ""}`.slice(
-        0,
-        2000,
-      );
+  override componentDidCatch(error: unknown, info: ErrorInfo): void {
+    // Fremde Bibliotheken werfen auch bloße Zeichenketten.
+    const details = `${messageOf(error)}\n${info.componentStack ?? ""}`.slice(
+      0,
+      2000,
+    );
     console.error("Unerwarteter Fehler", error, info.componentStack);
     try {
       localStorage.setItem(LOG_KEY, `${new Date().toISOString()}\n${details}`);
@@ -36,6 +41,21 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
   override render(): ReactNode {
     const { error, details } = this.state;
     if (!error) return this.props.children;
+    const reset = () => this.setState({ error: null, details: "" });
+
+    // Im Dialog reicht eine Meldung an Ort und Stelle — der Rest der App
+    // bleibt bedienbar.
+    if (this.props.compact) {
+      return (
+        <div className="stack">
+          <Notice>{messageOf(error, "Das hat leider nicht geklappt.")}</Notice>
+          <button type="button" className="btn btn-secondary" onClick={reset}>
+            Nochmal versuchen
+          </button>
+        </div>
+      );
+    }
+
     return (
       <div className="error-screen">
         <h1 className="screen-title">Da ist etwas schiefgelaufen</h1>
@@ -44,11 +64,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
           Gerät.
         </p>
         <div className="stack">
-          <button
-            type="button"
-            className="btn"
-            onClick={() => this.setState({ error: null, details: "" })}
-          >
+          <button type="button" className="btn" onClick={reset}>
             Nochmal versuchen
           </button>
           <button
@@ -61,7 +77,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
         </div>
         <details style={{ marginTop: 18 }}>
           <summary className="row-sub">Fehlerdetails</summary>
-          <pre>{details || error.message}</pre>
+          <pre>{details || messageOf(error)}</pre>
         </details>
       </div>
     );

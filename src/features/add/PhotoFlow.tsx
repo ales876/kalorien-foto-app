@@ -5,6 +5,7 @@ import { Loading } from "../../ui/Loading";
 import { Notice } from "../../ui/Notice";
 import { IconCamera, IconImage } from "../../ui/icons";
 import { ConfirmStep } from "./ConfirmStep";
+import { messageOf } from "../../lib/errors";
 
 const loadVision = withReloadOnFailure(() => import("../../lib/vision"));
 
@@ -45,7 +46,7 @@ export function PhotoFlow({
       if (first) first.thumb = await downscaleToBase64(file, 100, 0.6);
       setResult(analysis);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Analyse fehlgeschlagen.");
+      setError(messageOf(err, "Analyse fehlgeschlagen."));
     } finally {
       setBusy(false);
     }

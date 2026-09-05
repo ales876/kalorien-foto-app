@@ -15,6 +15,7 @@ import {
 } from "../../lib/types";
 import { Notice } from "../../ui/Notice";
 import { Segmented } from "../../ui/Segmented";
+import { messageOf } from "../../lib/errors";
 
 const unitFor = (c: NutritionCandidate) => c.unit ?? guessUnit(c.name, c.brand);
 
@@ -60,9 +61,7 @@ export function ConfirmStep({
       );
       onSaved();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Speichern fehlgeschlagen.",
-      );
+      setError(messageOf(err, "Speichern fehlgeschlagen."));
     } finally {
       setSaving(false);
     }

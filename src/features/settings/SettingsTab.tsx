@@ -13,6 +13,7 @@ import { Card } from "../../ui/Card";
 import { Notice, type NoticeKind } from "../../ui/Notice";
 import { Segmented } from "../../ui/Segmented";
 import { IconDownload, IconUpload } from "../../ui/icons";
+import { messageOf } from "../../lib/errors";
 
 /** Jede Karte speichert für sich — ein Speichern-Knopf, der zwei Karten
  *  weiter unten etwas ganz anderes mitschreibt, war der Fehler der
@@ -309,7 +310,7 @@ function DataCard() {
     } catch (err) {
       setMessage({
         kind: "error",
-        text: err instanceof Error ? err.message : "Import fehlgeschlagen.",
+        text: messageOf(err, "Import fehlgeschlagen."),
       });
     } finally {
       if (fileInput.current) fileInput.current.value = "";

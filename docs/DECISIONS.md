@@ -200,6 +200,23 @@ Ziel plus erfasster Aktivität. Balken über dem Budget sind rot. Vorher
 stand dort eine feste Ziellinie, wodurch jeder Tag mit viel Bewegung
 nach einer Überschreitung aussah.
 
+## 18. Fremde Fehler bleiben lokal
+
+`html5-qrcode` wirft bloße Zeichenketten statt `Error` — und beim
+Anhalten eines nie gestarteten Scanners sogar synchron, sodass ein
+angehängtes `.catch()` nicht greift. Der Fehler flog dadurch aus dem
+Effekt-Aufräumer in die Fehlergrenze, die ihn als
+„undefined: undefined" anzeigte und die ganze App ersetzte.
+
+- `stopSafely()` in `BarcodeFlow` fängt beide Wurfarten ab.
+- Anlegen und Starten des Scanners laufen im selben `try` und melden
+  im Dialog statt zu werfen.
+- `messageOf()` (`lib/errors.ts`) macht aus jedem Wurf einen lesbaren
+  Text; alle Fehlermeldungen der App gehen darüber.
+- Der Erfassen-Dialog hat eine eigene Fehlergrenze (`compact`): ein
+  Fehler dort zeigt eine Meldung mit „Nochmal versuchen", der Rest der
+  App bleibt bedienbar.
+
 ## Fallstricke
 
 | Falle                                                  | Was passiert                        | Richtig                              |

@@ -11,6 +11,7 @@ import { Notice } from "../../ui/Notice";
 import { IconCheck, IconChevron } from "../../ui/icons";
 import { ConfirmStep } from "./ConfirmStep";
 import { ManualFlow } from "./ManualFlow";
+import { messageOf } from "../../lib/errors";
 
 interface SearchResults {
   history: HistoryHit[];
@@ -65,7 +66,7 @@ export function SearchFlow({
       });
     } catch (err) {
       setResults({ history: [], products: [], usedFallback: true });
-      setError(err instanceof Error ? err.message : "Suche fehlgeschlagen.");
+      setError(messageOf(err, "Suche fehlgeschlagen."));
     } finally {
       setBusy(false);
     }

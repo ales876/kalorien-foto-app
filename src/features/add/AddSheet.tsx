@@ -4,6 +4,7 @@ import { withReloadOnFailure } from "../../lib/lazyImport";
 import { guessMeal } from "../../lib/nutrition";
 import type { Suggestion } from "../../lib/suggestions";
 import type { NutritionCandidate } from "../../lib/types";
+import { ErrorBoundary } from "../../app/ErrorBoundary";
 import { Loading } from "../../ui/Loading";
 import { Sheet } from "../../ui/Sheet";
 import {
@@ -137,41 +138,45 @@ function AddFlow({
       )}
 
       <div className="step" key={mode} data-direction={direction}>
-        {mode === "choose" && (
-          <>
-            <div className="icon-row" role="group" aria-label="Erfassen">
-              {CHOICES.map(({ mode: target, Icon, color, label }) => (
-                <button
-                  type="button"
-                  className="icon-choice"
-                  key={target}
-                  onClick={() => go(target)}
-                >
-                  <span className="icon-circle" style={{ color }}>
-                    <Icon size={26} />
-                  </span>
-                  <span className="icon-label">{label}</span>
-                </button>
-              ))}
-            </div>
-            <QuickPicks meal={guessMeal()} onPick={pick} />
-          </>
-        )}
+        <ErrorBoundary compact key={`grenze-${mode}`}>
+          {mode === "choose" && (
+            <>
+              <div className="icon-row" role="group" aria-label="Erfassen">
+                {CHOICES.map(({ mode: target, Icon, color, label }) => (
+                  <button
+                    type="button"
+                    className="icon-choice"
+                    key={target}
+                    onClick={() => go(target)}
+                  >
+                    <span className="icon-circle" style={{ color }}>
+                      <Icon size={26} />
+                    </span>
+                    <span className="icon-label">{label}</span>
+                  </button>
+                ))}
+              </div>
+              <QuickPicks meal={guessMeal()} onPick={pick} />
+            </>
+          )}
 
-        {mode === "quick" && picked && (
-          <ConfirmStep candidates={[picked]} date={date} onSaved={onClose} />
-        )}
-        {mode === "photo" && (
-          <PhotoFlow apiKey={apiKey} date={date} onSaved={onClose} />
-        )}
-        {mode === "barcode" && (
-          <Suspense fallback={<Loading label="Scanner wird geladen …" />}>
-            <BarcodeFlow date={date} onSaved={onClose} />
-          </Suspense>
-        )}
-        {mode === "search" && <SearchFlow date={date} onSaved={onClose} />}
-        {mode === "weight" && <WeightFlow date={date} onSaved={onClose} />}
-        {mode === "activity" && <ActivityFlow date={date} onSaved={onClose} />}
+          {mode === "quick" && picked && (
+            <ConfirmStep candidates={[picked]} date={date} onSaved={onClose} />
+          )}
+          {mode === "photo" && (
+            <PhotoFlow apiKey={apiKey} date={date} onSaved={onClose} />
+          )}
+          {mode === "barcode" && (
+            <Suspense fallback={<Loading label="Scanner wird geladen …" />}>
+              <BarcodeFlow date={date} onSaved={onClose} />
+            </Suspense>
+          )}
+          {mode === "search" && <SearchFlow date={date} onSaved={onClose} />}
+          {mode === "weight" && <WeightFlow date={date} onSaved={onClose} />}
+          {mode === "activity" && (
+            <ActivityFlow date={date} onSaved={onClose} />
+          )}
+        </ErrorBoundary>
       </div>
 
       {mode !== "choose" && (
