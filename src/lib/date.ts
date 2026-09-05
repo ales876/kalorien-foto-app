@@ -41,6 +41,14 @@ export function longDate(key: string): string {
   });
 }
 
+/** Uhrzeit eines Zeitstempels als „08:12". */
+export function formatTime(timestamp: number): string {
+  return new Date(timestamp).toLocaleTimeString("de-DE", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export function shiftDays(key: string, delta: number): string {
   const d = fromDateKey(key);
   d.setDate(d.getDate() + delta);

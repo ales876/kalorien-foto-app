@@ -4,12 +4,11 @@ import { useSettings } from "../../hooks/useSettings";
 import { shiftDays, weekOf } from "../../lib/date";
 import { db } from "../../lib/db";
 import { groupByDate, sumTotals } from "../../lib/nutrition";
-import { MEALS, type Activity, type FoodEntry } from "../../lib/types";
+import type { Activity, BodyMeasurement, FoodEntry } from "../../lib/types";
 import { Notice } from "../../ui/Notice";
 import { DaySummary } from "./DaySummary";
-import { ActivitySection } from "./ActivitySection";
+import { DayTimeline } from "./DayTimeline";
 import { EmptyDay } from "./EmptyDay";
-import { MealSection } from "./MealSection";
 import { WeekStrip, type DayStat } from "./WeekStrip";
 import { useLiveData } from "../../hooks/useLiveData";
 
@@ -91,6 +90,11 @@ export function TodayScreen({
     [],
   );
   const activityByDate = new Map(weekActivities.map((a) => [a.date, a.kcal]));
+  const measurement = useLiveData<BodyMeasurement | undefined>(
+    () => db.measurements.where("date").equals(dateKey).first(),
+    [dateKey],
+    undefined,
+  );
   const activity = weekActivities.find((a) => a.date === dateKey);
   const activityKcal = activity?.kcal;
 
@@ -140,21 +144,19 @@ export function TodayScreen({
           activityKcal={activityKcal}
         />
 
-        {entries.length === 0 ? (
+        {entries.length === 0 &&
+        !activity &&
+        measurement?.weightKg === undefined ? (
           <EmptyDay />
         ) : (
-          MEALS.map((meal) => (
-            <MealSection
-              key={meal.id}
-              meal={meal}
-              entries={entries.filter((entry) => entry.meal === meal.id)}
-              editingId={editingId}
-              onEdit={setEditingId}
-            />
-          ))
+          <DayTimeline
+            entries={entries}
+            activity={activity}
+            measurement={measurement}
+            editingId={editingId}
+            onEdit={setEditingId}
+          />
         )}
-
-        {activity && <ActivitySection activity={activity} />}
       </div>
     </div>
   );

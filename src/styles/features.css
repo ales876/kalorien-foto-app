@@ -288,6 +288,60 @@
   background: var(--danger) !important;
 }
 
+/* ---------- Zeitstrahl ---------- */
+
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 30px;
+}
+
+.tl-item {
+  position: relative;
+  animation: card-in var(--dur-base) var(--ease-out) both;
+}
+
+/* Die Linie verbindet die Punkte und endet am letzten. */
+.tl-item::before {
+  content: "";
+  position: absolute;
+  left: -23px;
+  top: 0;
+  bottom: -16px;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--hairline);
+}
+
+.tl-item:first-child::before {
+  top: 22px;
+}
+
+.tl-item:last-child::before {
+  bottom: auto;
+  height: 22px;
+}
+
+.tl-dot {
+  position: absolute;
+  left: -30px;
+  top: 14px;
+  display: flex;
+  z-index: 1;
+}
+
+.tl-time {
+  position: absolute;
+  left: -30px;
+  top: 34px;
+  width: 44px;
+  font-size: 10px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  color: var(--ink-tertiary);
+}
+
 /* ---------- Mahlzeiten ---------- */
 
 .meal-header {
@@ -782,6 +836,18 @@
   height: 8px;
   border-radius: 50%;
   display: inline-block;
+}
+
+.legend-intake {
+  background: var(--tertiary);
+}
+
+.legend-line {
+  display: inline-block;
+  width: 16px;
+  height: 0;
+  margin-left: 12px;
+  border-top: 1.5px dashed var(--ink-tertiary);
 }
 
 /* ---------- Mehr ---------- */

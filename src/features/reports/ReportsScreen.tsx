@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSettings } from "../../hooks/useSettings";
 import { lastNDays } from "../../lib/date";
 import { db } from "../../lib/db";
-import type { BodyMeasurement, FoodEntry } from "../../lib/types";
+import type { Activity, BodyMeasurement, FoodEntry } from "../../lib/types";
 import { ScreenHeader } from "../../ui/ScreenHeader";
 import { Segmented } from "../../ui/Segmented";
 import { EnergyBalanceCard } from "./EnergyBalanceCard";
@@ -32,6 +32,11 @@ export function ReportsScreen() {
     [from],
     [],
   );
+  const activities = useLiveData<Activity[]>(
+    () => db.activities.where("date").aboveOrEqual(from).toArray(),
+    [from],
+    [],
+  );
   const settings = useSettings();
 
   return (
@@ -51,6 +56,7 @@ export function ReportsScreen() {
       <KcalChart
         range={range}
         entries={entries}
+        activities={activities}
         goal={settings?.kcalGoal ?? 0}
       />
       <WeightChart measurements={measurements} />

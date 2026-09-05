@@ -179,6 +179,27 @@ Dazu bleibt der Service Worker bei `cleanupOutdatedCaches: false` — sonst
 verlieren geöffnete Sitzungen nach einem Deploy ihre nachladbaren
 Bausteine.
 
+## 16. Der Tag als Zeitstrahl
+
+Die Tagesansicht listet nicht mehr vier feste Mahlzeitkarten, sondern
+zeigt in zeitlicher Reihenfolge, was erfasst wurde: Mahlzeiten mit ihren
+Einträgen, Gewicht, Aktivität. Links läuft eine Linie mit einem Punkt je
+Station — derselbe Ring wie das Heute-Symbol, in der Farbe der Station.
+
+Die Uhrzeit stammt aus dem Zeitstempel, wird aber **nur angezeigt, wenn
+sie auf den Tag des Eintrags fällt**. Verschobene, kopierte und
+importierte Einträge tragen sonst die Uhrzeit des Nachtragens. Solche
+Stationen werden nach der üblichen Uhrzeit ihrer Mahlzeit einsortiert
+(Frühstück 8:00, Mittag 12:30, Snack 15:30, Abend 19:00) und zeigen
+keine Zeit.
+
+## 17. Kalorien-Diagramm mit Budget statt Ziel
+
+Die Balken zeigen die Aufnahme, die gestufte Linie das Tagesbudget aus
+Ziel plus erfasster Aktivität. Balken über dem Budget sind rot. Vorher
+stand dort eine feste Ziellinie, wodurch jeder Tag mit viel Bewegung
+nach einer Überschreitung aussah.
+
 ## Fallstricke
 
 | Falle                                                  | Was passiert                        | Richtig                              |
