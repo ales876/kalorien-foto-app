@@ -181,8 +181,10 @@ export function DayTimeline({
     <ol className="timeline">
       {nodes.map((node) => (
         <li className="tl-item" key={node.key}>
-          <TimelineDot color={node.color} />
-          {node.label && <time className="tl-time">{node.label}</time>}
+          <span className="tl-marker">
+            <TimelineDot color={node.color} />
+            {node.label && <time className="tl-time">{node.label}</time>}
+          </span>
           {node.render()}
         </li>
       ))}

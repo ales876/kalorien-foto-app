@@ -301,7 +301,7 @@
   animation: card-in var(--dur-base) var(--ease-out) both;
 }
 
-/* Die Linie verbindet die Punkte und endet am letzten. */
+/* Die Linie verbindet die Punkte und endet am ersten und letzten. */
 .tl-item::before {
   content: "";
   position: absolute;
@@ -314,27 +314,43 @@
 }
 
 .tl-item:first-child::before {
-  top: 22px;
+  top: 50%;
 }
 
 .tl-item:last-child::before {
   bottom: auto;
-  height: 22px;
+  height: 50%;
 }
 
-.tl-dot {
+/* Einzelne Station: keine Linie, nur der Punkt. */
+.tl-item:first-child:last-child::before {
+  display: none;
+}
+
+/* Punkt und Uhrzeit sitzen mittig zur Karte und wandern mit, wenn die
+   Karte durch weitere Einträge wächst. */
+.tl-marker {
   position: absolute;
   left: -30px;
-  top: 14px;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
+  justify-content: center;
+  width: 44px;
   z-index: 1;
 }
 
+.tl-dot {
+  display: flex;
+}
+
+/* Die Uhrzeit hängt unter dem Punkt, ohne ihn aus der Mitte zu drücken. */
 .tl-time {
   position: absolute;
-  left: -30px;
-  top: 34px;
-  width: 44px;
+  top: calc(100% + 3px);
+  left: 0;
+  right: 0;
+  text-align: center;
   font-size: 10px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
