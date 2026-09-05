@@ -293,7 +293,7 @@
 .timeline {
   list-style: none;
   margin: 0;
-  padding: 0 0 0 30px;
+  padding: 0 0 0 38px;
 }
 
 .tl-item {
@@ -305,7 +305,7 @@
 .tl-item::before {
   content: "";
   position: absolute;
-  left: -23px;
+  left: -31px;
   top: 0;
   bottom: -16px;
   width: 2px;
@@ -331,17 +331,20 @@
    Karte durch weitere Einträge wächst. */
 .tl-marker {
   position: absolute;
-  left: -30px;
+  /* Mitte des Markers liegt genau auf der Linie. */
+  left: -50px;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
   justify-content: center;
-  width: 44px;
+  width: 40px;
   z-index: 1;
 }
 
 .tl-dot {
   display: flex;
+  border-radius: 50%;
+  background: var(--bg);
 }
 
 /* Die Uhrzeit hängt unter dem Punkt, ohne ihn aus der Mitte zu drücken. */

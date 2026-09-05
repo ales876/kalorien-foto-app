@@ -28,9 +28,9 @@
   /* Erfassungswege: jede Aktion ihre eigene Farbe, keine doppelt. */
   --action-photo: #a98ad4;
   --action-barcode: #4a90d9;
-  --action-search: #35b37e;
+  --action-search: #256d82;
   --action-weight: #f2994a;
-  --action-activity: #e2795b;
+  --action-activity: #35b37e;
 
   --meal-morning: #f2994a;
   --meal-noon: #f0b429;
