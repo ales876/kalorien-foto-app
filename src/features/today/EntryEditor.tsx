@@ -2,12 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { formatDateKey, shiftDays, toDateKey } from "../../lib/date";
 import { copyEntry, deleteEntry, updateEntry } from "../../lib/db";
-import { parseNonNegative } from "../../lib/format";
+import { parseNonNegative, toInputValue } from "../../lib/format";
 import { kcalFor, unitOf } from "../../lib/nutrition";
 import { MEALS, type FoodEntry, type Meal } from "../../lib/types";
 import { Segmented } from "../../ui/Segmented";
 import { IconCheck, IconCopy, IconMove, IconTrash } from "../../ui/icons";
 import { MEAL_ICONS } from "../../ui/mealIcons";
+import { NumberField } from "../../ui/NumberField";
 
 const PER100_FIELDS = [
   { key: "kcalPer100g", label: "kcal" },
@@ -31,12 +32,12 @@ export function EntryEditor({
   const [name, setName] = useState(entry.name);
   const [brand, setBrand] = useState(entry.brand ?? "");
   const [meal, setMeal] = useState<Meal>(entry.meal);
-  const [grams, setGrams] = useState(String(entry.grams));
+  const [grams, setGrams] = useState(toInputValue(entry.grams));
   const [per100, setPer100] = useState({
-    kcalPer100g: String(entry.kcalPer100g),
-    proteinPer100g: String(entry.proteinPer100g),
-    carbsPer100g: String(entry.carbsPer100g),
-    fatPer100g: String(entry.fatPer100g),
+    kcalPer100g: toInputValue(entry.kcalPer100g),
+    proteinPer100g: toInputValue(entry.proteinPer100g),
+    carbsPer100g: toInputValue(entry.carbsPer100g),
+    fatPer100g: toInputValue(entry.fatPer100g),
   });
   const [menu, setMenu] = useState<"none" | "delete" | "move" | "copy">("none");
 
@@ -135,15 +136,7 @@ export function EntryEditor({
           <label className="field-label" htmlFor={field("grams")}>
             Menge ({unitOf(entry)})
           </label>
-          <input
-            id={field("grams")}
-            className="input"
-            type="number"
-            inputMode="decimal"
-            min={0}
-            value={grams}
-            onChange={(e) => setGrams(e.target.value)}
-          />
+          <NumberField id={field("grams")} value={grams} onChange={setGrams} />
         </div>
       </div>
       <div className="field">
@@ -178,16 +171,10 @@ export function EntryEditor({
               >
                 {f.label}
               </label>
-              <input
+              <NumberField
                 id={field(f.key)}
-                className="input"
-                type="number"
-                inputMode="decimal"
-                min={0}
                 value={per100[f.key]}
-                onChange={(e) =>
-                  setPer100({ ...per100, [f.key]: e.target.value })
-                }
+                onChange={(wert) => setPer100({ ...per100, [f.key]: wert })}
               />
             </div>
           ))}

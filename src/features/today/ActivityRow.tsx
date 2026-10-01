@@ -4,6 +4,7 @@ import { formatNumber, parseNonNegative } from "../../lib/format";
 import type { Activity } from "../../lib/types";
 import { DeleteButton } from "../../ui/DeleteButton";
 import { IconCheck } from "../../ui/icons";
+import { NumberField } from "../../ui/NumberField";
 
 /** Die aktive Energie als Zeile im Zeitstrahl — an Ort und Stelle
  *  änderbar, ein Wert je Tag. */
@@ -62,14 +63,12 @@ export function ActivityRow({ activity }: { activity: Activity }) {
                 <label className="field-label" htmlFor="activity-edit">
                   Aktive Energie (kcal)
                 </label>
-                <input
+                <NumberField
                   id="activity-edit"
-                  className="input"
-                  type="number"
-                  inputMode="numeric"
+                  integer
                   autoFocus
                   value={value}
-                  onChange={(e) => setValue(e.target.value)}
+                  onChange={setValue}
                 />
               </div>
               <button

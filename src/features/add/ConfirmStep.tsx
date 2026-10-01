@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { addEntries } from "../../lib/db";
-import { parseNonNegative } from "../../lib/format";
+import { parseNonNegative, toInputValue } from "../../lib/format";
 import {
   candidateToEntry,
   guessMeal,
@@ -16,6 +16,7 @@ import {
 import { Notice } from "../../ui/Notice";
 import { Segmented } from "../../ui/Segmented";
 import { messageOf } from "../../lib/errors";
+import { NumberField } from "../../ui/NumberField";
 
 const unitFor = (c: NutritionCandidate) => c.unit ?? guessUnit(c.name, c.brand);
 
@@ -36,7 +37,7 @@ export function ConfirmStep({
   const [meal, setMeal] = useState<Meal>(guessMeal());
   // Als Text, damit das Feld leer sein darf, ohne dass eine 0 hineinspringt.
   const [grams, setGrams] = useState<string[]>(
-    candidates.map((c) => String(c.suggestedGrams)),
+    candidates.map((c) => toInputValue(c.suggestedGrams)),
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -100,16 +101,13 @@ export function ConfirmStep({
                 {unitFor(candidate)}
               </div>
             </div>
-            <input
+            <NumberField
               className="input input-compact"
-              type="number"
-              inputMode="decimal"
-              min={0}
               aria-label={`Menge ${candidate.name} in ${unitFor(candidate) === "ml" ? "Milliliter" : "Gramm"}`}
               value={grams[index] ?? ""}
-              onChange={(e) => {
+              onChange={(wert) => {
                 const next = [...grams];
-                next[index] = e.target.value;
+                next[index] = wert;
                 setGrams(next);
               }}
             />

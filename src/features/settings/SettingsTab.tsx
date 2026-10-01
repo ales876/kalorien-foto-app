@@ -14,6 +14,7 @@ import { Notice, type NoticeKind } from "../../ui/Notice";
 import { Segmented } from "../../ui/Segmented";
 import { IconDownload, IconUpload } from "../../ui/icons";
 import { messageOf } from "../../lib/errors";
+import { NumberField } from "../../ui/NumberField";
 
 /** Jede Karte speichert für sich — ein Speichern-Knopf, der zwei Karten
  *  weiter unten etwas ganz anderes mitschreibt, war der Fehler der
@@ -186,15 +187,7 @@ function GoalField({
       <label className="field-label" htmlFor={id}>
         {label}
       </label>
-      <input
-        id={id}
-        className="input"
-        type="number"
-        inputMode="numeric"
-        min={0}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      />
+      <NumberField id={id} integer value={value} onChange={onChange} />
     </div>
   );
 }
@@ -225,28 +218,24 @@ function BodyCard({ settings }: { settings: Settings }) {
           <label className="field-label" htmlFor="height">
             Größe (cm)
           </label>
-          <input
+          <NumberField
             id="height"
-            className="input"
-            type="number"
-            inputMode="numeric"
+            integer
             placeholder="179"
             value={heightCm}
-            onChange={(e) => setHeightCm(e.target.value)}
+            onChange={setHeightCm}
           />
         </div>
         <div className="field">
           <label className="field-label" htmlFor="age">
             Alter
           </label>
-          <input
+          <NumberField
             id="age"
-            className="input"
-            type="number"
-            inputMode="numeric"
+            integer
             placeholder="40"
             value={age}
-            onChange={(e) => setAge(e.target.value)}
+            onChange={setAge}
           />
         </div>
       </div>

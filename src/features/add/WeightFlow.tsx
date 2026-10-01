@@ -4,6 +4,7 @@ import { formatDecimal, parsePositive } from "../../lib/format";
 import type { BodyMeasurement } from "../../lib/types";
 import { Notice } from "../../ui/Notice";
 import { useLiveData } from "../../hooks/useLiveData";
+import { NumberField } from "../../ui/NumberField";
 
 /** Gewicht wird wie Essen über das Plus erfasst — ein Ort zum Eintragen,
  *  egal worum es geht. Ein Wert pro Tag. */
@@ -52,16 +53,12 @@ export function WeightFlow({
         <label className="field-label" htmlFor="weight">
           Gewicht (kg)
         </label>
-        <input
+        <NumberField
           id="weight"
-          className="input"
-          type="number"
-          inputMode="decimal"
-          step="0.1"
           placeholder="74,5"
           autoFocus
           value={weight}
-          onChange={(e) => setWeight(e.target.value)}
+          onChange={setWeight}
         />
       </div>
 

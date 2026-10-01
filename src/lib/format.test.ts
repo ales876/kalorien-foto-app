@@ -5,6 +5,8 @@ import {
   formatSigned,
   parseNonNegative,
   parsePositive,
+  sanitizeNumberInput,
+  toInputValue,
 } from "./format";
 
 describe("Zahlenformat", () => {
@@ -29,5 +31,36 @@ describe("Eingaben", () => {
     expect(parsePositive("abc")).toBeUndefined();
     expect(parseNonNegative("0")).toBe(0);
     expect(parseNonNegative("-1")).toBeUndefined();
+  });
+});
+
+describe("sanitizeNumberInput", () => {
+  it("lässt Komma und Punkt als Trennzeichen zu", () => {
+    expect(sanitizeNumberInput("74,5")).toBe("74,5");
+    expect(sanitizeNumberInput("74.5")).toBe("74.5");
+    expect(sanitizeNumberInput(",5")).toBe(",5");
+  });
+
+  it("wirft alles heraus, was keine Zahl sein kann", () => {
+    expect(sanitizeNumberInput("74,5 kg")).toBe("74,5");
+    expect(sanitizeNumberInput("abc")).toBe("");
+    expect(sanitizeNumberInput("-74,5")).toBe("74,5");
+  });
+
+  it("behält nur das erste Trennzeichen", () => {
+    expect(sanitizeNumberInput("74,5,2")).toBe("74,52");
+    expect(sanitizeNumberInput("74.5,2")).toBe("74.52");
+  });
+
+  it("verbietet Trennzeichen bei ganzen Zahlen", () => {
+    expect(sanitizeNumberInput("1650,5", false)).toBe("16505");
+    expect(sanitizeNumberInput("624", false)).toBe("624");
+  });
+});
+
+describe("toInputValue", () => {
+  it("schreibt Dezimalzahlen mit Komma", () => {
+    expect(toInputValue(74.5)).toBe("74,5");
+    expect(toInputValue(100)).toBe("100");
   });
 });

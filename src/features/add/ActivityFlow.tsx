@@ -4,6 +4,7 @@ import { formatNumber, parseNonNegative } from "../../lib/format";
 import type { Activity } from "../../lib/types";
 import { Notice } from "../../ui/Notice";
 import { useLiveData } from "../../hooks/useLiveData";
+import { NumberField } from "../../ui/NumberField";
 
 /** Aktivitätskalorien werden von Hand aus der Health-App übertragen —
  *  iOS gibt Webseiten keinen Zugriff auf HealthKit. Alternativ per
@@ -55,15 +56,13 @@ export function ActivityFlow({
         <label className="field-label" htmlFor="activity">
           Aktive Energie (kcal)
         </label>
-        <input
+        <NumberField
           id="activity"
-          className="input"
-          type="number"
-          inputMode="numeric"
+          integer
           placeholder="624"
           autoFocus
           value={kcal}
-          onChange={(e) => setKcal(e.target.value)}
+          onChange={setKcal}
         />
         <div className="hint">
           Aus der Health-App: Übersicht → Aktivität → Aktive Energie.

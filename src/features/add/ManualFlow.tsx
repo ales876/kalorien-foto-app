@@ -2,6 +2,7 @@ import { useState } from "react";
 import { parseNonNegative, parsePositive } from "../../lib/format";
 import type { NutritionCandidate } from "../../lib/types";
 import { ConfirmStep } from "./ConfirmStep";
+import { NumberField } from "../../ui/NumberField";
 
 const PER100 = [
   { key: "kcal", label: "kcal" },
@@ -94,15 +95,7 @@ export function ManualFlow({
           <label className="field-label" htmlFor="manual-grams">
             Portion (g)
           </label>
-          <input
-            id="manual-grams"
-            className="input"
-            type="number"
-            inputMode="decimal"
-            min={0}
-            value={grams}
-            onChange={(e) => setGrams(e.target.value)}
-          />
+          <NumberField id="manual-grams" value={grams} onChange={setGrams} />
         </div>
       </div>
       <div className="field">
@@ -117,18 +110,12 @@ export function ManualFlow({
               >
                 {f.label}
               </label>
-              <input
+              <NumberField
                 id={`manual-${f.key}`}
-                className="input"
-                type="number"
-                inputMode="decimal"
-                min={0}
                 placeholder={f.key === "kcal" ? "" : "0"}
                 autoFocus={!!initialName && f.key === "kcal"}
                 value={per100[f.key]}
-                onChange={(e) =>
-                  setPer100({ ...per100, [f.key]: e.target.value })
-                }
+                onChange={(wert) => setPer100({ ...per100, [f.key]: wert })}
               />
             </div>
           ))}

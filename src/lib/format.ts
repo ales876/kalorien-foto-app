@@ -17,6 +17,27 @@ export function formatSigned(value: number, digits = 1): string {
   return `${sign}${formatDecimal(Math.abs(value), digits)}`;
 }
 
+/** Zahl für ein Eingabefeld: deutsches Komma, keine Tausenderpunkte. */
+export function toInputValue(value: number): string {
+  return String(value).replace(".", ",");
+}
+
+/** Lässt in einem Eingabefeld nur durch, was eine Zahl werden kann:
+ *  Ziffern und höchstens ein Trennzeichen. Das Komma bleibt stehen —
+ *  die deutsche iOS-Tastatur tippt eines, und ein `type="number"` würde
+ *  die ganze Eingabe deshalb verwerfen. */
+export function sanitizeNumberInput(raw: string, allowDecimals = true): string {
+  const digitsOnly = raw.replace(/[^\d.,]/g, "");
+  if (!allowDecimals) return digitsOnly.replace(/[.,]/g, "");
+
+  // Nur das erste Trennzeichen behalten.
+  const match = /^(\d*)([.,])?(.*)$/.exec(digitsOnly);
+  if (!match) return digitsOnly;
+  const [, ganz, trenner, rest] = match;
+  if (!trenner) return ganz ?? "";
+  return `${ganz ?? ""}${trenner}${(rest ?? "").replace(/[.,]/g, "")}`;
+}
+
 /** Eingabe mit Komma oder Punkt in eine positive Zahl wandeln, sonst undefined. */
 export function parsePositive(raw: string): number | undefined {
   const value = Number(raw.trim().replace(",", "."));
