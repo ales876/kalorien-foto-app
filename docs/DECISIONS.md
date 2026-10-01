@@ -217,18 +217,35 @@ Effekt-Aufräumer in die Fehlergrenze, die ihn als
   Fehler dort zeigt eine Meldung mit „Nochmal versuchen", der Rest der
   App bleibt bedienbar.
 
+## 19. Zahlenfelder sind Textfelder
+
+Alle Eingaben für Zahlen laufen über `ui/NumberField.tsx`. Es nutzt
+bewusst `type="text"` mit `inputMode="decimal"` bzw. `"numeric"`:
+
+- Ein `type="number"` akzeptiert laut HTML nur den Punkt als
+  Trennzeichen. Auf der deutschen iOS-Tastatur tippt man ein Komma, die
+  Eingabe gilt dann als ungültig und der Browser gibt einen leeren Wert
+  zurück. Beim Tippen von „74,5" blieb am Ende „5" stehen — aufgefallen
+  mit iOS 27 bei der Gewichtseingabe.
+- `inputMode` sorgt trotzdem für die Zahlentastatur.
+- `sanitizeNumberInput()` lässt nur Ziffern und ein Trennzeichen durch,
+  `parsePositive()` / `parseNonNegative()` rechnen Komma in Punkt um.
+- Vorbelegte Dezimalwerte stehen über `toInputValue()` mit Komma da,
+  passend zur sonstigen Schreibweise der App.
+
 ## Fallstricke
 
-| Falle                                                  | Was passiert                        | Richtig                              |
-| ------------------------------------------------------ | ----------------------------------- | ------------------------------------ |
-| `toISOString()` für Datumsschlüssel                    | verschiebt nachts den Tag (UTC)     | `toDateKey()` aus `date.ts`          |
-| Recharts `domain={["dataMin - 1", …]}` bei zwei Reihen | Achse zeigt 99999                   | `paddedDomain()` aus `chartStyle.ts` |
-| `User-Agent`-Header im Browser                         | verbotener Header, CORS-Preflight   | Kennung als Query-Parameter          |
-| `white-space: nowrap` global auf `.row-sub`            | schneidet Erklärtexte ab            | nur in `.row-button`                 |
-| Funktionen aus Komponentendateien exportieren          | oxlint bricht Fast Refresh an       | nach `lib/` verschieben              |
-| Screenshot direkt nach Reload                          | Recharts mitten in der Animation    | 2–3 s warten                         |
-| Parameter-Properties im Konstruktor                    | `erasableSyntaxOnly` verbietet sie  | Feld explizit deklarieren            |
-| Hugging-Face-Parquet per DuckDB                        | HTTP 429 nach vielen Range-Requests | CSV-Export streamen                  |
+| Falle                                                  | Was passiert                                                       | Richtig                                     |
+| ------------------------------------------------------ | ------------------------------------------------------------------ | ------------------------------------------- |
+| `<input type="number">` für Kommazahlen                | deutsches Komma macht die Eingabe ungültig, der Wert kommt leer an | `NumberField` (`type="text"` + `inputMode`) |
+| `toISOString()` für Datumsschlüssel                    | verschiebt nachts den Tag (UTC)                                    | `toDateKey()` aus `date.ts`                 |
+| Recharts `domain={["dataMin - 1", …]}` bei zwei Reihen | Achse zeigt 99999                                                  | `paddedDomain()` aus `chartStyle.ts`        |
+| `User-Agent`-Header im Browser                         | verbotener Header, CORS-Preflight                                  | Kennung als Query-Parameter                 |
+| `white-space: nowrap` global auf `.row-sub`            | schneidet Erklärtexte ab                                           | nur in `.row-button`                        |
+| Funktionen aus Komponentendateien exportieren          | oxlint bricht Fast Refresh an                                      | nach `lib/` verschieben                     |
+| Screenshot direkt nach Reload                          | Recharts mitten in der Animation                                   | 2–3 s warten                                |
+| Parameter-Properties im Konstruktor                    | `erasableSyntaxOnly` verbietet sie                                 | Feld explizit deklarieren                   |
+| Hugging-Face-Parquet per DuckDB                        | HTTP 429 nach vielen Range-Requests                                | CSV-Export streamen                         |
 
 ## Nicht bauen ohne Nachfrage
 
