@@ -1,9 +1,7 @@
 import { formatDateKey } from "../../lib/date";
-import { db } from "../../lib/db";
-import { formatDecimal } from "../../lib/format";
 import type { BodyMeasurement } from "../../lib/types";
 import { Card } from "../../ui/Card";
-import { DeleteButton } from "../../ui/DeleteButton";
+import { WeightRow } from "../weight/WeightRow";
 
 export function MeasurementsCard({
   measurements,
@@ -18,24 +16,11 @@ export function MeasurementsCard({
     <Card title="Letzte Messungen">
       {recent.length === 0 ? (
         <p className="empty">
-          Noch nichts erfasst — über das Plus unter „Gewicht &amp; Maße".
+          Noch nichts erfasst — über das Plus unter „Gewicht".
         </p>
       ) : (
         recent.map((m) => (
-          <div className="row" key={m.id}>
-            <div className="row-main">
-              <div className="row-title">{formatDateKey(m.date)}</div>
-            </div>
-            <span className="row-value">
-              {m.weightKg ? `${formatDecimal(m.weightKg)} kg` : "–"}
-            </span>
-            <DeleteButton
-              label={`Messung vom ${formatDateKey(m.date)} löschen`}
-              onDelete={() =>
-                m.id !== undefined ? db.measurements.delete(m.id) : undefined
-              }
-            />
-          </div>
+          <WeightRow key={m.id} measurement={m} label={formatDateKey(m.date)} />
         ))
       )}
     </Card>

@@ -132,6 +132,16 @@ export async function deleteEntry(
   await withRetry(() => database.entries.delete(id));
 }
 
+/** Ändert eine bestehende Messung, ohne ihren Zeitstempel zu verschieben
+ *  — eine nachträgliche Korrektur soll die Uhrzeit der Wiegung behalten. */
+export async function updateMeasurement(
+  id: number,
+  values: { weightKg?: number; waistCm?: number },
+  database: AppDatabase = db,
+): Promise<void> {
+  await withRetry(() => database.measurements.update(id, values));
+}
+
 /** Legt eine Kopie eines Eintrags an — an einem anderen Tag oder in
  *  einer anderen Mahlzeit. Das Original bleibt unverändert. */
 export async function copyEntry(

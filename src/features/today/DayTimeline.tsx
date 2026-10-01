@@ -1,6 +1,5 @@
 import { formatTime, toDateKey } from "../../lib/date";
-import { db } from "../../lib/db";
-import { formatDecimal, formatNumber } from "../../lib/format";
+import { formatNumber } from "../../lib/format";
 import { sumTotals } from "../../lib/nutrition";
 import {
   MEALS,
@@ -9,9 +8,9 @@ import {
   type FoodEntry,
   type Meal,
 } from "../../lib/types";
-import { DeleteButton } from "../../ui/DeleteButton";
 import { IconActivity, IconBody } from "../../ui/icons";
 import { MEAL_ICONS } from "../../ui/mealIcons";
+import { WeightRow } from "../weight/WeightRow";
 import { ActivityRow } from "./ActivityRow";
 import { EntryRow } from "./EntryRow";
 import { TimelineDot } from "./TimelineDot";
@@ -133,21 +132,8 @@ export function DayTimeline({
               <IconBody size={18} />
             </span>
             <h2 className="meal-title">Gewicht</h2>
-            <span className="meal-total">{formatDecimal(weightKg)} kg</span>
           </header>
-          <div className="row">
-            <div className="row-main">
-              <div className="row-sub">Gewogen</div>
-            </div>
-            <DeleteButton
-              label="Wiegung löschen"
-              onDelete={() =>
-                measurement.id !== undefined
-                  ? db.measurements.delete(measurement.id)
-                  : undefined
-              }
-            />
-          </div>
+          <WeightRow measurement={measurement} label="Gewogen" />
         </section>
       ),
     });

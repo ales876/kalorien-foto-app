@@ -1,21 +1,33 @@
 import { useState } from "react";
-import { db, upsertActivity } from "../../lib/db";
-import { formatNumber, parseNonNegative } from "../../lib/format";
-import type { Activity } from "../../lib/types";
+import { db, updateMeasurement } from "../../lib/db";
+import { formatDecimal, parsePositive, toInputValue } from "../../lib/format";
+import type { BodyMeasurement } from "../../lib/types";
 import { DeleteButton } from "../../ui/DeleteButton";
-import { IconCheck, IconPencil } from "../../ui/icons";
 import { NumberField } from "../../ui/NumberField";
+import { IconCheck, IconPencil } from "../../ui/icons";
 
-/** Die aktive Energie als Zeile im Zeitstrahl — an Ort und Stelle
- *  änderbar, ein Wert je Tag. */
-export function ActivityRow({ activity }: { activity: Activity }) {
+/** Eine Wiegung als Zeile — im Zeitstrahl und in der Messungsliste.
+ *  Der Stift klappt ein Feld auf, mit dem sich der Wert nachträglich
+ *  berichtigen lässt; der Zeitstempel der Wiegung bleibt dabei stehen. */
+export function WeightRow({
+  measurement,
+  label,
+}: {
+  measurement: BodyMeasurement;
+  label: string;
+}) {
   const [editing, setEditing] = useState(false);
-  const [value, setValue] = useState(String(activity.kcal));
-  const parsed = parseNonNegative(value);
+  const [value, setValue] = useState(() =>
+    measurement.weightKg === undefined
+      ? ""
+      : toInputValue(measurement.weightKg),
+  );
+  const parsed = parsePositive(value);
+  const id = measurement.id;
 
   async function save() {
-    if (parsed === undefined) return;
-    await upsertActivity(activity.date, Math.round(parsed));
+    if (parsed === undefined || id === undefined) return;
+    await updateMeasurement(id, { weightKg: parsed });
     setEditing(false);
   }
 
@@ -25,30 +37,34 @@ export function ActivityRow({ activity }: { activity: Activity }) {
         type="button"
         className="entry-main"
         aria-expanded={editing}
+        aria-label={`${label} bearbeiten`}
         onClick={() => {
-          setValue(String(activity.kcal));
+          setValue(
+            measurement.weightKg === undefined
+              ? ""
+              : toInputValue(measurement.weightKg),
+          );
           setEditing((open) => !open);
         }}
       >
         <span className="row-main">
           <span className="row-title" style={{ display: "block" }}>
-            Aktive Energie
-          </span>
-          <span className="row-sub" style={{ display: "block" }}>
-            erhöht das Tagesbudget
+            {label}
           </span>
         </span>
-        <span className="row-value">+{formatNumber(activity.kcal)} kcal</span>
+        <span className="row-value">
+          {measurement.weightKg === undefined
+            ? "–"
+            : `${formatDecimal(measurement.weightKg)} kg`}
+        </span>
         <span className="row-pencil" aria-hidden="true">
           <IconPencil size={16} />
         </span>
       </button>
       <DeleteButton
-        label="Aktivität löschen"
+        label={`${label} löschen`}
         onDelete={() =>
-          activity.id !== undefined
-            ? db.activities.delete(activity.id)
-            : undefined
+          id !== undefined ? db.measurements.delete(id) : undefined
         }
       />
 
@@ -63,12 +79,14 @@ export function ActivityRow({ activity }: { activity: Activity }) {
               }}
             >
               <div className="field">
-                <label className="field-label" htmlFor="activity-edit">
-                  Aktive Energie (kcal)
+                <label
+                  className="field-label"
+                  htmlFor={`gewicht-${id ?? "neu"}`}
+                >
+                  Gewicht (kg)
                 </label>
                 <NumberField
-                  id="activity-edit"
-                  integer
+                  id={`gewicht-${id ?? "neu"}`}
                   autoFocus
                   value={value}
                   onChange={setValue}

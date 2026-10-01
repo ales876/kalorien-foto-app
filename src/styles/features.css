@@ -427,6 +427,21 @@
   flex: 0 0 auto;
 }
 
+/* Stift als Hinweis, dass sich die Zeile bearbeiten lässt. */
+.row-pencil {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  margin-left: 10px;
+  color: var(--ink-tertiary);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.entry-main:active .row-pencil,
+.entry-row[data-expanded="true"] .row-pencil {
+  color: var(--ink-secondary);
+}
+
 .entry-source {
   width: 30px;
   color: var(--ink-tertiary);
